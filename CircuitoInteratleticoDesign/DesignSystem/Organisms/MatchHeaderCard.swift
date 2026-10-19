@@ -1,37 +1,5 @@
 import SwiftUI
 
-/// Selo "● Ao vivo". O ponto pulsa (o sistema desliga com "Reduzir movimento").
-struct LiveBadge: View {
-    var body: some View {
-        HStack(spacing: Spacing.xs) {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 8))
-                .symbolEffect(.pulse)
-            Text("Ao vivo")
-                .font(.subheadline.weight(.semibold))
-        }
-        .foregroundStyle(.textPrimary)
-        .padding(.horizontal, Spacing.s)
-        .padding(.vertical, 6)
-        .background(.appBackground, in: Capsule())
-        .accessibilityElement(children: .combine)
-    }
-}
-
-/// "Atualizado há 8 s", contando sozinho a cada segundo.
-struct UpdatedAgoText: View {
-    let date: Date
-
-    var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            Text(Formatters.updatedAgo(since: date, now: context.date))
-                .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(.textSecondary)
-        }
-    }
-}
-
 /// Cartão grande da partida: carrossel "Ao vivo" da Home e topo do detalhe.
 struct MatchHeaderCard: View {
     let match: Match

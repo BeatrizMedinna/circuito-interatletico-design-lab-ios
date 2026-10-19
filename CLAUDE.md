@@ -30,7 +30,16 @@
 
 ## Padrões de UX e código
 - Preserve o layout, a hierarquia, os textos e a navegação dos wireframes aprovados; não redesenhe por iniciativa própria.
-- Organize o projeto progressivamente por funcionalidades, mantendo componentes, tokens, dados mockados e navegação bem separados. **Não criar pastas vazias**.
+- **Estrutura em Atomic Design obrigatória** no `DesignSystem/` e `Features/`:
+  - `DesignSystem/Tokens/`: cores semânticas, `Spacing`, `Radius`, `Formatters` e modificadores globais (`teamSideBars`).
+  - `DesignSystem/Atoms/`: elementos indivisíveis (`AthleticBadge`, `LiveBadge`, `MatchStatusTag`, `ChoiceChip`, `RemovableChip`, `CircleIconLabel`, `CountBadge`, `SearchField`, `SelectorLabel`, `InlineNote`, `Toast`, etc.).
+  - `DesignSystem/Molecules/`: combinações de átomos em unidades funcionais (`SectionHeader`, `TeamColumn`, `UnderlineTabs`, `FlowChips`, `ActiveFiltersBar`, `SelectionRow`, `CompetitionRow`, etc.).
+  - `DesignSystem/Organisms/`: blocos de interface ricos e autônomos (`MatchCard`, `MatchHeaderCard`, `TrialCard`, `Podium`, `AthleticPicker`, `ScheduleItemLink`, `AgendaSummary`, `PartialsTable`, etc.).
+  - `Features/<Feature>/`: telas completas (`View.swift`). Se a tela possuir abas ou seções ricas, modularize em subpastas `Tabs/` ou `Components/` (ex.: `Features/Sports/Tabs/`, `Features/Athletic/Tabs/`).
+- **Regra de 1 componente por arquivo**: não crie arquivos "guarda-chuva" com múltiplos `struct: View`. Cada componente público ou reutilizável deve residir em seu próprio arquivo `.swift` com o nome exato do struct, facilitando a busca no Xcode (`Cmd + Shift + O`).
+- **Views Principais Declarativas e Enxutas**: As telas raiz (`<Feature>View.swift`) devem atuar apenas como orquestradoras de estado e navegação. Evite métodos `@ViewBuilder` longos com múltiplos blocos de renderização dentro da própria tela. Em vez disso, quebre em componentes específicos em `Features/<Feature>/Components/` (ex.: `if !query.isEmpty { RankingSearchResultsView(...) } else { DivisionRankingContent(...) }`), mantendo a árvore de visualização límpida e declarativa.
+- **Desacoplamento de modelos e dados**: nunca declare structs/enums de modelos de domínio dentro de arquivos de View ou Sheets de filtro. Mantenha modelos e escopos compartilhados em `Mocks/` (ex.: `ScheduleItem`, `ContentScope`).
+- Consulte sempre o guia arquitetural consolidado em `PLANO_ATOMIC_DESIGN.md`.
 - Reutilize componentes antes de inventar novos. Minimize efeitos colaterais em telas já validadas.
 - Simule cenários realistas: preenchido, vazio, carregando, erro, sucesso, indisponível e outros previstos na documentação.
 - Faça formulários, filtros, seletores, abas, sheets e transições funcionarem com estado local quando forem necessários para testar a experiência.

@@ -158,15 +158,24 @@ private struct MatchupCard: View {
         var parts = ["Jogo \(number)", "\(nameA) contra \(nameB)"]
         if let match {
             switch match.status {
-            case .scheduled: parts.append("\(Formatters.dayLabel(match.startDate)), \(Formatters.time(match.startDate))")
-            case .live: parts.append("ao vivo, \(match.scoreA ?? 0) a \(match.scoreB ?? 0)")
-            case .finished:
-                if match.walkoverWinner != nil { parts.append("W.O.") } else { parts.append("\(match.scoreA ?? 0) a \(match.scoreB ?? 0)") }
+                case .scheduled: parts.append("\(Formatters.dayLabel(match.startDate)), \(Formatters.time(match.startDate))")
+                case .live: parts.append("ao vivo, \(match.scoreA ?? 0) a \(match.scoreB ?? 0)")
+                case .finished:
+                    if match.walkoverWinner != nil { parts.append("W.O.") } else { parts.append("\(match.scoreA ?? 0) a \(match.scoreB ?? 0)") }
             }
         } else {
             parts.append("a definir")
         }
         if let winner { parts.append("vencedora: \(winner.name)") }
         return parts.joined(separator: ", ")
+    }
+}
+
+#Preview {
+    NavigationStack {
+        if let competition = MockData.competitions.first {
+            BracketTab(competition: competition)
+                .environment(AppState(favoriteAthletic: MockData.athletic("ath-bufalos"), scenario: .filled, preloaded: true))
+        }
     }
 }

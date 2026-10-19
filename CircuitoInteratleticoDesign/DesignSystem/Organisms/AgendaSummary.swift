@@ -1,15 +1,5 @@
 import SwiftUI
 
-extension ScheduleItem {
-    /// Partida ao vivo ou prova com resultados parciais (em andamento).
-    var isLive: Bool {
-        switch self {
-        case .match(let match): match.status == .live
-        case .trial(let competition): competition.trial?.hasPartialResults ?? false
-        }
-    }
-}
-
 /// Recorte resumido de uma agenda: tudo que está ao vivo, o próximo evento e
 /// o último encerrado. Compartilhado entre os perfis de Atlética e Modalidade.
 struct AgendaSelection {
