@@ -1,5 +1,40 @@
 import SwiftUI
 
+/// Item do cronograma publicado: uma partida ou uma prova (RN-52).
+enum ScheduleItem: Identifiable, Hashable {
+    case match(Match)
+    case trial(Competition)
+
+    var id: String {
+        switch self {
+        case .match(let match): match.id
+        case .trial(let competition): competition.id
+        }
+    }
+
+    var startDate: Date {
+        switch self {
+        case .match(let match): match.startDate
+        case .trial(let competition): competition.trial?.startDate ?? .distantFuture
+        }
+    }
+
+    var sport: Sport {
+        switch self {
+        case .match(let match): match.sport
+        case .trial(let competition): competition.sport
+        }
+    }
+
+    /// Partida ainda não encerrada ou prova ainda aberta.
+    var isOpen: Bool {
+        switch self {
+        case .match(let match): match.status != .finished
+        case .trial(let competition): competition.trial?.isClosed == false
+        }
+    }
+}
+
 /// Critérios do cronograma. Cada campo aceita uma opção (hipótese do protótipo);
 /// campos diferentes se combinam (todos precisam valer).
 struct ScheduleFilters: Equatable {
@@ -20,6 +55,19 @@ struct ScheduleFilters: Equatable {
             && (athleticID.map(match.involves) ?? true)
             && (divisionID == nil || match.division.id == divisionID)
     }
+
+    func includes(_ item: ScheduleItem) -> Bool {
+        switch item {
+        case .match(let match):
+            return includes(match)
+        case .trial(let competition):
+            let participants = competition.trial?.participants ?? []
+            return (sportName == nil || competition.sport.name == sportName)
+                && (gender == nil || competition.sport.gender == gender)
+                && (athleticID.map { id in participants.contains { $0.id == id } } ?? true)
+                && (divisionID == nil || competition.division.id == divisionID)
+        }
+    }
 }
 
 /// Tela 08 — Filtros do cronograma. Edita um rascunho: ✕ descarta, ✓ aplica,
@@ -27,12 +75,12 @@ struct ScheduleFilters: Equatable {
 struct ScheduleFilterSheet: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
-    let matches: [Match]
+    let items: [ScheduleItem]
     @Binding var applied: ScheduleFilters
     @State private var draft: ScheduleFilters
 
-    init(matches: [Match], applied: Binding<ScheduleFilters>) {
-        self.matches = matches
+    init(items: [ScheduleItem], applied: Binding<ScheduleFilters>) {
+        self.items = items
         _applied = applied
         _draft = State(initialValue: applied.wrappedValue)
     }
@@ -101,12 +149,12 @@ struct ScheduleFilterSheet: View {
         .sensoryFeedback(.selection, trigger: draft)
     }
 
-    private var resultCount: Int { matches.filter(draft.includes).count }
+    private var resultCount: Int { items.filter(draft.includes).count }
 
     private var footer: some View {
         VStack(spacing: Spacing.xs) {
             Text(resultCount == 0 ? "Nenhum jogo com esses filtros"
-                 : resultCount == 1 ? "1 jogo no cronograma" : "\(resultCount) jogos no cronograma")
+                 : resultCount == 1 ? "1 jogo ou prova no cronograma" : "\(resultCount) jogos e provas no cronograma")
                 .font(.footnote)
                 .foregroundStyle(.textSecondary)
                 .contentTransition(.numericText())
@@ -128,11 +176,11 @@ struct ScheduleFilterSheet: View {
 
     private var sportOptions: [Sport] {
         var seen = Set<String>()
-        return matches.map(\.sport).filter { seen.insert($0.name).inserted }.sorted { $0.name < $1.name }
+        return items.map(\.sport).filter { seen.insert($0.name).inserted }.sorted { $0.name < $1.name }
     }
 
     private var genderOptions: [Gender] {
-        [.male, .female, .mixed].filter { gender in matches.contains { $0.sport.gender == gender } }
+        [.male, .female, .mixed].filter { gender in items.contains { $0.sport.gender == gender } }
     }
 
     private func field<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -167,28 +215,6 @@ private struct SelectorLabel: View {
         .overlay {
             RoundedRectangle(cornerRadius: Radius.control)
                 .strokeBorder(.borderStrong, lineWidth: value == nil ? 0 : 1.5)
-        }
-    }
-}
-
-/// Pílulas que quebram linha quando não cabem (nomes longos, fonte grande).
-private struct FlowChips<Option: Hashable>: View {
-    let options: [Option]
-    @Binding var selection: Option?
-    let title: (Option) -> String
-
-    var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: Spacing.xs) { chips }
-            VStack(alignment: .leading, spacing: Spacing.xs) { chips }
-        }
-    }
-
-    private var chips: some View {
-        ForEach(options, id: \.self) { option in
-            ChoiceChip(title: title(option), isSelected: selection == option) {
-                selection = selection == option ? nil : option
-            }
         }
     }
 }
@@ -250,7 +276,7 @@ private struct AthleticFilterPicker: View {
 #Preview {
     @Previewable @State var filters = ScheduleFilters(gender: .female)
     Color.clear.sheet(isPresented: .constant(true)) {
-        ScheduleFilterSheet(matches: MockData.matches, applied: $filters)
+        ScheduleFilterSheet(items: MockData.matches.map(ScheduleItem.match), applied: $filters)
             .environment(AppState(favoriteAthletic: MockData.athletic("ath-bufalos"), scenario: .filled, preloaded: true))
     }
 }

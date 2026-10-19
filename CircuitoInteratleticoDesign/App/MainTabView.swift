@@ -1,16 +1,17 @@
 import SwiftUI
 
-/// Destinos empilhados nas abas Início, Cronograma e Ranking.
+/// Destinos empilhados em todas as abas.
 enum AppRoute: Hashable {
     case match(Match.ID)
     case notifications
     /// `nil` = jogos de todas as atléticas.
     case matchList(MatchListKind, Athletic.ID?)
     case athletic(Athletic.ID)
+    case competition(Competition.ID)
 }
 
 /// App depois do onboarding: quatro abas, cada uma com sua pilha de navegação.
-/// Prototipadas: Início (Bloco 1), Cronograma (Bloco 2) e Ranking (Bloco 3).
+/// Início (Bloco 1), Cronograma (Bloco 2), Ranking (Bloco 3) e Modalidades (Bloco 4).
 struct MainTabView: View {
     @State private var appState: AppState
 
@@ -36,7 +37,9 @@ struct MainTabView: View {
                 }
             }
             Tab("Modalidades", systemImage: "star") {
-                NextBlockPlaceholder(title: "Modalidades", systemImage: "star")
+                NavigationStack {
+                    SportsView().withAppRoutes()
+                }
             }
         }
         .overlay(alignment: .bottom) {
@@ -59,26 +62,8 @@ private extension View {
             case .notifications: NotificationsView()
             case .matchList(let kind, let athleticID): MatchListView(kind: kind, athleticID: athleticID)
             case .athletic(let id): AthleticDetailView(athleticID: id)
+            case .competition(let id): CompetitionDetailView(competitionID: id)
             }
-        }
-    }
-}
-
-/// Abas que ainda não foram prototipadas.
-private struct NextBlockPlaceholder: View {
-    let title: String
-    let systemImage: String
-
-    var body: some View {
-        NavigationStack {
-            ContentUnavailableView {
-                Label(title, systemImage: systemImage)
-            } description: {
-                Text("Esta área será prototipada em um próximo bloco do Design Lab.")
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.canvas.ignoresSafeArea())
-            .navigationTitle(title)
         }
     }
 }

@@ -22,11 +22,12 @@ struct DivisionRanking: Identifiable, Hashable {
     let entries: [RankingEntry]
 }
 
-/// Colocação da atlética numa modalidade (tela 12). `nil` = ainda sem resultado.
+/// Situação da atlética numa modalidade (tela 12): até onde chegou no mata-mata
+/// ou posição e marca na prova.
 struct SportStanding: Identifiable, Hashable {
-    var id: String { sport.title }
-    let sport: Sport
-    let position: Int?
+    var id: Competition.ID { competition.id }
+    let competition: Competition
+    let status: String
 }
 
 /// Dados da atlética que o domínio ainda não tem (descrição) ou que são 📝 (torcedores).
@@ -59,25 +60,15 @@ extension MockData {
         return DivisionRanking(division: division, entries: entries)
     }
 
-    // MARK: - Por modalidade (fictícia)
+    // MARK: - Por modalidade
 
-    private static let sportPositions: [Athletic.ID: [String: Int]] = [
-        "ath-bufalos": ["Basquete Masculino": 2, "Futsal Feminino": 1],
-        "ath-imortal": ["Basquete Masculino": 1, "Futsal Feminino": 3, "Vôlei Feminino": 2],
-        "ath-sanguinaria": ["Basquete Masculino": 3, "Futsal Feminino": 2],
-        "ath-fanatica": ["Vôlei Feminino": 1, "Handebol Feminino": 1],
-        "ath-diastolica": ["Vôlei Feminino": 2, "Handebol Feminino": 2],
-        "ath-severa": ["Tênis de Mesa Misto": 1, "Futsal Feminino": 4],
-        "ath-nce": ["Tênis de Mesa Misto": 2],
-    ]
-
-    /// Modalidades que a atlética disputa (pelas partidas) e a colocação em cada uma.
-    static func standings(for athleticID: Athletic.ID) -> [SportStanding] {
-        var seen = Set<String>()
-        let sports = matches.filter { $0.involves(athleticID) }.map(\.sport).filter { seen.insert($0.title).inserted }
-        return sports
-            .map { SportStanding(sport: $0, position: sportPositions[athleticID]?[$0.title]) }
-            .sorted { ($0.position ?? .max, $0.sport.title) < ($1.position ?? .max, $1.sport.title) }
+    /// Modalidades que a atlética disputa, com a situação derivada da chave ou da prova.
+    static func standings(for athleticID: Athletic.ID, matches: [Match]) -> [SportStanding] {
+        competitions.compactMap { competition in
+            guard competition.involves(athleticID, matches: matches) else { return nil }
+            return SportStanding(competition: competition,
+                                 status: competition.standing(of: athleticID, matches: matches) ?? "Inscrita")
+        }
     }
 
     // MARK: - Perfil (fictício)

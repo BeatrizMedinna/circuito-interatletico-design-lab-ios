@@ -17,7 +17,7 @@ struct ScheduleView: View {
         .background(Color.canvas.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $isShowingFilters) {
-            ScheduleFilterSheet(matches: allMatches, applied: $filters)
+            ScheduleFilterSheet(items: allItems, applied: $filters)
         }
         .sensoryFeedback(.success, trigger: filters)
     }
@@ -27,12 +27,13 @@ struct ScheduleView: View {
         MockData.scheduleDays.first { Calendar.current.isDateInToday($0) } ?? MockData.scheduleDays.first ?? .now
     }
 
-    private var allMatches: [Match] {
-        guard case .loaded(let matches) = appState.matchesState else { return [] }
-        return matches
+    /// Partidas e provas do cronograma publicado.
+    private var allItems: [ScheduleItem] {
+        appState.matches.map(ScheduleItem.match)
+            + appState.competitions.filter { $0.trial != nil }.map(ScheduleItem.trial)
     }
 
-    private var hasSchedule: Bool { !allMatches.isEmpty }
+    private var hasSchedule: Bool { !allItems.isEmpty }
 
     // MARK: - Cabeçalho
 
@@ -57,7 +58,7 @@ struct ScheduleView: View {
 
             if hasSchedule {
                 DayTabs(days: MockData.scheduleDays, selection: $selectedDay) { day in
-                    matches(on: day).count
+                    items(on: day).count
                 }
                 if !filters.isEmpty {
                     activeFilters
@@ -104,7 +105,7 @@ struct ScheduleView: View {
     private var content: some View {
         switch appState.matchesState {
         case .loading:
-            ScheduleTimeline(matches: Array(MockData.matches.prefix(3)))
+            ScheduleTimeline(items: MockData.matches.prefix(3).map(ScheduleItem.match))
                 .redacted(reason: .placeholder)
                 .disabled(true)
                 .accessibilityElement(children: .ignore)
@@ -139,16 +140,16 @@ struct ScheduleView: View {
 
     @ViewBuilder
     private var dayContent: some View {
-        let dayMatches = matches(on: selectedDay)
+        let dayMatches = items(on: selectedDay)
         if dayMatches.isEmpty {
             let nextDay = nextDayWithMatches(after: selectedDay)
             ContentUnavailableView {
-                Label(filters.isEmpty ? "Nenhum jogo neste dia" : "Nenhum jogo com esses filtros",
+                Label(filters.isEmpty ? "Nenhum jogo ou prova neste dia" : "Nada com esses filtros",
                       systemImage: filters.isEmpty ? "calendar" : "line.3.horizontal.decrease")
             } description: {
                 Text(filters.isEmpty
-                     ? "Não há jogos marcados para \(Formatters.fullDay(selectedDay))."
-                     : "Nenhum jogo de \(Formatters.fullDay(selectedDay)) atende aos filtros.")
+                     ? "Não há jogos nem provas marcados para \(Formatters.fullDay(selectedDay))."
+                     : "Nenhum jogo ou prova de \(Formatters.fullDay(selectedDay)) atende aos filtros.")
             } actions: {
                 if let nextDay {
                     Button("Ver \(Formatters.dayTab(nextDay).lowercased() == "hoje" ? "hoje" : Formatters.fullDay(nextDay))") {
@@ -164,14 +165,14 @@ struct ScheduleView: View {
                 }
             }
         } else {
-            ScheduleTimeline(matches: dayMatches)
+            ScheduleTimeline(items: dayMatches)
                 .id(selectedDay)
                 .refreshable { await appState.refresh() }
         }
     }
 
-    private func matches(on day: Date) -> [Match] {
-        allMatches
+    private func items(on day: Date) -> [ScheduleItem] {
+        allItems
             .filter { Calendar.current.isDate($0.startDate, inSameDayAs: day) && filters.includes($0) }
             .sorted { $0.startDate < $1.startDate }
     }
@@ -179,8 +180,8 @@ struct ScheduleView: View {
     /// Próximo dia (depois deste; senão, antes) com jogos que atendem aos filtros.
     private func nextDayWithMatches(after day: Date) -> Date? {
         let days = MockData.scheduleDays
-        return days.first { $0 > day && !matches(on: $0).isEmpty }
-            ?? days.last { $0 < day && !matches(on: $0).isEmpty }
+        return days.first { $0 > day && !items(on: $0).isEmpty }
+            ?? days.last { $0 < day && !items(on: $0).isEmpty }
     }
 }
 
@@ -247,7 +248,7 @@ private struct DayTabs: View {
 /// Jogos agrupados por horário de início. A linha fica preta nos horários que já
 /// começaram e cinza nos próximos; hoje, a lista abre no jogo ao vivo ou no próximo.
 private struct ScheduleTimeline: View {
-    let matches: [Match]
+    let items: [ScheduleItem]
     @ScaledMetric(relativeTo: .subheadline) private var timeColumnWidth: CGFloat = 52
     /// Em tamanhos de acessibilidade o horário vai para cima dos jogos, liberando a largura.
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -269,13 +270,13 @@ private struct ScheduleTimeline: View {
         }
     }
 
-    private var slots: [(start: Date, matches: [Match])] {
-        var result: [(start: Date, matches: [Match])] = []
-        for match in matches {
-            if let last = result.indices.last, result[last].start == match.startDate {
-                result[last].matches.append(match)
+    private var slots: [(start: Date, items: [ScheduleItem])] {
+        var result: [(start: Date, items: [ScheduleItem])] = []
+        for item in items {
+            if let last = result.indices.last, result[last].start == item.startDate {
+                result[last].items.append(item)
             } else {
-                result.append((match.startDate, [match]))
+                result.append((item.startDate, [item]))
             }
         }
         return result
@@ -284,11 +285,11 @@ private struct ScheduleTimeline: View {
     /// Hoje: primeiro horário com jogo ao vivo ou ainda por começar.
     private var anchorSlot: Date? {
         guard let first = slots.first, Calendar.current.isDateInToday(first.start) else { return nil }
-        return slots.first { slot in slot.matches.contains { $0.status != .finished } }?.start
+        return slots.first { slot in slot.items.contains(where: \.isOpen) }?.start
     }
 
     @ViewBuilder
-    private func slotRow(_ slot: (start: Date, matches: [Match])) -> some View {
+    private func slotRow(_ slot: (start: Date, items: [ScheduleItem])) -> some View {
         let time = Text(Formatters.time(slot.start))
             .font(.subheadline.weight(.semibold))
             .monospacedDigit()
@@ -309,14 +310,22 @@ private struct ScheduleTimeline: View {
         }
     }
 
-    private func cards(_ slot: (start: Date, matches: [Match])) -> some View {
+    private func cards(_ slot: (start: Date, items: [ScheduleItem])) -> some View {
         let hasStarted = slot.start <= .now
         return VStack(spacing: Spacing.s) {
-            ForEach(slot.matches) { match in
-                NavigationLink(value: AppRoute.match(match.id)) {
-                    MatchCard(match: match, showsStatus: true, date: .none, showsVenue: true)
+            ForEach(slot.items) { item in
+                switch item {
+                case .match(let match):
+                    NavigationLink(value: AppRoute.match(match.id)) {
+                        MatchCard(match: match, showsStatus: true, date: .none, showsVenue: true)
+                    }
+                    .buttonStyle(.pressableCard)
+                case .trial(let competition):
+                    NavigationLink(value: AppRoute.competition(competition.id)) {
+                        TrialCard(competition: competition)
+                    }
+                    .buttonStyle(.pressableCard)
                 }
-                .buttonStyle(.pressableCard)
             }
         }
         .padding(.leading, Spacing.s)

@@ -20,11 +20,11 @@
 | 03 / 04 / 05 | Jogo ao vivo / encerrado / a iniciar | **Validada** |
 | 06 | Notificações (Minha Atlética / Geral) | **Validada** (Bloco 2 adicionou lidas e permissão) |
 | 07 / 08 | Cronograma / filtros | **Validada** |
-| 09 | Ranking por divisão (pódio + lista) | **Bloco 3 — em validação** |
-| 10 / 11 / 12 | Atlética: info / cronograma / ranking | **Bloco 3 — em validação** |
-| 13 | Modalidades (busca + filtro) | — |
-| 14 / 15 / 16 | Modalidade: cronograma / chaveamento / ranking | — |
-| 17 | Filtros de modalidades | — |
+| 09 | Ranking por divisão (pódio + lista) | **Validada** |
+| 10 / 11 / 12 | Atlética: info / cronograma / ranking | **Validada** (Bloco 4 ligou a aba Modalidades) |
+| 13 | Modalidades (busca + filtro) | **Bloco 4 — em validação** |
+| 14 / 15 / 16 | Modalidade: cronograma / chaveamento / ranking | **Bloco 4 — em validação** |
+| 17 | Filtros de modalidades | **Bloco 4 — em validação** |
 
 ## Fluxos identificados
 - Primeiro acesso → 01 Escolha da atlética → app com 4 tabs (Início, Cronograma, Ranking, Modalidades).
@@ -35,6 +35,13 @@
 - Cada tab terá seu próprio `NavigationStack`; tab bar sempre visível nos pushes.
 
 ## Componentes compartilhados
+Criados no Bloco 4:
+- `Mocks/Competition.swift`: `Competition` (modalidade × divisão), `CompetitionFormat`, `RankingCriterion`, `MarkUnit` (formata tempo, distância, pontos, quantidade), `Trial`, `TrialResult`, `ResultSituation`, `RankedResult`, `BracketRound`, `BracketMatchup`, `Phase`.
+- `Mocks/CompetitionProgress.swift`: chave (explícita ou montada a partir das partidas), vencedor, momento da modalidade, campanha no mata-mata e situação de cada atlética.
+- `Mocks/MockCompetitions.swift`: 16 modalidades (12 eliminatórias, 3 provas, 1 sem chave), duas chaves completas com bye e "a definir".
+- `TrialCard` (prova no cronograma), `CompetitionRow`, `FlowChips` (agora compartilhado), `RankingRow.showsPosition`, `MatchCard.caption`.
+- `ScheduleItem` (partida ou prova) no Cronograma; `AppRoute.competition`.
+
 Criados no Bloco 3:
 - `RankingRow` (posição, escudo, nome, pontos, empate, "Sua atlética").
 - `UnderlineTabs` ganhou ícone opcional e passa a rolar quando as abas não cabem.
@@ -65,6 +72,26 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Bloco 4 — Modalidades (13–17)
+Lista (13) e filtros (17) — `Features/Sports/SportsView.swift`:
+- Cada linha é uma modalidade numa divisão: ícone do esporte, nome (com a prova, ex.: "Natação Masculino · 50m livre"), divisão · formato e o momento (fase atual, "Resultados parciais", "Começa…", "Encerrada · Campeã: X", "Chave ainda não definida"); selo "ao vivo"; coração quando a atlética de coração disputa.
+- Busca por nome; filtros Categoria e Divisão em meia tela (rascunho, ✕/✓, "Limpar", contagem); filtros ativos em pílulas e no botão.
+- Estados: carregando, erro, sem edição, modalidades não divulgadas, busca/filtros sem resultado (com "Limpar busca" e "Limpar filtros").
+
+Detalhe — `CompetitionDetailView` (o formato muda as abas):
+- Eliminatória → **Jogos** (ao vivo e próximos, depois encerrados, com a fase no cartão), **Chave** (15) e **Classificação** (16).
+- Classificatória → **Prova** (data, local, critério, unidade, individual/equipe, situação) e **Resultados** (16).
+- Resumo: divisão, etapa/situação, atletas, "Jogo ao vivo agora" e "Campeã: X".
+- Chave: uma fase por vez (abre na atual); confrontos com situação, placar, ✓ no vencedor, perdedor em cinza, W.O., bye ("avança direto, sem jogo"), "A definir" e para onde o vencedor segue. Tocar abre a partida.
+- Classificação do mata-mata: sem pontos; mostra até onde cada atlética chegou (Campeã, Vice-campeã, Na semifinal, Eliminada nas quartas…), com aviso explicando.
+- Resultados da prova: marca formatada pela unidade, empates "2º=", ausente/desistência/desclassificado sem posição, "Resultados parciais" antes do encerramento, "Aguardando resultado" para inscritas sem marca, prova por equipe mostra a atlética.
+- Estados: chave não definida, prova agendada sem resultados, modalidade indisponível.
+
+Integrações:
+- Cronograma mostra provas (`TrialCard`, borda tracejada quando parcial) junto com as partidas; filtros valem para as duas. Isso resolve a pendência "provas no cronograma".
+- Detalhe da partida → "Ver chave e classificação" da modalidade.
+- Atlética › Modalidades: situação real de cada modalidade (antes, posições fictícias), com seta para a modalidade.
+
 ### Bloco 3 — Ranking e Atléticas (09–12)
 Ranking (`Features/Ranking/`):
 - Abas por divisão (abre na divisão da atlética de coração), pódio 2º·1º·3º e lista a partir do 4º; tocar abre a atlética.
@@ -144,6 +171,7 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 01 — Escolha sua Atlética (17/10/2026, no simulador).
 - 02–06 — Bloco 1: Início, partidas e notificações (19/10/2026, no simulador).
 - 07–08 — Bloco 2: Cronograma e Filtros, com atlética de coração e notificações (19/10/2026).
+- 09–12 — Bloco 3: Ranking e Atléticas (19/10/2026).
 
 ## Decisões confirmadas
 - Mobile first; iOS nativo em SwiftUI; target existente convertido para iPhone (sem novo projeto).
@@ -169,6 +197,13 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 10. Personas usam nomes antigos (`ADMIN_SUPREMO`, `EM_EDICAO`/`SALVA`), substituídos pela seção 12 do documento-fonte, e citam recursos sem wireframe (estatísticas individuais/artilharia, card de resultado, abrir no mapa, histórico) — não antecipados.
 
 ## Pendências
+**Hipóteses do Bloco 4:**
+- Lista de Modalidades por modalidade × divisão (a chave e a prova existem por divisão, RN-39/RN-46).
+- No mata-mata, a classificação mostra a fase alcançada; só campeã e vice têm posição. "Campeã" aparece quando a final termina (o registro oficial de campeões é 📝, RN-90).
+- Prova sem estado "em andamento" no domínio: resultados lançados antes do encerramento aparecem como parciais (RN-50).
+- Chaves das demais modalidades são montadas a partir das partidas mockadas e completadas até a final com "a definir".
+- Marcas, inscritos e nomes de atletas são fictícios. Ajustei fases e adversários de algumas partidas mockadas para as chaves fazerem sentido (ex.: a final de Basquete Masculino agora é contra Lobos).
+
 **Hipóteses do Bloco 3 (dados fictícios, sem regra oficial):**
 - Pontos, posições, torcedores e colocação por modalidade são ilustrativos. A tabela de pontuação e os desempates não existem no domínio (P-08).
 - Pontos iguais dividem a posição (como RN-49 nas provas); a ordem entre empatados é alfabética só para exibir.
@@ -184,21 +219,21 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - "Minha atlética" nas Notificações = avisos que citam a atlética.
 
 **Decisões de produto em aberto:**
-- Provas classificatórias (natação, atletismo) também ocupam o cronograma (item = partida **ou** prova), mas não há cartão de prova no wireframe. Não implementado; decidir junto com Modalidades.
 - Onboarding sem opção "seguir sem atlética" (RN-86 permite). Hoje dá para remover depois, na Início.
 - Destino do "Ver mais" da Início: continua numa lista própria; pode passar a abrir o Cronograma filtrado.
 - Ranking geral: qual é o critério oficial (pontos por colocação em cada modalidade? Torcidômetro entra?). Definir antes da alta fidelidade.
-- Modalidades na tela da atlética: ligar cada linha à tela de Modalidade no Bloco 4 e definir como mostrar classificatórias (marca/tempo) × eliminatórias (fase).
+- Início mostra só partidas; provas ao vivo/parciais poderiam entrar no carrossel "Ao vivo".
+- Filtro de Modalidades por formato (eliminatória/classificatória) ou por "Minha atlética": não está no wireframe; não implementado.
+- Contagem nas abas de dia do Cronograma diz "jogos" mesmo incluindo provas.
 - Rótulo "Em andamento" (cronograma, 07) × "Ao vivo" (Início e detalhe): o protótipo usa "Ao vivo" em tudo.
 - Abrir o local da partida no app de mapas (💡 no domínio, citado nas personas): não implementado.
 - Torcedor vê a escalação validada (RN-70), mas os wireframes não mostram escalação na partida.
 
-- **Modalidades (etapa 13–17):** analisar as diferenças entre eliminatórias e classificatórias — ranking em "pts" não existe no mata-mata; classificatórias usam marca (tempo/distância) e situação; não há wireframe de resultados de prova; a aba Chaveamento não se aplica a elas. Nenhuma tela nova antecipada.
 - Divergências 6–9 serão retomadas quando as telas correspondentes entrarem.
 
 ## Próximos passos autorizados
-- Validação do Bloco 3 pela designer.
-- Bloco 4 (Modalidades) — **ainda não autorizado**.
+- Validação do Bloco 4 pela designer.
+- Alta fidelidade e painel web — **não autorizados**.
 
 ## Histórico
 - 2026-10-17 — Registro inicial das diretrizes do Design Lab. Nenhuma implementação assumida.
@@ -206,3 +241,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-17 — Tela 01 validada. Bloco 1 (telas 02–06) implementado com abas, rotas, estados completos e cenários por argumento de inicialização; testado no simulador.
 - 2026-10-19 — Bloco 1 validado. Bloco 2: Cronograma e Filtros, atlética de coração editável, notificações lidas/não lidas com contador e permissão simulada; testado no simulador.
 - 2026-10-19 — Bloco 2 validado. Bloco 3: Ranking por divisão e detalhes da atlética (Jogos, Sobre, Modalidades), com dados fictícios e navegação partida ↔ atlética; testado no simulador.
+- 2026-10-19 — Bloco 3 validado. Bloco 4: Modalidades com layouts próprios para eliminatória (jogos, chave, campanha) e classificatória (prova, resultados), provas no Cronograma e ligações partida/atlética ↔ modalidade; testado no simulador.

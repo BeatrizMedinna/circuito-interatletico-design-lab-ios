@@ -33,6 +33,8 @@ final class AppState {
     private(set) var notificationsState: LoadState<[AppNotification]> = .loading
     /// Classificação geral por divisão (dados fictícios, ver Mocks/Ranking.swift).
     private(set) var rankingState: LoadState<[DivisionRanking]> = .loading
+    /// Modalidades da edição (chaves e provas).
+    private(set) var competitionsState: LoadState<[Competition]> = .loading
     /// Última atualização dos placares ao vivo ("Atualizado há…").
     private(set) var lastRefresh = Date()
 
@@ -64,6 +66,7 @@ final class AppState {
         matchesState = .loading
         notificationsState = .loading
         rankingState = .loading
+        competitionsState = .loading
         guard scenario != .loading else { return }
         try? await Task.sleep(for: .seconds(0.8))
         apply()
@@ -84,6 +87,21 @@ final class AppState {
     func match(id: Match.ID) -> Match? {
         guard case .loaded(let matches) = matchesState else { return nil }
         return matches.first { $0.id == id }
+    }
+
+    /// Partidas carregadas (vazio enquanto carrega ou com erro).
+    var matches: [Match] {
+        guard case .loaded(let matches) = matchesState else { return [] }
+        return matches
+    }
+
+    var competitions: [Competition] {
+        guard case .loaded(let competitions) = competitionsState else { return [] }
+        return competitions
+    }
+
+    func competition(id: Competition.ID) -> Competition? {
+        competitions.first { $0.id == id }
     }
 
     /// Posição da atlética na classificação da divisão, se já houver.
@@ -153,6 +171,7 @@ final class AppState {
         matchesState = resolve(MockData.matches)
         notificationsState = resolve(MockData.notifications)
         rankingState = resolve(MockData.rankings)
+        competitionsState = resolve(MockData.competitions)
         lastRefresh = Date()
     }
 

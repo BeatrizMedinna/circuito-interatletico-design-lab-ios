@@ -278,13 +278,14 @@ private struct AthleticAboutTab: View {
 
 // MARK: - Modalidades (tela 12)
 
-/// Colocação da atlética em cada modalidade que disputa (dados fictícios).
-/// Sem seta: a tela de Modalidade chega no Bloco 4.
+/// Situação da atlética em cada modalidade que disputa: até onde chegou no
+/// mata-mata ou posição e marca na prova. Cada linha abre a modalidade.
 private struct AthleticSportsTab: View {
+    @Environment(AppState.self) private var appState
     let athletic: Athletic
 
     var body: some View {
-        let standings = MockData.standings(for: athletic.id)
+        let standings = MockData.standings(for: athletic.id, matches: appState.matches)
         VStack(alignment: .leading, spacing: Spacing.s) {
             SectionHeader(title: "Modalidades")
             if standings.isEmpty {
@@ -292,7 +293,10 @@ private struct AthleticSportsTab: View {
             } else {
                 VStack(spacing: 1) {
                     ForEach(standings) { standing in
-                        row(standing)
+                        NavigationLink(value: AppRoute.competition(standing.competition.id)) {
+                            row(standing)
+                        }
+                        .buttonStyle(.pressableCard)
                     }
                 }
                 .background(Color.canvas)
@@ -302,27 +306,39 @@ private struct AthleticSportsTab: View {
     }
 
     private func row(_ standing: SportStanding) -> some View {
-        HStack(spacing: Spacing.s) {
-            Image(systemName: standing.sport.symbol)
+        let competition = standing.competition
+        let isHighlight = standing.status == "Campeã" || standing.status.hasPrefix("1º")
+        return HStack(spacing: Spacing.s) {
+            Image(systemName: isHighlight ? "trophy.fill" : competition.sport.symbol)
                 .font(.body.weight(.medium))
                 .foregroundStyle(.textPrimary)
                 .frame(width: 44, height: 44)
                 .background(.surface, in: Circle())
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(standing.sport.title)
+                Text(competition.title)
                     .font(.headline)
                     .foregroundStyle(.textPrimary)
-                Text(standing.position.map { "\($0)º lugar" } ?? "Ainda sem resultado")
-                    .font(.subheadline)
-                    .foregroundStyle(standing.position == nil ? Color.textSecondary : Color.textPrimary)
+                    .multilineTextAlignment(.leading)
+                Text(standing.status)
+                    .font(.subheadline.weight(isHighlight ? .semibold : .regular))
+                    .foregroundStyle(isHighlight ? Color.textPrimary : Color.textSecondary)
+                Text("\(competition.division.name) · \(competition.format.label)")
+                    .font(.caption)
+                    .foregroundStyle(.textSecondary)
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: Spacing.xs)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.textSecondary)
+                .accessibilityHidden(true)
         }
         .padding(Spacing.s)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.appBackground)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+        .accessibilityHint("Abre a modalidade")
     }
 }
 

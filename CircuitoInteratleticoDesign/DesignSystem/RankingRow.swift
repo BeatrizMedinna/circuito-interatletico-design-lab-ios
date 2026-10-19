@@ -8,14 +8,18 @@ struct RankingRow: View {
     let detail: String
     var isTied = false
     var isFavorite = false
+    /// Falso quando nenhuma linha da lista tem posição (ex.: mata-mata em andamento).
+    var showsPosition = true
 
     var body: some View {
         HStack(spacing: Spacing.s) {
-            Text(position.map { "\($0)º" } ?? "—")
-                .font(.headline)
-                .monospacedDigit()
-                .foregroundStyle(.textPrimary)
-                .frame(minWidth: 36, alignment: .leading)
+            if showsPosition {
+                Text(position.map { "\($0)º" } ?? "—")
+                    .font(.headline)
+                    .monospacedDigit()
+                    .foregroundStyle(.textPrimary)
+                    .frame(minWidth: 36, alignment: .leading)
+            }
             AthleticBadge(size: .medium, fill: .surface)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: Spacing.xxs) {

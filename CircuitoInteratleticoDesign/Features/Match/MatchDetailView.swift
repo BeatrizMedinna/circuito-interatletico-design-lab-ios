@@ -53,6 +53,13 @@ struct MatchDetailView: View {
 
                 MatchInfoSection(match: match)
 
+                if let competition = MockData.competition(for: match) {
+                    NavigationLink(value: AppRoute.competition(competition.id)) {
+                        CompetitionLinkRow(competition: competition)
+                    }
+                    .buttonStyle(.pressableCard)
+                }
+
                 if !match.periods.isEmpty {
                     VStack(alignment: .leading, spacing: Spacing.s) {
                         SectionHeader(title: "Parciais")
@@ -118,6 +125,38 @@ private struct MatchInfoSection: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Atalho da partida para a modalidade (chave e classificação).
+private struct CompetitionLinkRow: View {
+    let competition: Competition
+
+    var body: some View {
+        HStack(spacing: Spacing.s) {
+            Image(systemName: "point.3.connected.trianglepath.dotted")
+                .font(.body.weight(.medium))
+                .frame(width: 44, height: 44)
+                .background(.appBackground, in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Ver chave e classificação")
+                    .font(.headline)
+                Text("\(competition.title) · \(competition.division.name)")
+                    .font(.subheadline)
+                    .foregroundStyle(.textSecondary)
+            }
+            Spacer(minLength: Spacing.xs)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.textSecondary)
+                .accessibilityHidden(true)
+        }
+        .foregroundStyle(.textPrimary)
+        .padding(Spacing.s)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
         .accessibilityElement(children: .combine)
     }
 }

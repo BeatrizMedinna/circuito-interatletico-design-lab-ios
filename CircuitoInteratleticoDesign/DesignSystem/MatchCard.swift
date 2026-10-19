@@ -64,13 +64,15 @@ struct MatchCard: View {
     var showsStatus = false
     /// Listas agrupadas por dia usam `.time`; a linha do tempo, `.none`.
     var date: Formatters.CardDate = .dayAndTime
+    /// Substitui o cabeçalho (ex.: "SEMIFINAL · 15:30" dentro da modalidade).
+    var caption: String? = nil
     /// Local da partida no rodapé (cronograma, onde jogos simultâneos se distinguem pelo local).
     var showsVenue = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                Text(Formatters.cardHeader(match, date: date))
+                Text(caption ?? Formatters.cardHeader(match, date: date))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.textSecondary)
                     .lineLimit(2)
