@@ -4,8 +4,6 @@ import SwiftUI
 enum AppRoute: Hashable {
     case match(Match.ID)
     case notifications
-    /// `nil` = jogos de todas as atléticas.
-    case matchList(MatchListKind, Athletic.ID?)
     case athletic(Athletic.ID)
     case competition(Competition.ID)
 }
@@ -14,29 +12,30 @@ enum AppRoute: Hashable {
 /// Início (Bloco 1), Cronograma (Bloco 2), Ranking (Bloco 3) e Modalidades (Bloco 4).
 struct MainTabView: View {
     @State private var appState: AppState
+    @State private var schedulePath = NavigationPath()
 
     init(appState: AppState) {
         _appState = State(initialValue: appState)
     }
 
     var body: some View {
-        TabView {
-            Tab("Início", systemImage: "house") {
+        TabView(selection: $appState.selectedTab) {
+            Tab("Início", systemImage: "house", value: AppTab.home) {
                 NavigationStack {
                     HomeView().withAppRoutes()
                 }
             }
-            Tab("Cronograma", systemImage: "calendar") {
-                NavigationStack {
+            Tab("Cronograma", systemImage: "calendar", value: AppTab.schedule) {
+                NavigationStack(path: $schedulePath) {
                     ScheduleView().withAppRoutes()
                 }
             }
-            Tab("Ranking", systemImage: "trophy") {
+            Tab("Ranking", systemImage: "trophy", value: AppTab.ranking) {
                 NavigationStack {
                     RankingView().withAppRoutes()
                 }
             }
-            Tab("Modalidades", systemImage: "star") {
+            Tab("Modalidades", systemImage: "star", value: AppTab.sports) {
                 NavigationStack {
                     SportsView().withAppRoutes()
                 }
@@ -49,6 +48,10 @@ struct MainTabView: View {
                     .allowsHitTesting(false)
             }
         }
+        // Um pedido de outra tela volta o Cronograma para a raiz antes de filtrar.
+        .onChange(of: appState.scheduleRequest?.id) { _, request in
+            if request != nil { schedulePath = NavigationPath() }
+        }
         .environment(appState)
         .task { await appState.load() }
     }
@@ -60,7 +63,6 @@ private extension View {
             switch route {
             case .match(let id): MatchDetailView(matchID: id)
             case .notifications: NotificationsView()
-            case .matchList(let kind, let athleticID): MatchListView(kind: kind, athleticID: athleticID)
             case .athletic(let id): AthleticDetailView(athleticID: id)
             case .competition(let id): CompetitionDetailView(competitionID: id)
             }

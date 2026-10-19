@@ -22,9 +22,9 @@
 | 07 / 08 | Cronograma / filtros | **Validada** |
 | 09 | Ranking por divisão (pódio + lista) | **Validada** |
 | 10 / 11 / 12 | Atlética: info / cronograma / ranking | **Validada** (Bloco 4 ligou a aba Modalidades) |
-| 13 | Modalidades (busca + filtro) | **Bloco 4 — em validação** |
-| 14 / 15 / 16 | Modalidade: cronograma / chaveamento / ranking | **Bloco 4 — em validação** |
-| 17 | Filtros de modalidades | **Bloco 4 — em validação** |
+| 13 | Modalidades (busca + filtro) | **Validada** · refinamento em validação |
+| 14 / 15 / 16 | Modalidade: cronograma / chaveamento / ranking | **Validada** |
+| 17 | Filtros de modalidades | **Validada** |
 
 ## Fluxos identificados
 - Primeiro acesso → 01 Escolha da atlética → app com 4 tabs (Início, Cronograma, Ranking, Modalidades).
@@ -72,6 +72,14 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Refinamento de UX (19/10/2026) — em validação
+- **Cronograma:** abas de dia sem contagem ("Hoje" segue identificando o dia atual); barra de filtros ativos com botão preto ✕ (limpar tudo) fixo à esquerda, separado por um traço, e ✕ em cada pílula (`ActiveFiltersBar`, também em Modalidades); coluna de horário mais estreita (fonte footnote, largura mínima 40 pt, cresce com Dynamic Type sem cortar).
+- **"Ver mais" da Início → Cronograma** (`AppState.openSchedule`): troca de aba, volta o Cronograma à raiz, aplica a atlética da aba de origem (ou nenhuma em "Geral") e abre no dia certo — próximo jogo ("Próximos") ou último dia com encerrado ("Últimos"), rolando até ele. Filtros continuam editáveis. A lista intermediária (`MatchListView`) foi removida.
+- **Perfil da atlética:** sem o coração na barra. Ação textual no resumo: "Escolher como atlética de coração", "Trocar para [nome]" (com "Hoje você torce por X. Só dá para ter uma…") ou "Remover atlética de coração" + "Sua atlética" na própria. Início mantém a troca sob o título; Ranking mantém o destaque.
+- **Modalidades:** linha com duas informações (nome com categoria; divisão · estado curto, sem datas) e selo ao vivo; sem coração decorativo. Abas "Minha atlética | Geral" como na Início (some sem atlética de coração; estado vazio com "Ver todas as modalidades"); Categoria e Divisão continuam nos filtros, aplicados sobre a aba.
+- **Agendas contextuais (resumo):** aba "Agenda" da atlética (jogos e provas) e aba Jogos da modalidade usam o mesmo `AgendaSummary`: "Ao vivo e próximos" (tudo ao vivo/em andamento + só o próximo) e "Último encerrado" (só o mais recente). "Ver todos" abre o Cronograma com a origem (atlética, ou esporte + categoria + divisão) e o foco da seção. Decisão: "Ver todos" só aparece quando há mais eventos do que os mostrados, e seções vazias somem.
+- **Torcidômetro:** aviso mockado "Ultrapassagem no ranking" passou a "Liderança no Torcidômetro" para não sugerir que mexe no Ranking.
+
 ### Bloco 4 — Modalidades (13–17)
 Lista (13) e filtros (17) — `Features/Sports/SportsView.swift`:
 - Cada linha é uma modalidade numa divisão: ícone do esporte, nome (com a prova, ex.: "Natação Masculino · 50m livre"), divisão · formato e o momento (fase atual, "Resultados parciais", "Começa…", "Encerrada · Campeã: X", "Chave ainda não definida"); selo "ao vivo"; coração quando a atlética de coração disputa.
@@ -220,11 +228,9 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 
 **Decisões de produto em aberto:**
 - Onboarding sem opção "seguir sem atlética" (RN-86 permite). Hoje dá para remover depois, na Início.
-- Destino do "Ver mais" da Início: continua numa lista própria; pode passar a abrir o Cronograma filtrado.
-- Ranking geral: qual é o critério oficial (pontos por colocação em cada modalidade? Torcidômetro entra?). Definir antes da alta fidelidade.
+- **Ranking geral × Torcidômetro** (consulta ao documento-fonte, seções 2, 4.2, 7.16 e 11.3): o Torcidômetro é um ranking próprio — contagem de dispositivos que escolheram cada atlética (RN-88, entidade com posição própria). A "Classificação" é por modalidade (RN-89), com pontuação e desempate não definidos (P-08). O documento **não define** um ranking geral por divisão nem relação com o Torcidômetro; só prevê "campeão geral de cada divisão" registrado pelo organizador (RN-90), sem critério. Mantido: Ranking com pontos fictícios e Torcidômetro apenas como "Torcedores" no perfil. Decidir: existe ranking geral? Qual o critério? O Torcidômetro deve ter tela própria?
 - Início mostra só partidas; provas ao vivo/parciais poderiam entrar no carrossel "Ao vivo".
 - Filtro de Modalidades por formato (eliminatória/classificatória) ou por "Minha atlética": não está no wireframe; não implementado.
-- Contagem nas abas de dia do Cronograma diz "jogos" mesmo incluindo provas.
 - Rótulo "Em andamento" (cronograma, 07) × "Ao vivo" (Início e detalhe): o protótipo usa "Ao vivo" em tudo.
 - Abrir o local da partida no app de mapas (💡 no domínio, citado nas personas): não implementado.
 - Torcedor vê a escalação validada (RN-70), mas os wireframes não mostram escalação na partida.
@@ -242,3 +248,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-19 — Bloco 1 validado. Bloco 2: Cronograma e Filtros, atlética de coração editável, notificações lidas/não lidas com contador e permissão simulada; testado no simulador.
 - 2026-10-19 — Bloco 2 validado. Bloco 3: Ranking por divisão e detalhes da atlética (Jogos, Sobre, Modalidades), com dados fictícios e navegação partida ↔ atlética; testado no simulador.
 - 2026-10-19 — Bloco 3 validado. Bloco 4: Modalidades com layouts próprios para eliminatória (jogos, chave, campanha) e classificatória (prova, resultados), provas no Cronograma e ligações partida/atlética ↔ modalidade; testado no simulador.
+- 2026-10-19 — Bloco 4 validado. Rodada de refinamento: Cronograma mais enxuto, "Ver mais" e "Ver no cronograma" abrem o Cronograma filtrado, ação textual de atlética de coração no perfil, Modalidades com "Minha atlética | Geral" e agendas completas; testado no simulador.

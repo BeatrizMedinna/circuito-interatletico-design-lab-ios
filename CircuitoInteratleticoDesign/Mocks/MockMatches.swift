@@ -215,7 +215,7 @@ extension MockData {
                         message: "Severa venceu a Final e garantiu o troféu do Tênis de Mesa Misto (Série Bronze)!",
                         date: minutesFromNow(-150), matchID: "m-fin-tenis",
                         athleticIDs: ["ath-severa", "ath-nce"]),
-        AppNotification(id: "n-torcida", kind: .fanMeter, title: "Ultrapassagem no ranking",
+        AppNotification(id: "n-torcida", kind: .fanMeter, title: "Liderança no Torcidômetro",
                         message: "Búfalos assumiu a liderança do Torcidômetro.",
                         date: day(-1, 20, 15), athleticIDs: ["ath-bufalos"]),
         AppNotification(id: "n-comeca-ontem", kind: .startingSoon, title: "Vai começar!",

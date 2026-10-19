@@ -19,6 +19,18 @@ enum CompetitionProgress: Hashable {
         case .finished(let champion): champion.map { "Encerrada · Campeã: \($0.name)" } ?? "Encerrada"
         }
     }
+
+    /// Versão curta para a lista de Modalidades (sem datas). Na prova, diz "Prova…"
+    /// para o formato ficar implícito sem mais uma linha.
+    func shortLabel(isElimination: Bool) -> String {
+        switch self {
+        case .notGenerated: isElimination ? "Chave a definir" : "Prova a definir"
+        case .notStarted: isElimination ? "A iniciar" : "Prova a iniciar"
+        case .inProgress(let phase): isElimination ? phase : "Prova com resultados parciais"
+        case .finished(let champion):
+            isElimination ? (champion.map { "Campeã: \($0.name)" } ?? "Encerrada") : "Prova encerrada"
+        }
+    }
 }
 
 /// Situação da atlética na modalidade (aba Classificação do mata-mata e aba

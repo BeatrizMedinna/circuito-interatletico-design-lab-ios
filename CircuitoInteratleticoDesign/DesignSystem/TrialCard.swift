@@ -4,11 +4,14 @@ import SwiftUI
 /// liderança (ou quantas atléticas disputam) e a situação da prova.
 struct TrialCard: View {
     let competition: Competition
+    /// O cronograma já mostra o horário (`.none`); a agenda da atlética mostra dia e hora.
+    var date: Formatters.CardDate = .none
+    var showsVenue = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                Text(competition.title.uppercased())
+                Text(Formatters.cardHeader(start: competition.trial?.startDate ?? .now, title: competition.title, date: date))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.textSecondary)
                     .lineLimit(2)
@@ -34,7 +37,7 @@ struct TrialCard: View {
                         .foregroundStyle(.textSecondary)
                 }
             }
-            if let venue = competition.trial?.venue {
+            if showsVenue, let venue = competition.trial?.venue {
                 Label(venue, systemImage: "mappin.and.ellipse")
                     .font(.caption)
                     .foregroundStyle(.textSecondary)

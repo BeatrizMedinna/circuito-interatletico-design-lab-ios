@@ -177,8 +177,8 @@ private struct CompetitionSummaryCard: View {
 
 // MARK: - Jogos (tela 14)
 
-/// Partidas da modalidade: ao vivo e próximas primeiro, depois as encerradas
-/// (mais recentes no topo). A fase aparece no cabeçalho do cartão.
+/// Resumo dos jogos da modalidade: ao vivo, próximo e último encerrado, com a
+/// fase no cartão. "Ver todos" abre o Cronograma filtrado por esporte, categoria e divisão.
 private struct CompetitionMatchesTab: View {
     @Environment(AppState.self) private var appState
     let competition: Competition
@@ -189,30 +189,14 @@ private struct CompetitionMatchesTab: View {
             InlineNote(systemImage: "calendar",
                        text: "A chave desta modalidade ainda não foi definida. Os jogos aparecem aqui depois do sorteio.")
         } else {
-            VStack(alignment: .leading, spacing: Spacing.xl) {
-                section("Ao vivo e próximos",
-                        matches.filter { $0.status != .finished }.sorted { $0.startDate < $1.startDate },
-                        empty: "Nenhum jogo por vir nesta modalidade.")
-                section("Encerrados",
-                        matches.filter { $0.status == .finished }.sorted { $0.startDate > $1.startDate },
-                        empty: "Nenhum jogo encerrado ainda.")
-            }
-        }
-    }
-
-    private func section(_ title: String, _ matches: [Match], empty: String) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.s) {
-            SectionHeader(title: title)
-            if matches.isEmpty {
-                InlineNote(systemImage: "calendar", text: empty)
-            }
-            ForEach(matches) { match in
-                NavigationLink(value: AppRoute.match(match.id)) {
-                    MatchCard(match: match, showsStatus: true,
-                              caption: "\(match.phase) · \(Formatters.dayLabel(match.startDate)), \(Formatters.time(match.startDate))".uppercased())
-                }
-                .buttonStyle(.pressableCard)
-            }
+            AgendaSummary(items: matches.map(ScheduleItem.match),
+                          filters: ScheduleFilters(sportName: competition.sport.name,
+                                                   gender: competition.sport.gender,
+                                                   divisionID: competition.division.id),
+                          originName: competition.title,
+                          matchCaption: { match in
+                              "\(match.phase) · \(Formatters.dayLabel(match.startDate)), \(Formatters.time(match.startDate))".uppercased()
+                          })
         }
     }
 }

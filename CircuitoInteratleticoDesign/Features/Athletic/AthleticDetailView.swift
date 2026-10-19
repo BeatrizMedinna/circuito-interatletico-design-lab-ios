@@ -1,14 +1,14 @@
 import SwiftUI
 
-/// Telas 10, 11 e 12 — Detalhes da atlética: resumo fixo no topo e três abas
-/// (Jogos, Sobre, Modalidades). O coração na barra torna a atlética "de coração".
+/// Telas 10, 11 e 12 — Detalhes da atlética: resumo no topo (com a ação de atlética
+/// de coração) e três abas (Agenda, Sobre, Modalidades).
 struct AthleticDetailView: View {
     enum Tab: Hashable, CaseIterable {
         case matches, about, sports
 
         var title: String {
             switch self {
-            case .matches: "Jogos"
+            case .matches: "Agenda"
             case .about: "Sobre"
             case .sports: "Modalidades"
             }
@@ -31,9 +31,6 @@ struct AthleticDetailView: View {
         Group {
             if let athletic = MockData.athletics.first(where: { $0.id == athleticID }) {
                 content(athletic)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) { favoriteButton(athletic) }
-                    }
             } else {
                 ContentUnavailableView {
                     Label("Atlética indisponível", systemImage: "shield")
@@ -54,7 +51,9 @@ struct AthleticDetailView: View {
                 AthleticSummaryCard(athletic: athletic,
                                     entry: appState.rankingEntry(for: athletic.id),
                                     profile: MockData.profile(for: athletic.id),
-                                    isFavorite: athletic.id == appState.favoriteAthletic?.id)
+                                    isFavorite: athletic.id == appState.favoriteAthletic?.id) {
+                    FavoriteChoice(athletic: athletic)
+                }
                     .padding(Spacing.l)
                 Section {
                     Group {
@@ -74,28 +73,17 @@ struct AthleticDetailView: View {
         }
         .refreshable { await appState.refresh() }
     }
-
-    /// Torcer por esta atlética (ou deixar de torcer), o mesmo efeito da troca na Início.
-    private func favoriteButton(_ athletic: Athletic) -> some View {
-        let isFavorite = athletic.id == appState.favoriteAthletic?.id
-        return Button {
-            appState.setFavorite(isFavorite ? nil : athletic)
-        } label: {
-            Image(systemName: isFavorite ? "heart.fill" : "heart")
-        }
-        .accessibilityLabel(isFavorite ? "Deixar de torcer por \(athletic.name)" : "Torcer por \(athletic.name)")
-        .sensoryFeedback(.selection, trigger: isFavorite)
-    }
 }
 
 // MARK: - Resumo
 
 /// Escudo, nome, instituição e números da atlética. Dados ausentes aparecem como "—".
-private struct AthleticSummaryCard: View {
+private struct AthleticSummaryCard<Action: View>: View {
     let athletic: Athletic
     let entry: RankingEntry?
     let profile: AthleticProfile
     let isFavorite: Bool
+    @ViewBuilder var action: Action
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.m) {
@@ -124,6 +112,8 @@ private struct AthleticSummaryCard: View {
                     GridRow { stat(pointsText, "Pontos"); stat(fansText, "Torcedores") }
                 }
             }
+            Divider()
+            action
         }
         .padding(Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -169,9 +159,49 @@ private struct AthleticSummaryCard: View {
     }
 }
 
-// MARK: - Jogos (tela 11)
+// MARK: - Atlética de coração
 
-/// Ao vivo, próximos e últimos jogos da atlética, com "Ver mais" para a lista completa.
+/// Ação única e reversível, escrita conforme o estado: escolher, trocar ou remover.
+/// Substitui o coração solto na barra, que sugeria favoritar várias atléticas.
+private struct FavoriteChoice: View {
+    @Environment(AppState.self) private var appState
+    let athletic: Athletic
+
+    var body: some View {
+        let current = appState.favoriteAthletic
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            if current?.id == athletic.id {
+                Text("Esta é a sua atlética de coração. Você vê os jogos e avisos dela em destaque.")
+                    .font(.footnote)
+                    .foregroundStyle(.textSecondary)
+                Button("Remover atlética de coração") { appState.setFavorite(nil) }
+                    .font(.subheadline.weight(.semibold))
+                    .underline()
+                    .foregroundStyle(.textPrimary)
+                    .frame(minHeight: 44)
+            } else {
+                Button {
+                    appState.setFavorite(athletic)
+                } label: {
+                    Text(current == nil ? "Escolher como atlética de coração" : "Torcer para \(athletic.name)")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.secondary)
+                Text(current.map { "Hoje você torce por \($0.name). Clique se deseja trocar sua torcida." }
+                     ?? "Você acompanha uma atlética por vez e pode trocar quando quiser.")
+                    .font(.footnote)
+                    .foregroundStyle(.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .sensoryFeedback(.selection, trigger: current?.id)
+    }
+}
+
+// MARK: - Agenda (tela 11)
+
+/// Resumo da agenda da atlética (jogos e provas): ao vivo, próximo e último
+/// encerrado. "Ver todos" abre o Cronograma filtrado por esta atlética.
 private struct AthleticMatchesTab: View {
     @Environment(AppState.self) private var appState
     let athletic: Athletic
@@ -179,51 +209,26 @@ private struct AthleticMatchesTab: View {
     var body: some View {
         switch appState.matchesState {
         case .loading:
-            ProgressView("Carregando jogos")
+            ProgressView("Carregando agenda")
                 .frame(maxWidth: .infinity, minHeight: 120)
         case .failed:
             VStack(spacing: Spacing.s) {
-                InlineNote(systemImage: "wifi.exclamationmark", text: "Não foi possível carregar os jogos.")
+                InlineNote(systemImage: "wifi.exclamationmark", text: "Não foi possível carregar a agenda.")
                 Button("Tentar novamente") { Task { await appState.retry() } }
                     .buttonStyle(.secondary)
             }
         case .unavailable:
             InlineNote(systemImage: "calendar.badge.exclamationmark", text: "Nenhuma edição em andamento.")
-        case .loaded(let all):
-            let matches = all.filter { $0.involves(athletic.id) }
-            if matches.isEmpty {
+        case .loaded:
+            let items = appState.matches.filter { $0.involves(athletic.id) }.map(ScheduleItem.match)
+                + appState.competitions.filter { competition in
+                    competition.trial?.participants.contains { $0.id == athletic.id } ?? false
+                }.map(ScheduleItem.trial)
+            if items.isEmpty {
                 InlineNote(systemImage: "calendar",
-                           text: "\(athletic.name) ainda não tem jogos no cronograma publicado.")
+                           text: "\(athletic.name) ainda não tem jogos nem provas no cronograma publicado.")
             } else {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
-                    let live = matches.filter { $0.status == .live }
-                    if !live.isEmpty {
-                        section("Ao vivo", matches: live, kind: nil)
-                    }
-                    section(MatchListKind.upcoming.title, matches: MatchListKind.upcoming.select(from: matches), kind: .upcoming)
-                    section(MatchListKind.recent.title, matches: MatchListKind.recent.select(from: matches), kind: .recent)
-                }
-            }
-        }
-    }
-
-    private func section(_ title: String, matches: [Match], kind: MatchListKind?) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.s) {
-            SectionHeader(title: title) {
-                if let kind, matches.count > 3 {
-                    NavigationLink("Ver mais", value: AppRoute.matchList(kind, athletic.id))
-                        .frame(minHeight: 44)
-                        .accessibilityLabel("Ver mais \(title.lowercased()) de \(athletic.name)")
-                }
-            }
-            if matches.isEmpty, let kind {
-                InlineNote(systemImage: kind.emptySymbol, text: kind.emptyMessage)
-            }
-            ForEach(matches.prefix(3)) { match in
-                NavigationLink(value: AppRoute.match(match.id)) {
-                    MatchCard(match: match, showsStatus: kind == nil)
-                }
-                .buttonStyle(.pressableCard)
+                AgendaSummary(items: items, filters: ScheduleFilters(athleticID: athletic.id), originName: athletic.name)
             }
         }
     }

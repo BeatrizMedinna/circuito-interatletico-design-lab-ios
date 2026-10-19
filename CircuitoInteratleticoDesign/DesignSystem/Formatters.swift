@@ -41,12 +41,16 @@ enum Formatters {
     }
 
     static func cardHeader(_ match: Match, date: CardDate = .dayAndTime) -> String {
+        cardHeader(start: match.startDate, title: match.sport.title, date: date)
+    }
+
+    static func cardHeader(start: Date, title: String, date: CardDate) -> String {
         let when: String? = switch date {
-        case .dayAndTime: "\(dayLabel(match.startDate)), \(time(match.startDate))"
-        case .time: time(match.startDate)
+        case .dayAndTime: "\(dayLabel(start)), \(time(start))"
+        case .time: time(start)
         case .none: nil
         }
-        return [when, match.sport.title].compactMap { $0 }.joined(separator: " · ").uppercased()
+        return [when, title].compactMap { $0 }.joined(separator: " · ").uppercased()
     }
 
     /// Aba de dia do cronograma: "Hoje" ou "sex, 16 out".

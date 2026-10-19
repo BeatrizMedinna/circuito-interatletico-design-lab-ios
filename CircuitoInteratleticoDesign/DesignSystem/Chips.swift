@@ -56,6 +56,41 @@ struct RemovableChip: View {
     }
 }
 
+/// Barra de filtros ativos: botão preto "limpar tudo" fixo à esquerda, separado
+/// por um traço, e as pílulas (cada uma com seu ✕) rolando na horizontal.
+struct ActiveFiltersBar<Chips: View>: View {
+    let onClearAll: () -> Void
+    @ViewBuilder var chips: Chips
+
+    var body: some View {
+        HStack(spacing: Spacing.xs) {
+            Button(action: onClearAll) {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.textOnAccent)
+                    .frame(width: 32, height: 32)
+                    .background(.actionPrimary, in: Circle())
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.pressableCard)
+            .accessibilityLabel("Limpar todos os filtros")
+
+            Rectangle()
+                .fill(.surfaceSelected)
+                .frame(width: 1, height: 24)
+                .accessibilityHidden(true)
+
+            ScrollView(.horizontal) {
+                HStack(spacing: Spacing.xs) { chips }
+                    .padding(.trailing, Spacing.l)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .padding(.leading, Spacing.l - 6)
+    }
+}
+
 /// Pílulas que quebram linha quando não cabem (nomes longos, fonte grande).
 struct FlowChips<Option: Hashable>: View {
     let options: [Option]

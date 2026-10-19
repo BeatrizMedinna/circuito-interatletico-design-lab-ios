@@ -12,6 +12,42 @@ enum HomeScope: Hashable, CaseIterable {
     }
 }
 
+/// Seções "Próximos jogos" e "Últimos jogos" da Início.
+enum MatchListKind: Hashable {
+    case upcoming, recent
+
+    var title: String {
+        switch self {
+        case .upcoming: "Próximos jogos"
+        case .recent: "Últimos jogos"
+        }
+    }
+
+    var emptyMessage: String {
+        switch self {
+        case .upcoming: "Nenhum jogo agendado por enquanto."
+        case .recent: "Nenhum jogo encerrado ainda."
+        }
+    }
+
+    var emptySymbol: String {
+        switch self {
+        case .upcoming: "calendar"
+        case .recent: "flag.checkered"
+        }
+    }
+
+    /// Próximos: do mais cedo ao mais tarde. Últimos: do mais recente ao mais antigo.
+    func select(from matches: [Match]) -> [Match] {
+        switch self {
+        case .upcoming:
+            matches.filter { $0.status == .scheduled }.sorted { $0.startDate < $1.startDate }
+        case .recent:
+            matches.filter { $0.status == .finished }.sorted { $0.startDate > $1.startDate }
+        }
+    }
+}
+
 /// Tela 02 — Início: ao vivo, próximos e últimos jogos, com acesso às notificações.
 struct HomeView: View {
     @Environment(AppState.self) private var appState
@@ -186,10 +222,15 @@ struct HomeView: View {
     private func listSection(_ kind: MatchListKind, matches: [Match]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             SectionHeader(title: kind.title) {
-                if matches.count > 1 {
-                    NavigationLink("Ver mais", value: AppRoute.matchList(kind, effectiveScope == .favorite ? appState.favoriteAthletic?.id : nil))
-                        .frame(minHeight: 44)
-                        .accessibilityLabel("Ver mais \(kind.title.lowercased())")
+                // Abre o Cronograma com a atlética da aba atual e o dia certo.
+                if !matches.isEmpty {
+                    Button("Ver mais") {
+                        appState.openSchedule(
+                            filters: ScheduleFilters(athleticID: effectiveScope == .favorite ? appState.favoriteAthletic?.id : nil),
+                            focus: kind == .upcoming ? .upcoming : .recent)
+                    }
+                    .frame(minHeight: 44)
+                    .accessibilityLabel("Ver mais \(kind.title.lowercased()) no cronograma")
                 }
             }
             .padding(.horizontal, Spacing.l)

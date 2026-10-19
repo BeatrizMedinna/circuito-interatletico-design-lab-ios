@@ -22,6 +22,24 @@ enum NotificationPermission: String {
     }
 }
 
+enum AppTab: Hashable {
+    case home, schedule, ranking, sports
+}
+
+/// O que o Cronograma deve mostrar ao ser aberto de outra tela.
+enum ScheduleFocus: Hashable {
+    /// Dia com o próximo jogo ou prova (abre no que está por vir).
+    case upcoming
+    /// Dia mais recente com jogo ou prova encerrada.
+    case recent
+}
+
+struct ScheduleRequest: Equatable {
+    let id = UUID()
+    let filters: ScheduleFilters
+    let focus: ScheduleFocus
+}
+
 /// Estado compartilhado do app depois do onboarding: atlética de coração,
 /// partidas, avisos, leitura dos avisos e permissão simulada (sem rede).
 @Observable
@@ -43,6 +61,10 @@ final class AppState {
     var notificationPermission: NotificationPermission
     /// "Agora não" esconde o convite para ativar notificações até o app reabrir.
     var hasDeferredNotificationPrompt = false
+
+    /// Aba visível e pedido pendente para o Cronograma ("Ver mais", "Ver no cronograma").
+    var selectedTab: AppTab = .home
+    var scheduleRequest: ScheduleRequest?
 
     /// Mensagem curta exibida acima da barra de abas.
     private(set) var toast: String?
@@ -108,6 +130,14 @@ final class AppState {
     func rankingEntry(for athleticID: Athletic.ID) -> RankingEntry? {
         guard case .loaded(let rankings) = rankingState else { return nil }
         return rankings.lazy.flatMap(\.entries).first { $0.athletic.id == athleticID }
+    }
+
+    // MARK: - Navegação
+
+    /// Leva ao Cronograma já filtrado; os filtros continuam editáveis lá.
+    func openSchedule(filters: ScheduleFilters, focus: ScheduleFocus = .upcoming) {
+        scheduleRequest = ScheduleRequest(filters: filters, focus: focus)
+        selectedTab = .schedule
     }
 
     // MARK: - Atlética de coração

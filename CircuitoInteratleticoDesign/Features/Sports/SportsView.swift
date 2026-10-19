@@ -15,12 +15,13 @@ struct SportsFilters: Equatable {
 }
 
 /// Tela 13 — Modalidades da edição (cada uma por divisão), com busca e filtros.
-/// Mostra o formato e o momento de cada uma; a atlética de coração aparece marcada.
+/// "Minha atlética | Geral" funciona como na Início; Categoria e Divisão continuam nos filtros.
 struct SportsView: View {
     @Environment(AppState.self) private var appState
     @State private var query = ""
     @State private var filters = SportsFilters()
     @State private var isShowingFilters = false
+    @State private var scope: HomeScope = .favorite
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,12 +32,26 @@ struct SportsView: View {
         .background(Color.canvas.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $isShowingFilters) {
-            SportsFilterSheet(competitions: appState.competitions, applied: $filters)
+            SportsFilterSheet(competitions: scoped(appState.competitions), applied: $filters)
         }
         .sensoryFeedback(.success, trigger: filters)
+        .onChange(of: appState.favoriteAthletic?.id) { _, newValue in
+            withAnimation { scope = newValue == nil ? .general : .favorite }
+        }
     }
 
     private var hasCompetitions: Bool { !appState.competitions.isEmpty }
+
+    /// Sem atlética de coração, mostra sempre todas.
+    private var effectiveScope: HomeScope {
+        appState.favoriteAthletic == nil ? .general : scope
+    }
+
+    private func scoped(_ competitions: [Competition]) -> [Competition] {
+        guard effectiveScope == .favorite, let favoriteID = appState.favoriteAthletic?.id else { return competitions }
+        let matches = appState.matches
+        return competitions.filter { $0.involves(favoriteID, matches: matches) }
+    }
 
     // MARK: - Cabeçalho
 
@@ -59,6 +74,9 @@ struct SportsView: View {
             }
             if hasCompetitions {
                 SearchField(prompt: "Buscar modalidade", text: $query)
+                if appState.favoriteAthletic != nil {
+                    UnderlineTabs(items: HomeScope.allCases, selection: $scope) { $0.title }
+                }
                 if !filters.isEmpty { activeFilters }
             }
         }
@@ -69,23 +87,15 @@ struct SportsView: View {
     }
 
     private var activeFilters: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: Spacing.xs) {
-                if let gender = filters.gender {
-                    RemovableChip(title: gender.label) { withAnimation { filters.gender = nil } }
-                }
-                if let division = MockData.divisions.first(where: { $0.id == filters.divisionID }) {
-                    RemovableChip(title: division.name) { withAnimation { filters.divisionID = nil } }
-                }
-                Button("Limpar") { withAnimation { filters = SportsFilters() } }
-                    .font(.footnote.weight(.semibold))
-                    .underline()
-                    .foregroundStyle(.textPrimary)
-                    .frame(minHeight: 44)
-                    .accessibilityLabel("Limpar todos os filtros")
+        ActiveFiltersBar(onClearAll: { withAnimation { filters = SportsFilters() } }) {
+            if let gender = filters.gender {
+                RemovableChip(title: gender.label) { withAnimation { filters.gender = nil } }
+            }
+            if let division = MockData.divisions.first(where: { $0.id == filters.divisionID }) {
+                RemovableChip(title: division.name) { withAnimation { filters.divisionID = nil } }
             }
         }
-        .scrollIndicators(.hidden)
+        .padding(.horizontal, -Spacing.l)
     }
 
     // MARK: - Conteúdo
@@ -97,7 +107,7 @@ struct SportsView: View {
             VStack(spacing: 1) {
                 ForEach(MockData.competitions.prefix(5)) { competition in
                     CompetitionRow(competition: competition, progress: .notStarted(next: nil),
-                                   isLive: false, involvesFavorite: false)
+                                   isLive: false)
                 }
                 Spacer(minLength: 0)
             }
@@ -135,8 +145,18 @@ struct SportsView: View {
 
     @ViewBuilder
     private func list(_ all: [Competition]) -> some View {
-        let items = all.filter { filters.includes($0) && matchesQuery($0) }
-        if items.isEmpty {
+        let base = scoped(all)
+        let items = base.filter { filters.includes($0) && matchesQuery($0) }
+        if base.isEmpty {
+            ContentUnavailableView {
+                Label("Sua atlética ainda não disputa modalidades", systemImage: "star")
+            } description: {
+                Text("Quando \(appState.favoriteAthletic?.name ?? "sua atlética") entrar em uma chave ou prova, a modalidade aparece aqui.")
+            } actions: {
+                Button("Ver todas as modalidades") { withAnimation { scope = .general } }
+                    .buttonStyle(.secondary)
+            }
+        } else if items.isEmpty {
             ContentUnavailableView {
                 Label(query.isEmpty ? "Nenhuma modalidade com esses filtros" : "Nenhuma modalidade encontrada",
                       systemImage: query.isEmpty ? "line.3.horizontal.decrease" : "magnifyingglass")
@@ -158,15 +178,13 @@ struct SportsView: View {
             }
         } else {
             let matches = appState.matches
-            let favoriteID = appState.favoriteAthletic?.id
             ScrollView {
                 LazyVStack(spacing: 1) {
                     ForEach(items) { competition in
                         NavigationLink(value: AppRoute.competition(competition.id)) {
                             CompetitionRow(competition: competition,
                                            progress: competition.progress(matches: matches),
-                                           isLive: competition.hasLiveMatch(in: matches),
-                                           involvesFavorite: favoriteID.map { competition.involves($0, matches: matches) } ?? false)
+                                           isLive: competition.hasLiveMatch(in: matches))
                         }
                         .buttonStyle(.pressableCard)
                     }
@@ -186,42 +204,31 @@ struct SportsView: View {
     }
 }
 
-/// Linha da lista: ícone do esporte, nome, divisão · formato e o momento.
+/// Linha da lista: ícone do esporte, nome com categoria, e divisão · momento.
+/// Sem datas: o horário do próximo jogo fica na modalidade e no Cronograma.
 struct CompetitionRow: View {
     let competition: Competition
     let progress: CompetitionProgress
     let isLive: Bool
-    let involvesFavorite: Bool
 
     var body: some View {
         HStack(spacing: Spacing.s) {
             Image(systemName: competition.sport.symbol)
                 .font(.body.weight(.medium))
                 .foregroundStyle(.textPrimary)
-                .frame(width: 48, height: 48)
+                .frame(width: 44, height: 44)
                 .background(.surface, in: Circle())
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Spacing.xxs) {
-                    Text(competition.title)
-                        .font(.headline)
-                        .foregroundStyle(.textPrimary)
-                        .multilineTextAlignment(.leading)
-                    if involvesFavorite {
-                        Image(systemName: "heart.fill")
-                            .font(.caption)
-                            .foregroundStyle(.textPrimary)
-                            .accessibilityHidden(true)
-                    }
-                }
-                Text("\(competition.division.name) · \(competition.format.label)")
-                    .font(.subheadline)
-                    .foregroundStyle(.textSecondary)
+                Text(competition.title)
+                    .font(.headline)
+                    .foregroundStyle(.textPrimary)
+                    .multilineTextAlignment(.leading)
                 HStack(spacing: Spacing.xs) {
-                    if isLive { MatchStatusTag(status: .live) }
-                    Text(progress.label)
-                        .font(.subheadline.weight(isInProgress ? .semibold : .regular))
-                        .foregroundStyle(isInProgress ? Color.textPrimary : Color.textSecondary)
+                    Text("\(competition.division.name) · \(progress.shortLabel(isElimination: competition.isElimination))")
+                        .font(.subheadline)
+                        .foregroundStyle(.textSecondary)
+                    if isLive { MatchStatusTag(status: .live).fixedSize() }
                 }
             }
             Spacer(minLength: Spacing.xs)
@@ -236,12 +243,6 @@ struct CompetitionRow: View {
         .background(.appBackground)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityValue(involvesFavorite ? "Sua atlética disputa" : "")
-    }
-
-    private var isInProgress: Bool {
-        if case .inProgress = progress { return true }
-        return isLive
     }
 }
 
