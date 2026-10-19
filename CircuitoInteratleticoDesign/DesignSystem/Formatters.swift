@@ -30,11 +30,37 @@ enum Formatters {
         weekdayDay.string(from: date).replacingOccurrences(of: ".", with: "")
     }
 
-    /// Cabeçalho dos cartões: "HOJE, 08:00 · FUTSAL FEMININO" ou, sem o dia, "08:00 · FUTSAL FEMININO".
-    static func cardHeader(_ match: Match, includingDay: Bool = true) -> String {
-        let when = includingDay ? "\(dayLabel(match.startDate)), \(time(match.startDate))" : time(match.startDate)
-        return "\(when) · \(match.sport.title)".uppercased()
+    /// Quanto da data o cabeçalho do cartão mostra.
+    enum CardDate {
+        /// "HOJE, 08:00 · FUTSAL FEMININO"
+        case dayAndTime
+        /// "08:00 · FUTSAL FEMININO" (listas agrupadas por dia)
+        case time
+        /// "FUTSAL FEMININO" (linha do tempo, que já mostra o horário)
+        case none
     }
+
+    static func cardHeader(_ match: Match, date: CardDate = .dayAndTime) -> String {
+        let when: String? = switch date {
+        case .dayAndTime: "\(dayLabel(match.startDate)), \(time(match.startDate))"
+        case .time: time(match.startDate)
+        case .none: nil
+        }
+        return [when, match.sport.title].compactMap { $0 }.joined(separator: " · ").uppercased()
+    }
+
+    /// Aba de dia do cronograma: "Hoje" ou "sex, 16 out".
+    static func dayTab(_ date: Date) -> String {
+        if Calendar.current.isDateInToday(date) { return "Hoje" }
+        return shortDay.string(from: date).replacingOccurrences(of: ".", with: "")
+    }
+
+    private static let shortDay: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.dateFormat = "EEE, d MMM"
+        return formatter
+    }()
 
     /// "Atualizado há 8 s" / "Atualizado há 3 min".
     static func updatedAgo(since date: Date, now: Date) -> String {

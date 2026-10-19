@@ -56,8 +56,8 @@ struct MatchListView: View {
                         ForEach(groups, id: \.day) { group in
                             Section {
                                 ForEach(group.matches) { match in
-                                    NavigationLink(value: HomeRoute.match(match.id)) {
-                                        MatchCard(match: match, showsDay: false)
+                                    NavigationLink(value: AppRoute.match(match.id)) {
+                                        MatchCard(match: match, date: .time)
                                     }
                                     .buttonStyle(.pressableCard)
                                 }
@@ -81,14 +81,14 @@ struct MatchListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.canvas.ignoresSafeArea())
         .navigationTitle(kind.title)
-        .navigationSubtitle(scope == .favorite ? appState.favoriteAthletic.name : "Todas as atléticas")
+        .navigationSubtitle(scope == .favorite ? (appState.favoriteAthletic?.name ?? "") : "Todas as atléticas")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var groups: [(day: Date, matches: [Match])] {
         guard case .loaded(let all) = appState.matchesState else { return [] }
-        let favoriteID = appState.favoriteAthletic.id
-        let matches = kind.select(from: scope == .favorite ? all.filter { $0.involves(favoriteID) } : all)
+        let favoriteID = appState.favoriteAthletic?.id
+        let matches = kind.select(from: scope == .favorite && favoriteID != nil ? all.filter { $0.involves(favoriteID!) } : all)
         let calendar = Calendar.current
         var result: [(day: Date, matches: [Match])] = []
         for match in matches {

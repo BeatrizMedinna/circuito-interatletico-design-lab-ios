@@ -16,6 +16,7 @@ enum HomeScope: Hashable, CaseIterable {
 struct HomeView: View {
     @Environment(AppState.self) private var appState
     @State private var scope: HomeScope = .favorite
+    @State private var isPickingFavorite = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,6 +26,18 @@ struct HomeView: View {
         }
         .background(Color.canvas.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $isPickingFavorite) {
+            FavoriteAthleticSheet()
+        }
+        // Ao escolher uma atlética, mostra os jogos dela; ao remover, mostra todos.
+        .onChange(of: appState.favoriteAthletic?.id) { _, newValue in
+            withAnimation { scope = newValue == nil ? .general : .favorite }
+        }
+    }
+
+    /// Sem atlética de coração, a Home mostra sempre todos os jogos.
+    private var effectiveScope: HomeScope {
+        appState.favoriteAthletic == nil ? .general : scope
     }
 
     // MARK: - Cabeçalho
@@ -38,12 +51,15 @@ struct HomeView: View {
                     .lineLimit(2)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
-                NavigationLink(value: HomeRoute.notifications) {
+                NavigationLink(value: AppRoute.notifications) {
                     CircleIconLabel(systemName: "bell")
+                        .overlay(alignment: .topTrailing) { CountBadge(count: appState.unreadCount) }
                 }
                 .buttonStyle(.pressableCard)
-                .accessibilityLabel("Notificações")
+                .accessibilityLabel(appState.unreadCount > 0 ? "Notificações, \(appState.unreadCount) não lidas" : "Notificações")
             }
+            favoriteButton
+                .frame(maxWidth: .infinity, alignment: .leading)
             if showsScopeTabs {
                 UnderlineTabs(items: HomeScope.allCases, selection: $scope) { $0.title }
             }
@@ -54,9 +70,45 @@ struct HomeView: View {
         .background(Color.appBackground.ignoresSafeArea(edges: .top))
     }
 
-    /// As abas só aparecem quando há jogos para filtrar.
+    /// Atlética de coração; tocar abre a troca ou a remoção (RN-86).
+    private var favoriteButton: some View {
+        Button { isPickingFavorite = true } label: {
+            HStack(spacing: Spacing.xs) {
+                if let favorite = appState.favoriteAthletic {
+                    AthleticBadge(size: .small, fill: .surface)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Atlética de coração")
+                            .font(.caption)
+                            .foregroundStyle(.textSecondary)
+                        Text(favorite.name)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.textPrimary)
+                            .lineLimit(1)
+                    }
+                } else {
+                    Image(systemName: "heart")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 32, height: 32)
+                        .background(.surface, in: Circle())
+                    Text("Escolher atlética de coração")
+                        .font(.subheadline.weight(.semibold))
+                }
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.textSecondary)
+            }
+            .foregroundStyle(.textPrimary)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.pressableCard)
+        .accessibilityLabel(appState.favoriteAthletic.map { "Atlética de coração: \($0.name)" } ?? "Escolher atlética de coração")
+        .accessibilityHint("Abre a escolha da atlética")
+    }
+
+    /// As abas só aparecem com atlética de coração e jogos para filtrar.
     private var showsScopeTabs: Bool {
-        guard case .loaded(let matches) = appState.matchesState else { return false }
+        guard appState.favoriteAthletic != nil, case .loaded(let matches) = appState.matchesState else { return false }
         return !matches.isEmpty
     }
 
@@ -90,7 +142,7 @@ struct HomeView: View {
     @ViewBuilder
     private func feed(_ allMatches: [Match]) -> some View {
         let favorite = appState.favoriteAthletic
-        let matches = scope == .favorite ? allMatches.filter { $0.involves(favorite.id) } : allMatches
+        let matches = effectiveScope == .favorite ? allMatches.filter { $0.involves(favorite?.id ?? "") } : allMatches
 
         if allMatches.isEmpty {
             ContentUnavailableView {
@@ -102,7 +154,7 @@ struct HomeView: View {
             ContentUnavailableView {
                 Label("Sua atlética ainda não tem jogos", systemImage: "sportscourt")
             } description: {
-                Text("Quando houver jogos de \(favorite.name) no cronograma, eles aparecem aqui.")
+                Text("Quando houver jogos de \(favorite?.name ?? "sua atlética") no cronograma, eles aparecem aqui.")
             } actions: {
                 Button("Ver todos os jogos") { withAnimation { scope = .general } }
                     .buttonStyle(.secondary)
@@ -124,7 +176,7 @@ struct HomeView: View {
     private func liveSection(_ live: [Match]) -> some View {
         if live.isEmpty {
             InlineNote(systemImage: "dot.radiowaves.left.and.right",
-                       text: scope == .favorite ? "Sua atlética não tem jogo ao vivo agora." : "Nenhum jogo ao vivo agora.")
+                       text: effectiveScope == .favorite ? "Sua atlética não tem jogo ao vivo agora." : "Nenhum jogo ao vivo agora.")
                 .padding(.horizontal, Spacing.l)
         } else {
             LiveCarousel(matches: live, lastRefresh: appState.lastRefresh)
@@ -135,7 +187,7 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             SectionHeader(title: kind.title) {
                 if matches.count > 1 {
-                    NavigationLink("Ver mais", value: HomeRoute.matchList(kind, scope))
+                    NavigationLink("Ver mais", value: AppRoute.matchList(kind, effectiveScope))
                         .frame(minHeight: 44)
                         .accessibilityLabel("Ver mais \(kind.title.lowercased())")
                 }
@@ -181,7 +233,7 @@ private struct LiveCarousel: View {
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: Spacing.s) {
                     ForEach(matches) { match in
-                        NavigationLink(value: HomeRoute.match(match.id)) {
+                        NavigationLink(value: AppRoute.match(match.id)) {
                             MatchHeaderCard(match: match, lastRefresh: lastRefresh, showsLiveBadge: true)
                         }
                         .buttonStyle(.pressableCard)
@@ -221,7 +273,7 @@ private struct MatchCarousel: View {
         ScrollView(.horizontal) {
             LazyHStack(alignment: .top, spacing: Spacing.s) {
                 ForEach(matches) { match in
-                    NavigationLink(value: HomeRoute.match(match.id)) {
+                    NavigationLink(value: AppRoute.match(match.id)) {
                         MatchCard(match: match)
                     }
                     .buttonStyle(.pressableCard)
@@ -244,6 +296,11 @@ private struct MatchCarousel: View {
 #Preview("Atlética sem jogos") {
     NavigationStack { HomeView() }
         .environment(AppState(favoriteAthletic: MockData.athletic("ath-poraque"), scenario: .filled, preloaded: true))
+}
+
+#Preview("Sem atlética de coração") {
+    NavigationStack { HomeView() }
+        .environment(AppState(favoriteAthletic: nil, scenario: .filled, preloaded: true))
 }
 
 #Preview("Cronograma não publicado") {

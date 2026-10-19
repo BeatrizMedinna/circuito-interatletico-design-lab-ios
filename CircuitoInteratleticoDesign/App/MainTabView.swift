@@ -1,14 +1,14 @@
 import SwiftUI
 
-/// Destinos empilhados a partir da aba Início.
-enum HomeRoute: Hashable {
+/// Destinos empilhados nas abas Início e Cronograma.
+enum AppRoute: Hashable {
     case match(Match.ID)
     case notifications
     case matchList(MatchListKind, HomeScope)
 }
 
 /// App depois do onboarding: quatro abas, cada uma com sua pilha de navegação.
-/// Por enquanto só Início está prototipada (Bloco 1).
+/// Prototipadas: Início (Bloco 1) e Cronograma (Bloco 2).
 struct MainTabView: View {
     @State private var appState: AppState
 
@@ -20,18 +20,13 @@ struct MainTabView: View {
         TabView {
             Tab("Início", systemImage: "house") {
                 NavigationStack {
-                    HomeView()
-                        .navigationDestination(for: HomeRoute.self) { route in
-                            switch route {
-                            case .match(let id): MatchDetailView(matchID: id)
-                            case .notifications: NotificationsView()
-                            case .matchList(let kind, let scope): MatchListView(kind: kind, scope: scope)
-                            }
-                        }
+                    HomeView().withAppRoutes()
                 }
             }
             Tab("Cronograma", systemImage: "calendar") {
-                NextBlockPlaceholder(title: "Cronograma", systemImage: "calendar")
+                NavigationStack {
+                    ScheduleView().withAppRoutes()
+                }
             }
             Tab("Ranking", systemImage: "trophy") {
                 NextBlockPlaceholder(title: "Ranking", systemImage: "trophy")
@@ -40,8 +35,27 @@ struct MainTabView: View {
                 NextBlockPlaceholder(title: "Modalidades", systemImage: "star")
             }
         }
+        .overlay(alignment: .bottom) {
+            if let message = appState.toast {
+                Toast(message: message)
+                    .padding(.bottom, 96)
+                    .allowsHitTesting(false)
+            }
+        }
         .environment(appState)
         .task { await appState.load() }
+    }
+}
+
+private extension View {
+    func withAppRoutes() -> some View {
+        navigationDestination(for: AppRoute.self) { route in
+            switch route {
+            case .match(let id): MatchDetailView(matchID: id)
+            case .notifications: NotificationsView()
+            case .matchList(let kind, let scope): MatchListView(kind: kind, scope: scope)
+            }
+        }
     }
 }
 

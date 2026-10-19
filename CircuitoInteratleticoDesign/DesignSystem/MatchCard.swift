@@ -18,6 +18,7 @@ struct TeamColumn: View {
                 // Nome de uma palavra só encolhe em vez de quebrar com hífen.
                 .lineLimit(name.contains(" ") ? 2 : 1)
                 .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
     }
@@ -61,13 +62,15 @@ extension View {
 struct MatchCard: View {
     let match: Match
     var showsStatus = false
-    /// Falso em listas já agrupadas por dia: o cabeçalho mostra só o horário.
-    var showsDay = true
+    /// Listas agrupadas por dia usam `.time`; a linha do tempo, `.none`.
+    var date: Formatters.CardDate = .dayAndTime
+    /// Local da partida no rodapé (cronograma, onde jogos simultâneos se distinguem pelo local).
+    var showsVenue = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                Text(Formatters.cardHeader(match, includingDay: showsDay))
+                Text(Formatters.cardHeader(match, date: date))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.textSecondary)
                     .lineLimit(2)
@@ -82,6 +85,13 @@ struct MatchCard: View {
                 ScoreBoxes(match: match)
                 TeamColumn(athletic: match.teamB, isDimmed: match.isLoser(.b))
             }
+            if showsVenue {
+                Label(match.venue, systemImage: "mappin.and.ellipse")
+                    .font(.caption)
+                    .foregroundStyle(.textSecondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(.vertical, Spacing.s)
         .padding(.horizontal, Spacing.m)
@@ -94,7 +104,7 @@ struct MatchCard: View {
         .teamSideBars()
         .clipShape(RoundedRectangle(cornerRadius: Radius.card))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(match.accessibilitySummary)
+        .accessibilityLabel(showsVenue ? "\(match.accessibilitySummary), \(match.venue)" : match.accessibilitySummary)
     }
 }
 

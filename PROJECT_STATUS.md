@@ -16,10 +16,10 @@
 | # | Tela | Status |
 |---|---|---|
 | 01 | Escolha sua Atlética (onboarding) | **Validada** |
-| 02 | Início (abas Atlética/Geral, ao vivo, próximos e últimos jogos) | **Bloco 1 — em validação** |
-| 03 / 04 / 05 | Jogo ao vivo / encerrado / a iniciar | **Bloco 1 — em validação** |
-| 06 | Notificações (Minha Atlética / Geral) | **Bloco 1 — em validação** |
-| 07 / 08 | Cronograma / filtros | — |
+| 02 | Início (abas Atlética/Geral, ao vivo, próximos e últimos jogos) | **Validada** (Bloco 2 adicionou a atlética de coração) |
+| 03 / 04 / 05 | Jogo ao vivo / encerrado / a iniciar | **Validada** |
+| 06 | Notificações (Minha Atlética / Geral) | **Validada** (Bloco 2 adicionou lidas e permissão) |
+| 07 / 08 | Cronograma / filtros | **Bloco 2 — em validação** |
 | 09 | Ranking por divisão (pódio + lista) | — |
 | 10 / 11 / 12 | Atlética: info / cronograma / ranking | — |
 | 13 | Modalidades (busca + filtro) | — |
@@ -35,6 +35,12 @@
 - Cada tab terá seu próprio `NavigationStack`; tab bar sempre visível nos pushes.
 
 ## Componentes compartilhados
+Criados no Bloco 2:
+- `AthleticPicker` (+ `SelectionRow`, `AthleticSelectionRow`): busca + lista de escolha única, usado no onboarding, na troca da atlética e no filtro.
+- `ChoiceChip` e `RemovableChip` (Chips.swift), `Toast`, `CountBadge`; `CircleIconLabel` ganhou `isActive`.
+- `MatchCard` ganhou `date` (`.dayAndTime`, `.time`, `.none`) e `showsVenue`.
+- `AppState`: atlética de coração opcional, leitura dos avisos, permissão simulada e aviso rápido (toast). `AppRoute` (antes `HomeRoute`) serve Início e Cronograma.
+
 Criados no Bloco 1:
 - `MatchCard` (+ `TeamColumn`, `MatchStatusTag`, `teamSideBars()`), `ScoreBoxes`, `MatchHeaderCard` (+ `LiveBadge`, `UpdatedAgoText`), `UnderlineTabs`, `SectionHeader`, `CircleIconLabel`, `InlineNote`, `Formatters` (datas pt-BR, 24h) e o estilo `.pressableCard`.
 - `AthleticBadge` ganhou o tamanho `.prominent` e a variante `isUndefined` (borda tracejada + "?").
@@ -52,6 +58,28 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Bloco 2 — Cronograma e Filtros (07–08) + pendências do Bloco 1
+Cronograma (`Features/Schedule/`):
+- Abas de dias do cronograma publicado (inclui dia sem jogos), com "Hoje" e a quantidade de jogos (já filtrada) em cada dia; começa em hoje.
+- Linha do tempo por horário: vários jogos no mesmo horário ficam juntos; linha preta nos horários já iniciados e cinza nos próximos; hoje abre no primeiro jogo ao vivo ou por começar.
+- Cartões com situação (ao vivo, a iniciar, encerrado, W.O., a definir) e local; tocar abre o detalhe já existente.
+- Estados: carregando, erro com nova tentativa, sem edição, não publicado, dia sem jogos e filtros sem resultado, ambos com saída ("Ver [dia com jogos]" e "Limpar filtros").
+- Fonte de acessibilidade: o horário passa para cima dos jogos.
+
+Filtros:
+- Modalidade (lista), Categoria (Masculino/Feminino/Misto, só as que existem), Atlética (atalho "Minha atlética" + lista com busca), Divisão. Os campos se combinam.
+- Rascunho: ✕ descarta, ✓ aplica, "Limpar" zera; o rodapé mostra quantos jogos o rascunho encontra.
+- Filtros ativos: botão preto com contador e pílulas removíveis abaixo dos dias, mais "Limpar".
+
+Atlética de coração (RN-86):
+- Abaixo do título da Início, toque abre um sheet com a mesma lista do onboarding: "Salvar" (só quando muda) e "Remover atlética de coração".
+- Sem atlética: Início e Notificações mostram tudo e escondem as abas "Minha atlética | Geral"; o atalho do filtro some. Ao escolher, a Início volta para "Minha atlética". Toast confirma a mudança.
+
+Notificações:
+- Não lidas: barra preta à esquerda (do wireframe) e título em negrito; lidas: texto em cinza. Abrir um aviso o marca como lido; ao voltar, a lista mantém a posição.
+- Sino com contador de não lidas; "Ler todas" na barra; toque longo marca como lida/não lida.
+- Permissão (RN-87): convite na tela de Notificações → alerta simulado do iOS → concedida (some), negada (cartão com "Abrir Ajustes") ou "Agora não" (some até reabrir o app).
+
 ### Bloco 1 — Início, partidas e notificações (telas 02–06)
 Fluxos:
 - Onboarding → abas (Início, Cronograma, Ranking, Modalidades). Só Início está prototipada; as outras mostram "próximo bloco" (sem becos sem saída: a tab bar sempre leva de volta).
@@ -80,7 +108,8 @@ Melhorias de UX (preservam a intenção do wireframe):
 Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments):
 - `-labSkipOnboarding YES` abre direto na Início (atlética Búfalos).
 - `-labFavorite ath-poraque` escolhe uma atlética sem jogos.
-- `-labScenario empty|loading|error|unavailable` muda os dados de Início e Notificações.
+- `-labScenario empty|loading|error|unavailable` muda os dados de Início, Cronograma e Notificações.
+- `-labNotifications authorized|denied` começa com a permissão já decidida.
 
 ### 01 — Escolha sua Atlética (`Features/Onboarding/OnboardingView.swift`) — validada
 - Busca por nome ou sigla, sem diferenciar maiúsculas e acentos.
@@ -92,6 +121,7 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 
 ## Telas validadas
 - 01 — Escolha sua Atlética (17/10/2026, no simulador).
+- 02–06 — Bloco 1: Início, partidas e notificações (19/10/2026, no simulador).
 
 ## Decisões confirmadas
 - Mobile first; iOS nativo em SwiftUI; target existente convertido para iPhone (sem novo projeto).
@@ -117,24 +147,29 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 10. Personas usam nomes antigos (`ADMIN_SUPREMO`, `EM_EDICAO`/`SALVA`), substituídos pela seção 12 do documento-fonte, e citam recursos sem wireframe (estatísticas individuais/artilharia, card de resultado, abrir no mapa, histórico) — não antecipados.
 
 ## Pendências
-**Decisões de produto do Bloco 1:**
-- Notificações lidas/não lidas: o wireframe 06 tem uma barra cinza à esquerda dos avisos, que pode indicar "não lido". O domínio não tem esse estado. Sem decisão, não implementei nem a barra nem um contador no sino.
-- Trocar a atlética de coração (RN-86) depois do onboarding: não há tela para isso. Hoje o protótipo sempre abre no onboarding.
-- Permissão de notificações (RN-87): onde e quando pedir.
-- Destino do "Ver mais": abre uma lista própria dentro da Início. Quando o Cronograma (07) existir, avaliar se deve levar para lá com filtro.
+**Hipóteses do Bloco 2 (reversíveis, sem regra no domínio):**
+- Leitura dos avisos guardada só no aparelho; o domínio não tem lido/não lido.
+- Cada campo do filtro aceita uma opção; filtros valem para todos os dias e não persistem ao reabrir o app.
+- O convite de permissão fica só na tela de Notificações; "Agora não" vale até reabrir o app.
+- "Minha atlética" nas Notificações = avisos que citam a atlética.
+
+**Decisões de produto em aberto:**
+- Provas classificatórias (natação, atletismo) também ocupam o cronograma (item = partida **ou** prova), mas não há cartão de prova no wireframe. Não implementado; decidir junto com Modalidades.
+- Onboarding sem opção "seguir sem atlética" (RN-86 permite). Hoje dá para remover depois, na Início.
+- Destino do "Ver mais" da Início: continua numa lista própria; pode passar a abrir o Cronograma filtrado.
 - Rótulo "Em andamento" (cronograma, 07) × "Ao vivo" (Início e detalhe): o protótipo usa "Ao vivo" em tudo.
 - Abrir o local da partida no app de mapas (💡 no domínio, citado nas personas): não implementado.
 - Torcedor vê a escalação validada (RN-70), mas os wireframes não mostram escalação na partida.
 
 - **Modalidades (etapa 13–17):** analisar as diferenças entre eliminatórias e classificatórias — ranking em "pts" não existe no mata-mata; classificatórias usam marca (tempo/distância) e situação; não há wireframe de resultados de prova; a aba Chaveamento não se aplica a elas. Nenhuma tela nova antecipada.
-- Onboarding: opção "seguir sem atlética" (RN-86) e pedido de permissão de notificações (RN-87) — aguardam decisão.
 - Divergências 6–9 serão retomadas quando as telas correspondentes entrarem.
 
 ## Próximos passos autorizados
-- Validação do Bloco 1 pela designer.
-- Próximo bloco — **ainda não autorizado**.
+- Validação do Bloco 2 pela designer.
+- Ranking e Modalidades — **ainda não autorizados**.
 
 ## Histórico
 - 2026-10-17 — Registro inicial das diretrizes do Design Lab. Nenhuma implementação assumida.
 - 2026-10-17 — Análise de referências (documento-fonte, personas, 17 telas) e plano aprovado. Target convertido para iOS/iPhone; AccentColor preto. Tela 01 implementada com tokens, componentes base, mocks e estados; compilada e aberta no simulador.
 - 2026-10-17 — Tela 01 validada. Bloco 1 (telas 02–06) implementado com abas, rotas, estados completos e cenários por argumento de inicialização; testado no simulador.
+- 2026-10-19 — Bloco 1 validado. Bloco 2: Cronograma e Filtros, atlética de coração editável, notificações lidas/não lidas com contador e permissão simulada; testado no simulador.

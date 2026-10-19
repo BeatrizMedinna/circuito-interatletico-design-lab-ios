@@ -19,6 +19,7 @@ extension MockData {
     static let handballMale = Sport(name: "Handebol", gender: .male, symbol: "figure.handball", periodAbbreviation: "T")
     static let handballFemale = Sport(name: "Handebol", gender: .female, symbol: "figure.handball", periodAbbreviation: "T")
     static let societyMale = Sport(name: "Futebol Society", gender: .male, symbol: "figure.soccer", periodAbbreviation: "T")
+    static let basketballFemale = Sport(name: "Basquete", gender: .female, symbol: "figure.basketball", periodAbbreviation: "Q")
     static let tableTennisMixed = Sport(name: "Tênis de Mesa", gender: .mixed, symbol: "figure.table.tennis", periodAbbreviation: "Set")
 
     // MARK: - Datas
@@ -111,6 +112,19 @@ extension MockData {
               venue: annexCourt, startDate: day(2, 9), status: .scheduled,
               teamA: athletic("ath-imortal"), teamB: athletic("ath-bufalos")),
 
+        Match(id: "m-up-volei-ouro", sport: volleyballFemale, division: serieOuro, phase: "Quartas de final",
+              venue: mainGym, startDate: slotFromNow(180), status: .scheduled,
+              teamA: athletic("ath-imortal"), teamB: athletic("ath-sanguinaria")),
+        Match(id: "m-up-futsal-bronze", sport: futsalMale, division: serieBronze, phase: "Semifinal",
+              venue: annexCourt, startDate: day(1, 10), status: .scheduled,
+              teamA: athletic("ath-severa"), teamB: athletic("ath-nce")),
+        Match(id: "m-up-basquete-fem", sport: basketballFemale, division: serieOuro, phase: "Semifinal",
+              venue: school, startDate: day(2, 14), status: .scheduled,
+              teamA: athletic("ath-bufalos"), teamB: nil),
+        Match(id: "m-up-handebol-fem", sport: handballFemale, division: seriePrata, phase: "Semifinal",
+              venue: mainGym, startDate: day(2, 16, 30), status: .scheduled,
+              teamA: athletic("ath-fanatica"), teamB: athletic("ath-diastolica")),
+
         // Encerradas
         Match(id: "m-fin-tenis", sport: tableTennisMixed, division: serieBronze, phase: "Final",
               venue: mainGym, startDate: slotFromNow(-200), status: .finished,
@@ -154,6 +168,12 @@ extension MockData {
               teamA: athletic("ath-guerreira"), teamB: athletic("ath-nce"),
               scoreA: 2, scoreB: 0),
     ]
+
+    /// Dias do cronograma publicado (data inicial a final). O último não tem jogos,
+    /// para testar o dia vazio.
+    static let scheduleDays: [Date] = (-2...3).map { offset in
+        Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: offset, to: Date())!)
+    }
 
     // MARK: - Avisos
 
