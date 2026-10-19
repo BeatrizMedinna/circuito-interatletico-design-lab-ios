@@ -187,7 +187,7 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             SectionHeader(title: kind.title) {
                 if matches.count > 1 {
-                    NavigationLink("Ver mais", value: AppRoute.matchList(kind, effectiveScope))
+                    NavigationLink("Ver mais", value: AppRoute.matchList(kind, effectiveScope == .favorite ? appState.favoriteAthletic?.id : nil))
                         .frame(minHeight: 44)
                         .accessibilityLabel("Ver mais \(kind.title.lowercased())")
                 }

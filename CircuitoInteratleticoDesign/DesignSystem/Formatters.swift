@@ -62,6 +62,11 @@ enum Formatters {
         return formatter
     }()
 
+    /// "1.345 pts"
+    static func points(_ value: Int) -> String {
+        "\(value.formatted(.number.locale(locale))) pts"
+    }
+
     /// "Atualizado há 8 s" / "Atualizado há 3 min".
     static func updatedAgo(since date: Date, now: Date) -> String {
         let seconds = max(0, Int(now.timeIntervalSince(date)))

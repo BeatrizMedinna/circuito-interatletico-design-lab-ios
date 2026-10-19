@@ -37,6 +37,8 @@ struct MatchHeaderCard: View {
     let match: Match
     var lastRefresh: Date = .now
     var showsLiveBadge = false
+    /// No detalhe da partida, cada time abre a atlética (não usar dentro de outro link).
+    var linksTeams = false
 
     var body: some View {
         VStack(spacing: Spacing.s) {
@@ -58,13 +60,7 @@ struct MatchHeaderCard: View {
             }
             .accessibilityElement(children: .combine)
 
-            HStack(alignment: .top, spacing: Spacing.xs) {
-                TeamColumn(athletic: match.teamA, badgeSize: .prominent, isDimmed: match.isLoser(.a))
-                ScoreBoxes(match: match, size: .large)
-                TeamColumn(athletic: match.teamB, badgeSize: .prominent, isDimmed: match.isLoser(.b))
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(scoreAccessibilityLabel)
+            teamsAndScore
 
             if match.status == .live, let period = match.currentPeriod {
                 Text([match.sport.periodLabel(period), match.clock].compactMap { $0 }.joined(separator: " · "))
@@ -85,6 +81,40 @@ struct MatchHeaderCard: View {
         }
         .teamSideBars()
         .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+    }
+
+    @ViewBuilder
+    private var teamsAndScore: some View {
+        let row = HStack(alignment: .top, spacing: Spacing.xs) {
+            team(.a)
+            ScoreBoxes(match: match, size: .large)
+                .overlay {
+                    if linksTeams {
+                        Color.clear
+                            .accessibilityElement()
+                            .accessibilityLabel(scoreAccessibilityLabel)
+                    }
+                }
+            team(.b)
+        }
+        if linksTeams {
+            row.accessibilityElement(children: .contain)
+        } else {
+            row.accessibilityElement(children: .ignore)
+                .accessibilityLabel(scoreAccessibilityLabel)
+        }
+    }
+
+    @ViewBuilder
+    private func team(_ side: MatchSide) -> some View {
+        let column = TeamColumn(athletic: match.team(side), badgeSize: .prominent, isDimmed: match.isLoser(side))
+        if linksTeams, let athletic = match.team(side) {
+            NavigationLink(value: AppRoute.athletic(athletic.id)) { column }
+                .buttonStyle(.pressableCard)
+                .accessibilityLabel("\(athletic.name), ver atlética")
+        } else {
+            column
+        }
     }
 
     private var scoreAccessibilityLabel: String {

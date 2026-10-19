@@ -70,9 +70,9 @@ struct ScheduleFilterSheet: View {
                     }
 
                     field("Divisão") {
-                        FlowChips(options: [MockData.serieOuro, MockData.seriePrata, MockData.serieBronze],
+                        FlowChips(options: MockData.divisions,
                                   selection: Binding(
-                                    get: { [MockData.serieOuro, MockData.seriePrata, MockData.serieBronze].first { $0.id == draft.divisionID } },
+                                    get: { MockData.divisions.first { $0.id == draft.divisionID } },
                                     set: { draft.divisionID = $0?.id })) { $0.name }
                     }
                 }

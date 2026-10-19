@@ -5,11 +5,23 @@ import SwiftUI
 struct UnderlineTabs<Item: Hashable>: View {
     let items: [Item]
     @Binding var selection: Item
+    /// Ícone acima do texto (abas da atlética e da modalidade).
+    var systemImage: ((Item) -> String)? = nil
     let title: (Item) -> String
 
     @Namespace private var underline
 
+    /// Quando as abas não cabem (nomes longos, fonte grande), passam a rolar na horizontal.
     var body: some View {
+        ViewThatFits(in: .horizontal) {
+            tabs
+            ScrollView(.horizontal) { tabs.padding(.horizontal, Spacing.xs) }
+                .scrollIndicators(.hidden)
+        }
+        .sensoryFeedback(.selection, trigger: selection)
+    }
+
+    private var tabs: some View {
         HStack(spacing: 0) {
             ForEach(items, id: \.self) { item in
                 let isSelected = item == selection
@@ -17,8 +29,15 @@ struct UnderlineTabs<Item: Hashable>: View {
                     withAnimation(.snappy) { selection = item }
                 } label: {
                     VStack(spacing: 6) {
+                        if let systemImage {
+                            Image(systemName: systemImage(item))
+                                .font(.title3)
+                                .symbolVariant(isSelected ? .fill : .none)
+                                .foregroundStyle(isSelected ? Color.textPrimary : Color.textSecondary)
+                                .accessibilityHidden(true)
+                        }
                         Text(title(item))
-                            .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                            .font((systemImage == nil ? Font.subheadline : .caption).weight(isSelected ? .semibold : .regular))
                             .foregroundStyle(isSelected ? Color.textPrimary : Color.textSecondary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
@@ -33,6 +52,7 @@ struct UnderlineTabs<Item: Hashable>: View {
                         }
                     }
                     .fixedSize(horizontal: true, vertical: false)
+                    .padding(.horizontal, Spacing.xs)
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(Rectangle())
                 }
@@ -40,7 +60,6 @@ struct UnderlineTabs<Item: Hashable>: View {
                 .accessibilityAddTraits(isSelected ? [.isSelected] : [])
             }
         }
-        .sensoryFeedback(.selection, trigger: selection)
     }
 }
 

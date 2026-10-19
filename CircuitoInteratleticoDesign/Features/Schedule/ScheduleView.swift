@@ -82,7 +82,7 @@ struct ScheduleView: View {
                 if let athletic = MockData.athletics.first(where: { $0.id == filters.athleticID }) {
                     RemovableChip(title: athletic.name) { withAnimation { filters.athleticID = nil } }
                 }
-                if let division = [MockData.serieOuro, MockData.seriePrata, MockData.serieBronze].first(where: { $0.id == filters.divisionID }) {
+                if let division = MockData.divisions.first(where: { $0.id == filters.divisionID }) {
                     RemovableChip(title: division.name) { withAnimation { filters.divisionID = nil } }
                 }
                 Button("Limpar") { withAnimation { filters = ScheduleFilters() } }

@@ -40,7 +40,8 @@ enum MatchListKind: Hashable {
 struct MatchListView: View {
     @Environment(AppState.self) private var appState
     let kind: MatchListKind
-    let scope: HomeScope
+    /// `nil` = todas as atléticas.
+    let athleticID: Athletic.ID?
 
     var body: some View {
         Group {
@@ -81,14 +82,13 @@ struct MatchListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.canvas.ignoresSafeArea())
         .navigationTitle(kind.title)
-        .navigationSubtitle(scope == .favorite ? (appState.favoriteAthletic?.name ?? "") : "Todas as atléticas")
+        .navigationSubtitle(MockData.athletics.first { $0.id == athleticID }?.name ?? "Todas as atléticas")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var groups: [(day: Date, matches: [Match])] {
         guard case .loaded(let all) = appState.matchesState else { return [] }
-        let favoriteID = appState.favoriteAthletic?.id
-        let matches = kind.select(from: scope == .favorite && favoriteID != nil ? all.filter { $0.involves(favoriteID!) } : all)
+        let matches = kind.select(from: athleticID.map { id in all.filter { $0.involves(id) } } ?? all)
         let calendar = Calendar.current
         var result: [(day: Date, matches: [Match])] = []
         for match in matches {
@@ -104,11 +104,11 @@ struct MatchListView: View {
 }
 
 #Preview("Próximos · Geral") {
-    NavigationStack { MatchListView(kind: .upcoming, scope: .general) }
+    NavigationStack { MatchListView(kind: .upcoming, athleticID: nil) }
         .environment(AppState(favoriteAthletic: MockData.athletic("ath-bufalos"), scenario: .filled, preloaded: true))
 }
 
 #Preview("Últimos · Minha atlética") {
-    NavigationStack { MatchListView(kind: .recent, scope: .favorite) }
+    NavigationStack { MatchListView(kind: .recent, athleticID: "ath-bufalos") }
         .environment(AppState(favoriteAthletic: MockData.athletic("ath-bufalos"), scenario: .filled, preloaded: true))
 }

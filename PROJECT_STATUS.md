@@ -19,9 +19,9 @@
 | 02 | Início (abas Atlética/Geral, ao vivo, próximos e últimos jogos) | **Validada** (Bloco 2 adicionou a atlética de coração) |
 | 03 / 04 / 05 | Jogo ao vivo / encerrado / a iniciar | **Validada** |
 | 06 | Notificações (Minha Atlética / Geral) | **Validada** (Bloco 2 adicionou lidas e permissão) |
-| 07 / 08 | Cronograma / filtros | **Bloco 2 — em validação** |
-| 09 | Ranking por divisão (pódio + lista) | — |
-| 10 / 11 / 12 | Atlética: info / cronograma / ranking | — |
+| 07 / 08 | Cronograma / filtros | **Validada** |
+| 09 | Ranking por divisão (pódio + lista) | **Bloco 3 — em validação** |
+| 10 / 11 / 12 | Atlética: info / cronograma / ranking | **Bloco 3 — em validação** |
 | 13 | Modalidades (busca + filtro) | — |
 | 14 / 15 / 16 | Modalidade: cronograma / chaveamento / ranking | — |
 | 17 | Filtros de modalidades | — |
@@ -35,6 +35,13 @@
 - Cada tab terá seu próprio `NavigationStack`; tab bar sempre visível nos pushes.
 
 ## Componentes compartilhados
+Criados no Bloco 3:
+- `RankingRow` (posição, escudo, nome, pontos, empate, "Sua atlética").
+- `UnderlineTabs` ganhou ícone opcional e passa a rolar quando as abas não cabem.
+- `MatchHeaderCard` ganhou `linksTeams` (no detalhe da partida, cada time abre a atlética).
+- `Mocks/Ranking.swift`: `RankingEntry`, `DivisionRanking`, `SportStanding`, `AthleticProfile` e dados fictícios; 8 atléticas novas em `MockData` (17 no total) e `MockData.divisions`.
+- `AppRoute.athletic` e `AppRoute.matchList(_, athleticID)` (a lista "Ver mais" agora é por atlética ou geral).
+
 Criados no Bloco 2:
 - `AthleticPicker` (+ `SelectionRow`, `AthleticSelectionRow`): busca + lista de escolha única, usado no onboarding, na troca da atlética e no filtro.
 - `ChoiceChip` e `RemovableChip` (Chips.swift), `Toast`, `CountBadge`; `CircleIconLabel` ganhou `isActive`.
@@ -58,6 +65,20 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Bloco 3 — Ranking e Atléticas (09–12)
+Ranking (`Features/Ranking/`):
+- Abas por divisão (abre na divisão da atlética de coração), pódio 2º·1º·3º e lista a partir do 4º; tocar abre a atlética.
+- Empate: mesma posição, mesmo degrau no pódio e "empate" na linha.
+- Busca em todas as divisões (nome ou sigla); atléticas sem classificação aparecem com "—".
+- Estados: carregando, erro, sem edição, ranking não disponível, divisão sem classificação (com "Ver [outra divisão]"), busca sem resultado (com "Limpar busca").
+- Atlética de coração destacada (barra preta, coração, "Sua atlética").
+
+Atlética (`Features/Athletic/AthleticDetailView.swift`), acessada pelo Ranking, pela busca e pelos times no detalhe da partida:
+- Resumo: escudo, nome, instituição, Divisão, Lugar, Pontos, Torcedores ("—" quando não há dado; 2×2 se não couber).
+- Abas com ícone e texto: Jogos (ao vivo, próximos e últimos, até 3 por seção + "Ver mais"), Sobre (sigla, instituição, descrição ou aviso de que não há), Modalidades (colocação ou "Ainda sem resultado").
+- Coração na barra: torcer ou deixar de torcer; Início, Ranking, Notificações e filtros atualizam na hora.
+- Estados: atlética sem jogos, sem descrição, sem classificação, sem modalidades, atlética indisponível.
+
 ### Bloco 2 — Cronograma e Filtros (07–08) + pendências do Bloco 1
 Cronograma (`Features/Schedule/`):
 - Abas de dias do cronograma publicado (inclui dia sem jogos), com "Hoje" e a quantidade de jogos (já filtrada) em cada dia; começa em hoje.
@@ -122,6 +143,7 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 ## Telas validadas
 - 01 — Escolha sua Atlética (17/10/2026, no simulador).
 - 02–06 — Bloco 1: Início, partidas e notificações (19/10/2026, no simulador).
+- 07–08 — Bloco 2: Cronograma e Filtros, com atlética de coração e notificações (19/10/2026).
 
 ## Decisões confirmadas
 - Mobile first; iOS nativo em SwiftUI; target existente convertido para iPhone (sem novo projeto).
@@ -147,6 +169,14 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 10. Personas usam nomes antigos (`ADMIN_SUPREMO`, `EM_EDICAO`/`SALVA`), substituídos pela seção 12 do documento-fonte, e citam recursos sem wireframe (estatísticas individuais/artilharia, card de resultado, abrir no mapa, histórico) — não antecipados.
 
 ## Pendências
+**Hipóteses do Bloco 3 (dados fictícios, sem regra oficial):**
+- Pontos, posições, torcedores e colocação por modalidade são ilustrativos. A tabela de pontuação e os desempates não existem no domínio (P-08).
+- Pontos iguais dividem a posição (como RN-49 nas provas); a ordem entre empatados é alfabética só para exibir.
+- Classificação pode faltar em uma divisão (Série Bronze no mock) para testar o estado vazio.
+- Descrição da atlética não existe no domínio; é mock e pode faltar.
+- Colocação por modalidade não leva a lugar nenhum por enquanto (a tela de Modalidade é do Bloco 4).
+- O coração na tela da atlética é um segundo caminho para RN-86, com o mesmo efeito da troca na Início.
+
 **Hipóteses do Bloco 2 (reversíveis, sem regra no domínio):**
 - Leitura dos avisos guardada só no aparelho; o domínio não tem lido/não lido.
 - Cada campo do filtro aceita uma opção; filtros valem para todos os dias e não persistem ao reabrir o app.
@@ -157,6 +187,8 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - Provas classificatórias (natação, atletismo) também ocupam o cronograma (item = partida **ou** prova), mas não há cartão de prova no wireframe. Não implementado; decidir junto com Modalidades.
 - Onboarding sem opção "seguir sem atlética" (RN-86 permite). Hoje dá para remover depois, na Início.
 - Destino do "Ver mais" da Início: continua numa lista própria; pode passar a abrir o Cronograma filtrado.
+- Ranking geral: qual é o critério oficial (pontos por colocação em cada modalidade? Torcidômetro entra?). Definir antes da alta fidelidade.
+- Modalidades na tela da atlética: ligar cada linha à tela de Modalidade no Bloco 4 e definir como mostrar classificatórias (marca/tempo) × eliminatórias (fase).
 - Rótulo "Em andamento" (cronograma, 07) × "Ao vivo" (Início e detalhe): o protótipo usa "Ao vivo" em tudo.
 - Abrir o local da partida no app de mapas (💡 no domínio, citado nas personas): não implementado.
 - Torcedor vê a escalação validada (RN-70), mas os wireframes não mostram escalação na partida.
@@ -165,11 +197,12 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - Divergências 6–9 serão retomadas quando as telas correspondentes entrarem.
 
 ## Próximos passos autorizados
-- Validação do Bloco 2 pela designer.
-- Ranking e Modalidades — **ainda não autorizados**.
+- Validação do Bloco 3 pela designer.
+- Bloco 4 (Modalidades) — **ainda não autorizado**.
 
 ## Histórico
 - 2026-10-17 — Registro inicial das diretrizes do Design Lab. Nenhuma implementação assumida.
 - 2026-10-17 — Análise de referências (documento-fonte, personas, 17 telas) e plano aprovado. Target convertido para iOS/iPhone; AccentColor preto. Tela 01 implementada com tokens, componentes base, mocks e estados; compilada e aberta no simulador.
 - 2026-10-17 — Tela 01 validada. Bloco 1 (telas 02–06) implementado com abas, rotas, estados completos e cenários por argumento de inicialização; testado no simulador.
 - 2026-10-19 — Bloco 1 validado. Bloco 2: Cronograma e Filtros, atlética de coração editável, notificações lidas/não lidas com contador e permissão simulada; testado no simulador.
+- 2026-10-19 — Bloco 2 validado. Bloco 3: Ranking por divisão e detalhes da atlética (Jogos, Sobre, Modalidades), com dados fictícios e navegação partida ↔ atlética; testado no simulador.

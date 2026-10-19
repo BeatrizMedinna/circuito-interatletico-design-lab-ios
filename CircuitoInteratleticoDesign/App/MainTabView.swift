@@ -1,14 +1,16 @@
 import SwiftUI
 
-/// Destinos empilhados nas abas Início e Cronograma.
+/// Destinos empilhados nas abas Início, Cronograma e Ranking.
 enum AppRoute: Hashable {
     case match(Match.ID)
     case notifications
-    case matchList(MatchListKind, HomeScope)
+    /// `nil` = jogos de todas as atléticas.
+    case matchList(MatchListKind, Athletic.ID?)
+    case athletic(Athletic.ID)
 }
 
 /// App depois do onboarding: quatro abas, cada uma com sua pilha de navegação.
-/// Prototipadas: Início (Bloco 1) e Cronograma (Bloco 2).
+/// Prototipadas: Início (Bloco 1), Cronograma (Bloco 2) e Ranking (Bloco 3).
 struct MainTabView: View {
     @State private var appState: AppState
 
@@ -29,7 +31,9 @@ struct MainTabView: View {
                 }
             }
             Tab("Ranking", systemImage: "trophy") {
-                NextBlockPlaceholder(title: "Ranking", systemImage: "trophy")
+                NavigationStack {
+                    RankingView().withAppRoutes()
+                }
             }
             Tab("Modalidades", systemImage: "star") {
                 NextBlockPlaceholder(title: "Modalidades", systemImage: "star")
@@ -53,7 +57,8 @@ private extension View {
             switch route {
             case .match(let id): MatchDetailView(matchID: id)
             case .notifications: NotificationsView()
-            case .matchList(let kind, let scope): MatchListView(kind: kind, scope: scope)
+            case .matchList(let kind, let athleticID): MatchListView(kind: kind, athleticID: athleticID)
+            case .athletic(let id): AthleticDetailView(athleticID: id)
             }
         }
     }

@@ -31,6 +31,8 @@ final class AppState {
     private(set) var scenario: LabScenario
     private(set) var matchesState: LoadState<[Match]> = .loading
     private(set) var notificationsState: LoadState<[AppNotification]> = .loading
+    /// Classificação geral por divisão (dados fictícios, ver Mocks/Ranking.swift).
+    private(set) var rankingState: LoadState<[DivisionRanking]> = .loading
     /// Última atualização dos placares ao vivo ("Atualizado há…").
     private(set) var lastRefresh = Date()
 
@@ -61,6 +63,7 @@ final class AppState {
     func load() async {
         matchesState = .loading
         notificationsState = .loading
+        rankingState = .loading
         guard scenario != .loading else { return }
         try? await Task.sleep(for: .seconds(0.8))
         apply()
@@ -81,6 +84,12 @@ final class AppState {
     func match(id: Match.ID) -> Match? {
         guard case .loaded(let matches) = matchesState else { return nil }
         return matches.first { $0.id == id }
+    }
+
+    /// Posição da atlética na classificação da divisão, se já houver.
+    func rankingEntry(for athleticID: Athletic.ID) -> RankingEntry? {
+        guard case .loaded(let rankings) = rankingState else { return nil }
+        return rankings.lazy.flatMap(\.entries).first { $0.athletic.id == athleticID }
     }
 
     // MARK: - Atlética de coração
@@ -143,6 +152,7 @@ final class AppState {
     private func apply() {
         matchesState = resolve(MockData.matches)
         notificationsState = resolve(MockData.notifications)
+        rankingState = resolve(MockData.rankings)
         lastRefresh = Date()
     }
 
