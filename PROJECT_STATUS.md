@@ -72,6 +72,25 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 3: Navegação global (26/10/2026) — em validação
+Diagnóstico: a navegação já usava os componentes nativos do iOS 26 — `TabView` com `Tab` (4 abas, cada uma com sua `NavigationStack`), barra de abas em Liquid Glass com seleção Lime e ícones preenchidos pelo sistema, botão Voltar nativo (monocromático), títulos em linha nos detalhes e efeito de borda nativo no topo. Sem fundos personalizados nas barras, sem vidro na camada de conteúdo. Rotas, destinos, `schedulePath`, filtros e a atlética de coração não foram alterados.
+
+Refinamentos (só aparência):
+- `DesignSystem/Tokens/NavigationStyles.swift` (novo): `barControlNeutral()` (fechar, cancelar, "Ler todas" em branco, como o padrão do iOS 26) e `barPrimaryAction()` (✓ "Aplicar filtros" em vidro preenchido Lime com símbolo On Lime, 12,6:1). Regra da HIG: barras monocromáticas, cor só na ação principal.
+- Aplicado em `ScheduleFilterSheet`, `SportsFilterSheet`, `FavoriteAthleticSheet` e `NotificationsView` (uma linha em cada item da barra).
+- `MainTabView`: `.scrollEdgeEffectStyle(.hard, for: .bottom)` — efeito de borda nativo mais forte sob a barra de abas; comprovado em captura com texto grande (o "Ver mais" Lime aparecia atrás dos rótulos). Reversível removendo a linha.
+
+Atlética de coração: trocar pelo perfil (Imortal) e pela sheet da Início (Poraquê → Búfalos) atualizou o Teal na Início, Ranking/pódio, parciais e lances sem reiniciar, e a escolha seguiu entre abas. **A atlética de coração vive só na memória (`AppState`)**: ao fechar o app volta ao onboarding (ou ao `-labFavorite`). Comportamento anterior à alta fidelidade, não alterado.
+
+Testes: build sem avisos; iPhone 17 Pro com toques reais nos fluxos A (Ranking → Atlética → Agenda → Ver todos), B (Modalidade → Jogos → Ver todos), C (Início → Ver mais), D (Partida → Ver chave → Voltar), E (troca de abas preservando a pilha) e F (Notificação → partida); "Aumentar contraste" e texto grande de acessibilidade por captura no 17 Pro; iPhone 16e (iOS 26) com texto padrão e grande. VoiceOver e "Reduzir transparência" não testados. Toques muito rápidos no simulador entregaram eventos fora de ordem; os fluxos foram refeitos com pausas.
+
+Pendências para as etapas de tela:
+- Início: no texto grande, o selo do sino sobrepõe o ícone e os nomes dos times truncam.
+- Títulos genéricos "Atlética" e "Modalidade" nos detalhes (avaliar o nome da entidade).
+- Sheet da atlética de coração: "Cancelar" em texto empurra o título; avaliar ✕ padrão.
+- Fundos próprios das sheets (`appBackground`) cobrem o vidro das sheets do iOS 26 (HIG: revisar).
+- Toast posicionado com margem fixa (96 pt) acima da barra de abas.
+
 ### Alta fidelidade — Etapa 2: Componentes reutilizáveis (26/10/2026) — em validação
 Decisões aprovadas: cartões sem barras laterais; "Ver mais/Ver todos" em Lime com chevron; não lida = ponto Lime + título em negrito; contadores em Lime (vermelho só para "Ao vivo"); SF Pro Rounded em placares e números esportivos; atlética de coração destacada automaticamente em Teal a partir de `AppState.favoriteAthletic`.
 
@@ -293,3 +312,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-19 — Refatoração de Arquitetura em **Atomic Design**: Reorganização completa do `DesignSystem` e de todas as telas em camadas (`Tokens/`, `Atoms/`, `Molecules/`, `Organisms/`, `Features/<Nome>/Tabs|Components`), aplicando o princípio estrito de **1 componente por arquivo** para máxima facilidade de busca no Xcode (`Cmd + Shift + O`), desacoplamento de modelos de domínio em `Mocks/` (`ScheduleItem`, `ContentScope`) e decomposição das views raiz (`HomeView`, `ScheduleView`, `SportsView`, `NotificationsView`, `RankingView`) em views orquestradoras declarativas que delegam cada estado e seção para componentes dedicados. Build 100% verificado com sucesso no iOS Simulator.
 - 2026-10-26 — Alta fidelidade, Etapa 1 (fundações): Color Sets com variantes, tokens remapeados, app em Dark fixo; compilado e conferido no iPhone 17 Pro (inclusive com Aumentar contraste).
 - 2026-10-26 — Alta fidelidade, Etapa 2 (componentes): tipografia Rounded, cartões sem barras laterais, links Lime, destaque Teal automático da atlética de coração, estados de ao vivo/não lida/atenção; compilado e testado no iPhone 17 Pro e 16e.
+- 2026-10-26 — Alta fidelidade, Etapa 3 (navegação global): diagnóstico da navegação nativa, controles das barras monocromáticos com ação principal em Lime, borda forte sob a barra de abas; atlética de coração validada com troca em tempo real; testado no iPhone 17 Pro e 16e.

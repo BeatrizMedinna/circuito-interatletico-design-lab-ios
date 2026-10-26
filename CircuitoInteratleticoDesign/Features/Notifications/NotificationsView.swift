@@ -27,6 +27,7 @@ struct NotificationsView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Ler todas") { appState.markAllAsRead() }
                         .accessibilityLabel("Marcar todas como lidas")
+                        .barControlNeutral()
                 }
             }
         }

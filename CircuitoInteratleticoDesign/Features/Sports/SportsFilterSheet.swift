@@ -40,6 +40,7 @@ struct SportsFilterSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: { Image(systemName: "xmark") }
                         .accessibilityLabel("Cancelar")
+                        .barControlNeutral()
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -47,6 +48,7 @@ struct SportsFilterSheet: View {
                         dismiss()
                     } label: { Image(systemName: "checkmark") }
                         .accessibilityLabel("Aplicar filtros")
+                        .barPrimaryAction()
                 }
             }
         }

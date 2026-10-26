@@ -41,6 +41,10 @@ struct MainTabView: View {
                 }
             }
         }
+        // Efeito de borda nativo mais forte sob a barra de abas: o conteúdo
+        // (texto grande, "Ver mais" em Lime) não disputa com os rótulos das abas.
+        // O vidro continua o do sistema. Para voltar ao padrão, remova esta linha.
+        .scrollEdgeEffectStyle(.hard, for: .bottom)
         .overlay(alignment: .bottom) {
             if let message = appState.toast {
                 Toast(message: message)

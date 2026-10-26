@@ -20,6 +20,7 @@ struct FavoriteAthleticSheet: View {
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancelar") { dismiss() }
+                            .barControlNeutral()
                     }
                 }
         }

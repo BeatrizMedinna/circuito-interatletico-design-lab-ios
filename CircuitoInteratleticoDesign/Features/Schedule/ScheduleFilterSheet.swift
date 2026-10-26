@@ -64,6 +64,7 @@ struct ScheduleFilterSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: { Image(systemName: "xmark") }
                         .accessibilityLabel("Cancelar")
+                        .barControlNeutral()
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -73,6 +74,7 @@ struct ScheduleFilterSheet: View {
                         Image(systemName: "checkmark")
                     }
                     .accessibilityLabel("Aplicar filtros")
+                    .barPrimaryAction()
                 }
             }
         }
