@@ -11,9 +11,10 @@ import SwiftUI
 struct CircuitoInteratleticoDesignApp: App {
     var body: some Scene {
         WindowGroup {
+            // A aparência Dark vem do Info.plist (UIUserInterfaceStyle = Dark).
+            // Para seguir o sistema no futuro, basta remover essa chave.
             RootView()
-                .preferredColorScheme(.light)
-                .tint(.textPrimary)
+                .tint(.brandPrimary)
         }
     }
 }

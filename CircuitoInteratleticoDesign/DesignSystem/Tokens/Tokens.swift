@@ -1,30 +1,59 @@
 import SwiftUI
 
-// Tokens da média fidelidade: somente modo claro, branco, preto e cinzas.
-// Os nomes são semânticos para que a alta fidelidade troque os valores
-// (ex.: cores da edição) sem mexer nas telas.
+// Tokens de cor da alta fidelidade. Cada um lê um Color Set em
+// Assets.xcassets/Palette com variantes clara, escura e de alto contraste.
+// O app roda fixo no escuro (Info.plist); as variantes claras existem para o
+// Liquid Glass se adaptar e para um futuro "seguir o sistema" sem retrabalho.
+// Os nomes antigos foram mantidos: as telas não precisaram mudar.
 
 extension ShapeStyle where Self == Color {
+    // MARK: Superfícies
+
     /// Cabeçalhos e barras fixas.
-    static var appBackground: Color { Color(white: 1.0) }
+    static var appBackground: Color { Color(.paletteBase) }
     /// Fundo do conteúdo rolável.
-    static var canvas: Color { Color(white: 0.965) }
+    static var canvas: Color { Color(.paletteBase) }
     /// Cartões, campos e linhas de lista.
-    static var surface: Color { Color(white: 0.89) }
+    static var surface: Color { Color(.paletteSurface1) }
+    /// Elementos dentro de cartões (chips, caixas internas, botões de ícone).
+    static var surfaceInset: Color { Color(.paletteSurface2) }
     /// Linha ou cartão selecionado (sempre junto com borda e ícone).
-    static var surfaceSelected: Color { Color(white: 0.82) }
+    static var surfaceSelected: Color { Color(.paletteSurface3) }
+    /// Linhas finas entre itens (decorativo).
+    static var separatorLine: Color { Color(.paletteSeparator) }
+    /// Borda de seleção e de botões secundários (3:1 ou mais sobre o fundo).
+    static var borderStrong: Color { Color(.paletteBorderStrong) }
 
-    static var textPrimary: Color { Color(white: 0.07) }
-    /// Contraste mínimo de 4.5:1 sobre `surface`.
-    static var textSecondary: Color { Color(white: 0.36) }
-    static var textOnAccent: Color { Color(white: 1.0) }
+    // MARK: Texto
 
-    /// Borda de seleção e de botões secundários.
-    static var borderStrong: Color { Color(white: 0.15) }
-    /// Ação principal. (`accent` já é gerado pelo asset AccentColor, também preto.)
-    static var actionPrimary: Color { Color(white: 0.10) }
-    static var disabledFill: Color { Color(white: 0.80) }
-    static var disabledText: Color { Color(white: 0.42) }
+    static var textPrimary: Color { Color(.paletteTextPrimary) }
+    /// 7:1 ou mais sobre fundo e superfícies.
+    static var textSecondary: Color { Color(.paletteTextSecondary) }
+    /// Perdedor, "a definir", desabilitado. 4,5:1 sobre fundo, superfície e superfície interna.
+    static var textTertiary: Color { Color(.paletteTextTertiary) }
+    /// Texto e ícones sobre `actionPrimary` (On Lime).
+    static var textOnAccent: Color { Color(.paletteOnBrand) }
+
+    // MARK: Marca
+
+    /// Preenchimento da ação principal e da seleção (Lime). Texto por cima: `textOnAccent`.
+    static var actionPrimary: Color { Color(.paletteBrandFill) }
+    /// Lime como texto ou ícone interativo (Lime Strong na variante clara).
+    static var brandPrimary: Color { Color(.paletteBrand) }
+    /// Tudo que é da atlética de coração (Teal). Não usar como sucesso.
+    static var favoriteAccent: Color { Color(.paletteFavorite) }
+
+    // MARK: Estados (sempre com ícone, rótulo ou borda além da cor)
+
+    static var live: Color { Color(.paletteLive) }
+    static var success: Color { Color(.paletteSuccess) }
+    static var warning: Color { Color(.paletteWarning) }
+    static var critical: Color { Color(.paletteCritical) }
+
+    // MARK: Desabilitado
+
+    static var disabledFill: Color { Color(.paletteSurface2) }
+    static var disabledText: Color { Color(.paletteTextTertiary) }
 }
 
 enum Spacing {

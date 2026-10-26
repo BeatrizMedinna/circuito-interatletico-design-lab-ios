@@ -31,6 +31,7 @@ struct MatchDetailView: View {
             if match.status == .live {
                 Image(systemName: "circle.fill")
                     .font(.system(size: 8))
+                    .foregroundStyle(.live)
                     .symbolEffect(.pulse)
             }
             Text(match.status.title)

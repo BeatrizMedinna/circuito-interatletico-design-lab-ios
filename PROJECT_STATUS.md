@@ -2,8 +2,8 @@
 
 ## Etapa atual
 - Plataforma: iOS / iPhone — SwiftUI (target convertido de macOS para iOS em 17/10/2026; iOS 26.1, só iPhone, retrato).
-- Fidelidade: média.
-- Paleta: branco, preto e tons neutros de cinza; **somente modo claro**.
+- Fidelidade: **alta, em andamento** na branch `design/high-fidelity-ios` (base `72fb2af`). A média fidelidade monocromática está validada no `main`.
+- Paleta: Dark fixo com marca Lime `#B7F34B` + Teal `#2DD4BF` (Etapa 1); variantes claras e de alto contraste preparadas.
 - Dados: mockados; sem backend.
 - Ambiente: projeto Xcode local separado do repositório dos desenvolvedores.
 
@@ -72,6 +72,24 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 1: Fundações (26/10/2026) — em validação
+Decisões aprovadas: Dark fixo no protótipo com variantes preparadas; "ao vivo" em vermelho `#FF5C5C` sempre com ponto/rótulo; Teal `#2DD4BF` = atlética de coração (não é cor de sucesso); neutros escuros com leve viés verde. Card ao vivo da Início **sem** contorno vermelho (usa `borderStrong`, cinza), a pedido da designer.
+
+Implementado:
+- `Assets.xcassets/Palette/`: 17 Color Sets com variantes clara, escura, clara alto contraste e escura alto contraste (base, surface 1–3, separador, borda forte, texto 1–3, marca, preenchimento da marca, sobre-marca, atlética de coração, ao vivo, sucesso, atenção, erro). `AccentColor`: Lime no escuro, Lime Strong no claro.
+- `Tokens.swift`: os nomes existentes passaram a ler os Color Sets (`appBackground`/`canvas` → base `#0B0E0C`, `surface` → `#151A17`, `surfaceSelected` → `#2A312C`, `actionPrimary` → Lime, `textOnAccent` → On Lime `#152211`…). Novos papéis: `surfaceInset`, `separatorLine`, `textTertiary`, `brandPrimary`, `favoriteAccent`, `live`, `success`, `warning`, `critical`. Telas não mudaram.
+- Aparência: `INFOPLIST_KEY_UIUserInterfaceStyle = Dark` (antes Light) no `project.pbxproj` (autorizado); `.preferredColorScheme(.light)` removido; `.tint(.brandPrimary)` na raiz. Para seguir o sistema no futuro, basta remover a chave do Info.plist.
+- Cores fixas trocadas por tokens: barras laterais dos cartões (`CardModifiers`) e linhas da tabela de parciais.
+- "Ao vivo" vermelho nos átomos `LiveBadge` e `MatchStatusTag` e no título do detalhe da partida.
+
+Contrastes (WCAG, escuro): texto primário 14,2–17,7:1; secundário 6,0–8,7:1; terciário ≥ 4,9:1 em base/surface 1/surface 2 (não usar em surface 3); Lime 10,1–14,7:1; Teal 7,2–10,4:1; ao vivo 5,8:1 (surface 1) e 6,4:1 (base); On Lime sobre Lime 12,6:1; borda forte 4,1:1. Claro: terciário 4,6–5,4:1; Lime Strong/Teal Strong ~5,0–5,5:1.
+
+Limitações e pendências para a Etapa 2:
+- Teal ainda não aplicado nos componentes (Início, Ranking, perfil); `success`/`warning`/`critical` definidos mas não usados.
+- `Toast` e `CountBadge` herdaram o Lime de `actionPrimary`; avaliar toast neutro com ícone de sucesso.
+- Escala tipográfica continua nos estilos do sistema (SF Pro + Dynamic Type); estilos de placar/destaque entram com os componentes.
+- Previews do Xcode aparecem no claro (o Info.plist não vale no Canvas).
+
 ### Refinamento de UX (19/10/2026) — em validação
 - **Cronograma:** abas de dia sem contagem ("Hoje" segue identificando o dia atual); barra de filtros ativos com botão preto ✕ (limpar tudo) fixo à esquerda, separado por um traço, e ✕ em cada pílula (`ActiveFiltersBar`, também em Modalidades); coluna de horário mais estreita (fonte footnote, largura mínima 40 pt, cresce com Dynamic Type sem cortar).
 - **"Ver mais" da Início → Cronograma** (`AppState.openSchedule`): troca de aba, volta o Cronograma à raiz, aplica a atlética da aba de origem (ou nenhuma em "Geral") e abre no dia certo — próximo jogo ("Próximos") ou último dia com encerrado ("Últimos"), rolando até ele. Filtros continuam editáveis. A lista intermediária (`MatchListView`) foi removida.
@@ -250,3 +268,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-19 — Bloco 3 validado. Bloco 4: Modalidades com layouts próprios para eliminatória (jogos, chave, campanha) e classificatória (prova, resultados), provas no Cronograma e ligações partida/atlética ↔ modalidade; testado no simulador.
 - 2026-10-19 — Bloco 4 validado. Rodada de refinamento: Cronograma mais enxuto, "Ver mais" e "Ver no cronograma" abrem o Cronograma filtrado, ação textual de atlética de coração no perfil, Modalidades com "Minha atlética | Geral" e agendas completas; testado no simulador.
 - 2026-10-19 — Refatoração de Arquitetura em **Atomic Design**: Reorganização completa do `DesignSystem` e de todas as telas em camadas (`Tokens/`, `Atoms/`, `Molecules/`, `Organisms/`, `Features/<Nome>/Tabs|Components`), aplicando o princípio estrito de **1 componente por arquivo** para máxima facilidade de busca no Xcode (`Cmd + Shift + O`), desacoplamento de modelos de domínio em `Mocks/` (`ScheduleItem`, `ContentScope`) e decomposição das views raiz (`HomeView`, `ScheduleView`, `SportsView`, `NotificationsView`, `RankingView`) em views orquestradoras declarativas que delegam cada estado e seção para componentes dedicados. Build 100% verificado com sucesso no iOS Simulator.
+- 2026-10-26 — Alta fidelidade, Etapa 1 (fundações): Color Sets com variantes, tokens remapeados, app em Dark fixo; compilado e conferido no iPhone 17 Pro (inclusive com Aumentar contraste).

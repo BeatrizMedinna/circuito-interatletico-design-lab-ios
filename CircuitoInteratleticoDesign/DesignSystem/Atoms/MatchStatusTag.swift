@@ -12,7 +12,7 @@ struct MatchStatusTag: View {
             Text(status.title.uppercased())
         }
         .font(.caption2.weight(.semibold))
-        .foregroundStyle(status == .live ? Color.textPrimary : Color.textSecondary)
+        .foregroundStyle(status == .live ? Color.live : Color.textSecondary)
     }
 }
 

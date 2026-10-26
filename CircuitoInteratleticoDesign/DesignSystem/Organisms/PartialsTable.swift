@@ -30,7 +30,7 @@ struct PartialsTable: View {
         .background(.appBackground, in: RoundedRectangle(cornerRadius: Radius.control))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.control)
-                .strokeBorder(Color(white: 0.75), lineWidth: 1)
+                .strokeBorder(Color.separatorLine, lineWidth: 1)
         }
         .clipShape(RoundedRectangle(cornerRadius: Radius.control))
     }
@@ -65,7 +65,7 @@ struct PartialsTable: View {
             .frame(maxHeight: .infinity)
             .background(isCurrent ? Color.surfaceSelected : Color.clear)
             .overlay(alignment: .leading) {
-                Rectangle().fill(Color(white: 0.75)).frame(width: 1)
+                Rectangle().fill(Color.separatorLine).frame(width: 1)
             }
     }
 
