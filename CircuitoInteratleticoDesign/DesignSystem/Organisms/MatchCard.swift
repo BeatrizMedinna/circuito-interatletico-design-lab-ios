@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Cartão compacto de partida (carrosséis e listas).
-/// Ao vivo ganha borda forte, além do selo, para não depender só de texto.
+/// Ao vivo ganha contorno cinza mais forte (não vermelho), além do selo.
 struct MatchCard: View {
     let match: Match
     var showsStatus = false
@@ -16,7 +16,8 @@ struct MatchCard: View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
                 Text(caption ?? Formatters.cardHeader(match, date: date))
-                    .font(.caption.weight(.medium))
+                    .font(.caption.weight(.semibold))
+                    .tracking(0.3)
                     .foregroundStyle(.textSecondary)
                     .lineLimit(2)
                 Spacer(minLength: 0)
@@ -41,19 +42,13 @@ struct MatchCard: View {
         .padding(.vertical, Spacing.s)
         .padding(.horizontal, Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card)
-                .strokeBorder(.borderStrong, lineWidth: match.status == .live ? 1.5 : 0)
-        }
-        .teamSideBars()
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .cardSurface(highlighted: match.status == .live)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(showsVenue ? "\(match.accessibilitySummary), \(match.venue)" : match.accessibilitySummary)
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     ScrollView {
         VStack(spacing: Spacing.s) {
             ForEach(MockData.matches) { match in

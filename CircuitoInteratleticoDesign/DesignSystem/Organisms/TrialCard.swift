@@ -12,21 +12,28 @@ struct TrialCard: View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
                 Text(Formatters.cardHeader(start: competition.trial?.startDate ?? .now, title: competition.title, date: date))
-                    .font(.caption.weight(.medium))
+                    .font(.caption.weight(.semibold))
+                    .tracking(0.3)
                     .foregroundStyle(.textSecondary)
                     .lineLimit(2)
                 Spacer(minLength: 0)
-                Text(status.uppercased())
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(isPartial ? Color.textPrimary : Color.textSecondary)
-                    .fixedSize()
+                Label {
+                    Text(status.uppercased())
+                } icon: {
+                    if isPartial { Image(systemName: "exclamationmark.triangle.fill") }
+                }
+                .labelStyle(.titleAndIcon)
+                .font(.eyebrow)
+                .tracking(0.6)
+                .foregroundStyle(statusColor)
+                .fixedSize()
             }
             HStack(spacing: Spacing.s) {
                 Image(systemName: competition.sport.symbol)
                     .font(.body.weight(.medium))
                     .foregroundStyle(.textPrimary)
                     .frame(width: 44, height: 44)
-                    .background(.appBackground, in: Circle())
+                    .background(.surfaceInset, in: Circle())
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(headline)
@@ -48,16 +55,18 @@ struct TrialCard: View {
         .padding(.vertical, Spacing.s)
         .padding(.horizontal, Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card)
-                .strokeBorder(.borderStrong, style: StrokeStyle(lineWidth: isPartial ? 1.5 : 0, dash: [6, 3]))
-        }
+        .cardSurface()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Prova, \(competition.title), \(status), \(headline), \(detail)")
     }
 
     private var isPartial: Bool { competition.trial?.hasPartialResults ?? false }
+
+    /// Parcial em amarelo de atenção (com ícone); encerrada apagada; a iniciar em cinza.
+    private var statusColor: Color {
+        if isPartial { return .warning }
+        return competition.trial?.isClosed == true ? .textTertiary : .textSecondary
+    }
 
     private var status: String {
         guard let trial = competition.trial else { return "" }
@@ -84,7 +93,7 @@ struct TrialCard: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.s) {
         ForEach(MockData.competitions.filter { $0.trial != nil }) { competition in
             TrialCard(competition: competition)

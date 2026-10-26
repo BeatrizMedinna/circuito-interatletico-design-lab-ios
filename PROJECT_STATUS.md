@@ -72,6 +72,29 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 2: Componentes reutilizáveis (26/10/2026) — em validação
+Decisões aprovadas: cartões sem barras laterais; "Ver mais/Ver todos" em Lime com chevron; não lida = ponto Lime + título em negrito; contadores em Lime (vermelho só para "Ao vivo"); SF Pro Rounded em placares e números esportivos; atlética de coração destacada automaticamente em Teal a partir de `AppState.favoriteAthletic`.
+
+Fundações complementares (`DesignSystem/Tokens/`):
+- `Typography.swift` (novo): `scoreLarge`, `scoreCompact`, `sportNumber(_:)` (SF Pro Rounded, segue o Dynamic Type), `sectionTitle`, `eyebrow`.
+- `CardModifiers.swift`: `teamSideBars()` removido; `cardSurface(_:cornerRadius:highlighted:)` com estilos `standard`/`emphasized` (gradiente sutil) e contorno reforçado em cinza para partida ao vivo. `Radius.card` 14 → 16.
+- `FavoriteEnvironment.swift` (novo): valor de ambiente `favoriteAthleticID`, projetado em `MainTabView` a partir do `AppState` (mesma fonte de verdade e persistência).
+- `ButtonStyles.swift`: estilo `.sectionLink` (Lime + chevron); botão secundário em `surfaceInset`.
+- `PreviewAppearance.swift` (novo): trait `.appAppearance` — os 37 previews do DesignSystem abrem no escuro.
+
+Átomos: `AthleticBadge` (anel Teal `isFavorite`, fundo `surfaceInset`), `ScoreBoxes` (Rounded), `LiveBadge` (caixa alta, fundo vermelho translúcido), `MatchStatusTag` (eyebrow; ao vivo vermelho, encerrado terciário), `ChoiceChip`, `RemovableChip`, `CircleIconLabel`, `CountBadge` (`onAccent` para botão Lime), `SearchField`, `SelectorLabel`, `Toast` (neutro com ✓ verde), `InlineNote` (tons neutro/atenção/erro).
+Moléculas: `SectionHeader`, `UnderlineTabs` (sublinhado Lime), `TeamColumn`, `RankingRow` (Teal + "· Sua atlética" + barra Teal), `SelectionRow`, `NotificationRow` (ponto Lime; ícone amarelo em mudança de local/horário), `CompetitionRow`, `CompetitionLinkRow`, `PlayRow`, `ActiveFiltersBar`.
+Organismos: `MatchCard`, `MatchHeaderCard`, `TrialCard` (status parcial com ícone de atenção), `Podium` (1º em Lime, Teal na sua atlética), `PartialsTable`, `AthleticSummaryCard` (corrigido: cartão era invisível no escuro), `CompetitionSummaryCard`, `MatchInfoSection`, `AthleticPicker`. `AgendaSummary` e `ScheduleItemLink` sem mudança de lógica.
+Fora do DesignSystem (só chamada): `MainTabView` (ambiente), `ScheduleHeader` e `SportsHeader` (`CountBadge(onAccent: true)`). Models, Mocks, Services, rotas, filtros e Tab Bar não foram alterados.
+
+Testes: build sem avisos (iPhone 17 Pro); no simulador 17 Pro, com toques reais: onboarding, Início, "Ver mais" → Cronograma filtrado, Ranking, perfil da atlética e "Ver todos" → Cronograma filtrado, Modalidades (lista e detalhe), Notificações. iPhone 16e: Início no tamanho padrão e em texto grande de acessibilidade, sem cortes.
+
+Pendências:
+- `DayTabs` do Cronograma ainda com sublinhado branco (Etapa 5, telas).
+- Algumas telas ainda passam `fill: .surface` para o escudo (ex.: cabeçalho da Início).
+- Tons do `InlineNote` disponíveis, ainda não usados pelas telas.
+- Previews das Features ainda no claro; VoiceOver e "Aumentar contraste" não retestados nesta etapa.
+
 ### Alta fidelidade — Etapa 1: Fundações (26/10/2026) — em validação
 Decisões aprovadas: Dark fixo no protótipo com variantes preparadas; "ao vivo" em vermelho `#FF5C5C` sempre com ponto/rótulo; Teal `#2DD4BF` = atlética de coração (não é cor de sucesso); neutros escuros com leve viés verde. Card ao vivo da Início **sem** contorno vermelho (usa `borderStrong`, cinza), a pedido da designer.
 
@@ -269,3 +292,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-19 — Bloco 4 validado. Rodada de refinamento: Cronograma mais enxuto, "Ver mais" e "Ver no cronograma" abrem o Cronograma filtrado, ação textual de atlética de coração no perfil, Modalidades com "Minha atlética | Geral" e agendas completas; testado no simulador.
 - 2026-10-19 — Refatoração de Arquitetura em **Atomic Design**: Reorganização completa do `DesignSystem` e de todas as telas em camadas (`Tokens/`, `Atoms/`, `Molecules/`, `Organisms/`, `Features/<Nome>/Tabs|Components`), aplicando o princípio estrito de **1 componente por arquivo** para máxima facilidade de busca no Xcode (`Cmd + Shift + O`), desacoplamento de modelos de domínio em `Mocks/` (`ScheduleItem`, `ContentScope`) e decomposição das views raiz (`HomeView`, `ScheduleView`, `SportsView`, `NotificationsView`, `RankingView`) em views orquestradoras declarativas que delegam cada estado e seção para componentes dedicados. Build 100% verificado com sucesso no iOS Simulator.
 - 2026-10-26 — Alta fidelidade, Etapa 1 (fundações): Color Sets com variantes, tokens remapeados, app em Dark fixo; compilado e conferido no iPhone 17 Pro (inclusive com Aumentar contraste).
+- 2026-10-26 — Alta fidelidade, Etapa 2 (componentes): tipografia Rounded, cartões sem barras laterais, links Lime, destaque Teal automático da atlética de coração, estados de ao vivo/não lida/atenção; compilado e testado no iPhone 17 Pro e 16e.

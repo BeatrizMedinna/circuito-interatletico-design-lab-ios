@@ -13,7 +13,7 @@ struct AthleticSelectionRow: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.s) {
         AthleticSelectionRow(athletic: MockData.athletic("ath-bufalos"), isSelected: true, action: {})
         AthleticSelectionRow(athletic: MockData.athletic("ath-engenharia"), isSelected: false, action: {})

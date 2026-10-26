@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Título de seção com ação opcional à direita (ex.: "Ver mais").
+/// Título de seção com ação opcional à direita (ex.: "Ver mais"), que recebe
+/// o estilo de link de seção: Lime com chevron.
 struct SectionHeader<Trailing: View>: View {
     let title: String
     @ViewBuilder var trailing: Trailing
@@ -8,13 +9,12 @@ struct SectionHeader<Trailing: View>: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .font(.title3.bold())
+                .font(.sectionTitle)
                 .foregroundStyle(.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: Spacing.xs)
             trailing
-                .font(.subheadline)
-                .foregroundStyle(.textSecondary)
+                .buttonStyle(.sectionLink)
         }
     }
 }
@@ -25,7 +25,7 @@ extension SectionHeader where Trailing == EmptyView {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.l) {
         SectionHeader(title: "Próximos jogos") {
             Button("Ver mais") {}

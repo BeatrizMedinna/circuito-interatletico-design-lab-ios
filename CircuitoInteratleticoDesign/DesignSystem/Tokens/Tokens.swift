@@ -70,5 +70,5 @@ enum Radius {
     /// Campos e botões.
     static let control: CGFloat = 12
     /// Cartões e linhas de lista.
-    static let card: CGFloat = 14
+    static let card: CGFloat = 16
 }

@@ -31,11 +31,11 @@ struct SearchField: View {
         }
         .padding(.horizontal, Spacing.s)
         .frame(minHeight: 44)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.control))
+        .background(.surfaceInset, in: RoundedRectangle(cornerRadius: Radius.control))
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     @Previewable @State var text = ""
     SearchField(prompt: "Buscar atlética", text: $text)
         .padding()

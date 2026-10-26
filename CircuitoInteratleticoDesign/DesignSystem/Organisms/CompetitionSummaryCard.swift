@@ -13,7 +13,7 @@ struct CompetitionSummaryCard: View {
                     .font(.system(size: 34, weight: .medium))
                     .foregroundStyle(.textPrimary)
                     .frame(width: 80, height: 80)
-                    .background(.surface, in: Circle())
+                    .background(.surfaceInset, in: Circle())
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(competition.eventName ?? competition.sport.name)
@@ -39,23 +39,32 @@ struct CompetitionSummaryCard: View {
                 stat(competition.registeredAthletes.map(String.init) ?? "—", "Atletas")
             }
             if isLive {
-                Label("Jogo ao vivo agora", systemImage: "circle.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.textPrimary)
-                    .symbolEffect(.pulse)
+                HStack(spacing: Spacing.xs) {
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.live)
+                        .symbolEffect(.pulse)
+                    Text("Jogo ao vivo agora")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.textPrimary)
+                .accessibilityElement(children: .combine)
             }
             if case .finished(let champion?) = progress {
-                Label("Campeã: \(champion.name)", systemImage: "trophy.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.textPrimary)
-                    .padding(Spacing.s)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.surface, in: RoundedRectangle(cornerRadius: Radius.control))
+                Label {
+                    Text("Campeã: \(champion.name)").foregroundStyle(.textPrimary)
+                } icon: {
+                    Image(systemName: "trophy.fill").foregroundStyle(.brandPrimary)
+                }
+                .font(.subheadline.weight(.semibold))
+                .padding(Spacing.s)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.surfaceInset, in: RoundedRectangle(cornerRadius: Radius.control))
             }
         }
         .padding(Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.appBackground, in: RoundedRectangle(cornerRadius: Radius.card))
+        .cardSurface()
     }
 
     private var stageValue: String {
@@ -85,7 +94,7 @@ struct CompetitionSummaryCard: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     let competition = MockData.competitions[0]
     CompetitionSummaryCard(competition: competition, progress: .notStarted(next: nil), isLive: false)
         .padding()

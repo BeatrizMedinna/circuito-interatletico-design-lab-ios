@@ -42,7 +42,7 @@ struct AthleticPicker: View {
                                     .font(.body.weight(.medium))
                                     .foregroundStyle(.textPrimary)
                                     .frame(width: 44, height: 44)
-                                    .background(.appBackground, in: Circle())
+                                    .background(.surfaceInset, in: Circle())
                             }
                         }
                         ForEach(filtered) { athletic in
@@ -72,7 +72,7 @@ struct AthleticPicker: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     @Previewable @State var selectedID: Athletic.ID? = "ath-bufalos"
     @Previewable @State var query = ""
     AthleticPicker(athletics: MockData.athletics, selectedID: $selectedID, query: $query)

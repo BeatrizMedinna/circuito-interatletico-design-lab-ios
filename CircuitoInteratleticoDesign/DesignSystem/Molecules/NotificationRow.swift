@@ -8,9 +8,15 @@ struct NotificationRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.s) {
+            // Não lida: ponto Lime + título em negrito.
+            Circle()
+                .fill(isRead ? Color.clear : Color.actionPrimary)
+                .frame(width: 8, height: 8)
+                .padding(.top, 7)
+                .accessibilityHidden(true)
             Image(systemName: notification.kind.symbol)
                 .font(.body.weight(.medium))
-                .foregroundStyle(.textPrimary)
+                .foregroundStyle(iconColor)
                 .frame(width: 28)
                 .accessibilityHidden(true)
 
@@ -41,23 +47,26 @@ struct NotificationRow: View {
             }
         }
         .padding(.vertical, Spacing.m)
-        .padding(.horizontal, Spacing.l)
+        .padding(.leading, Spacing.s)
+        .padding(.trailing, Spacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.appBackground)
-        // Barra à esquerda (do wireframe 06) marca o aviso não lido.
-        .overlay(alignment: .leading) {
-            if !isRead {
-                Rectangle().fill(.textPrimary).frame(width: 4)
-            }
-        }
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityValue(isRead ? "" : "Não lida")
         .accessibilityHint(opensMatch ? "Abre a partida" : "")
     }
+
+    /// Mudança de horário ou local em amarelo de atenção; os demais avisos em cinza.
+    private var iconColor: Color {
+        switch notification.kind {
+        case .venueChange, .timeChange: .warning
+        default: .textSecondary
+        }
+    }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: 0) {
         NotificationRow(notification: MockData.notifications[0], isRead: false, opensMatch: true)
         NotificationRow(notification: MockData.notifications[1], isRead: true, opensMatch: false)

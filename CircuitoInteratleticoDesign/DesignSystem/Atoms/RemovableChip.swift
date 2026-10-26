@@ -7,18 +7,21 @@ struct RemovableChip: View {
 
     var body: some View {
         Button(action: onRemove) {
-            HStack(spacing: Spacing.xxs) {
+            HStack(spacing: Spacing.xs) {
                 Text(title)
                     .lineLimit(1)
                 Image(systemName: "xmark")
-                    .font(.caption2.weight(.bold))
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.textSecondary)
+                    .frame(width: 18, height: 18)
+                    .background(.surfaceSelected, in: Circle())
             }
             .font(.footnote.weight(.semibold))
             .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Spacing.s)
+            .padding(.leading, Spacing.s)
+            .padding(.trailing, 6)
             .frame(minHeight: 32)
-            .background(.appBackground, in: Capsule())
-            .overlay { Capsule().strokeBorder(.borderStrong, lineWidth: 1) }
+            .background(.surfaceInset, in: Capsule())
             .padding(.vertical, 6)
             .contentShape(Rectangle())
         }
@@ -27,7 +30,7 @@ struct RemovableChip: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     RemovableChip(title: "Futsal") {}
         .padding()
 }

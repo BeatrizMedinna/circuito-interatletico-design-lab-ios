@@ -5,6 +5,7 @@ import SwiftUI
 struct Podium: View {
     let entries: [RankingEntry]
     let favoriteID: Athletic.ID?
+    @Environment(\.favoriteAthleticID) private var environmentFavoriteID
 
     var body: some View {
         HStack(alignment: .bottom, spacing: Spacing.xs) {
@@ -19,12 +20,12 @@ struct Podium: View {
     }
 
     private func step(_ entry: RankingEntry, rank: Int) -> some View {
-        let isFavorite = entry.athletic.id == favoriteID
+        let isFavorite = entry.athletic.id == (favoriteID ?? environmentFavoriteID)
         // Altura e tom seguem a posição: empatados ficam no mesmo degrau.
         let level = min(entry.position, 3) - 1
         return NavigationLink(value: AppRoute.athletic(entry.athletic.id)) {
             VStack(spacing: Spacing.xs) {
-                AthleticBadge(size: rank == 0 ? .large : .prominent, fill: .surface)
+                AthleticBadge(size: rank == 0 ? .large : .prominent, isFavorite: isFavorite)
                 HStack(spacing: Spacing.xxs) {
                     Text(entry.athletic.name)
                         .font(.subheadline.weight(.semibold))
@@ -33,13 +34,14 @@ struct Podium: View {
                         .lineLimit(entry.athletic.name.contains(" ") ? 2 : 1)
                         .minimumScaleFactor(0.6)
                     if isFavorite {
-                        Image(systemName: "heart.fill").font(.caption)
+                        Image(systemName: "heart.fill").font(.caption).foregroundStyle(.favoriteAccent)
                     }
                 }
                 .foregroundStyle(.textPrimary)
                 VStack(spacing: 2) {
                     Text("\(entry.position)º")
-                        .font(level == 0 ? .largeTitle.bold() : .title.bold())
+                        .font(.sportNumber(level == 0 ? .largeTitle : .title))
+                        .foregroundStyle(level == 0 ? Color.brandPrimary : Color.textPrimary)
                     Text(Formatters.points(entry.points))
                         .font(.caption)
                         .foregroundStyle(.textSecondary)
@@ -48,12 +50,14 @@ struct Podium: View {
                 }
                 .foregroundStyle(.textPrimary)
                 .frame(maxWidth: .infinity, minHeight: [112, 88, 72][level])
-                .background([Color.surfaceSelected, Color.surface, Color.surface][level],
+                .background([Color.surfaceSelected, Color.surfaceInset, Color.surfaceInset][level],
                             in: UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card))
-                .overlay {
-                    if isFavorite {
+                // Primeiro lugar com faixa Lime no topo do degrau.
+                .overlay(alignment: .top) {
+                    if level == 0 {
                         UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card)
-                            .strokeBorder(.borderStrong, lineWidth: 2)
+                            .fill(.actionPrimary)
+                            .frame(height: 3)
                     }
                 }
             }
@@ -68,7 +72,7 @@ struct Podium: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     NavigationStack {
         Podium(entries: Array(MockData.rankings[0].entries.prefix(3)), favoriteID: "ath-bufalos")
             .padding()

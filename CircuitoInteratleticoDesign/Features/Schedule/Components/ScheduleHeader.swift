@@ -20,7 +20,7 @@ struct ScheduleHeader: View {
                 if hasSchedule {
                     Button(action: onOpenFilters) {
                         CircleIconLabel(systemName: "line.3.horizontal.decrease", isActive: !filters.isEmpty)
-                            .overlay(alignment: .topTrailing) { CountBadge(count: filters.activeCount) }
+                            .overlay(alignment: .topTrailing) { CountBadge(count: filters.activeCount, onAccent: true) }
                     }
                     .buttonStyle(.pressableCard)
                     .accessibilityLabel(filters.isEmpty ? "Filtros" : "Filtros, \(filters.activeCount) ativos")

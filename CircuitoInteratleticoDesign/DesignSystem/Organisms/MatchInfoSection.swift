@@ -20,7 +20,7 @@ struct MatchInfoSection: View {
             }
             .padding(Spacing.m)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
+            .cardSurface()
         }
     }
 
@@ -39,7 +39,7 @@ struct MatchInfoSection: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     MatchInfoSection(match: MockData.matches[0])
         .padding()
         .background(Color.canvas)

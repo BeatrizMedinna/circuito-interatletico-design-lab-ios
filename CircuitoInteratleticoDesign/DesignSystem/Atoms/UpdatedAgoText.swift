@@ -14,7 +14,7 @@ struct UpdatedAgoText: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     UpdatedAgoText(date: .now.addingTimeInterval(-15))
         .padding()
 }

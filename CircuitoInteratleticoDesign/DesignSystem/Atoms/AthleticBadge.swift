@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Escudo circular da atlética. Na média fidelidade é um SF Symbol genérico;
-/// na alta fidelidade receberá a identidade visual da atlética.
-/// `isUndefined` mostra a vaga "a definir" com borda tracejada.
+/// Escudo circular da atlética (SF Symbol genérico até existir a identidade visual).
+/// `isUndefined` mostra a vaga "a definir" com borda tracejada; `isFavorite`
+/// desenha o anel Teal da atlética de coração.
 struct AthleticBadge: View {
     enum Size {
         case small, medium, prominent, large
@@ -18,9 +18,10 @@ struct AthleticBadge: View {
     }
 
     var size: Size = .medium
-    /// Branco sobre superfícies cinza; cinza sobre fundo branco.
-    var fill: Color = .appBackground
+    /// Fundo do círculo; o padrão é a superfície interna.
+    var fill: Color = .surfaceInset
     var isUndefined = false
+    var isFavorite = false
 
     @ScaledMetric(relativeTo: .body) private var scale: CGFloat = 1
 
@@ -28,20 +29,26 @@ struct AthleticBadge: View {
         let diameter = size.diameter * min(scale, 1.25)
         Image(systemName: isUndefined ? "questionmark" : "shield")
             .font(.system(size: diameter * (isUndefined ? 0.35 : 0.45), weight: .medium))
-            .foregroundStyle(isUndefined ? Color.textSecondary : Color.textPrimary)
+            .foregroundStyle(isUndefined ? Color.textTertiary : Color.textPrimary)
             .frame(width: diameter, height: diameter)
             .background {
                 if isUndefined {
-                    Circle().strokeBorder(.textSecondary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                    Circle().strokeBorder(.textTertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                 } else {
                     Circle().fill(fill)
+                        .overlay { Circle().strokeBorder(.separatorLine, lineWidth: 1) }
+                }
+            }
+            .overlay {
+                if isFavorite && !isUndefined {
+                    Circle().strokeBorder(.favoriteAccent, lineWidth: 2).padding(-3)
                 }
             }
             .accessibilityHidden(true)
     }
 }
 
-#Preview("Tamanhos") {
+#Preview("Tamanhos", traits: .appAppearance) {
     HStack(spacing: Spacing.m) {
         AthleticBadge(size: .small)
         AthleticBadge(size: .medium)

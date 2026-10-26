@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Placar em caixas "2 : 3". A iniciar mostra "– : –"; W.O. mostra uma caixa só.
-/// No encerrado, o placar de quem perdeu fica em cinza para destacar o vencedor
-/// sem depender de cor.
+/// No encerrado, o placar de quem perdeu fica em cinza terciário para destacar o
+/// vencedor sem depender de cor. Números em SF Pro Rounded (`Font.scoreLarge`/`scoreCompact`).
 struct ScoreBoxes: View {
     enum Size {
         case compact, large
@@ -20,7 +20,7 @@ struct ScoreBoxes: View {
                     box(value(match.scoreA), isDimmed: isDimmed(.a))
                     Text(":")
                         .font(font)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(.textTertiary)
                     box(value(match.scoreB), isDimmed: isDimmed(.b))
                 }
             }
@@ -32,7 +32,7 @@ struct ScoreBoxes: View {
     }
 
     private var font: Font {
-        size == .compact ? .title2.weight(.semibold) : .largeTitle.weight(.semibold)
+        size == .compact ? .scoreCompact : .scoreLarge
     }
 
     private func value(_ score: Int?) -> String {
@@ -51,14 +51,14 @@ struct ScoreBoxes: View {
             .monospacedDigit()
             .lineLimit(1)
             .minimumScaleFactor(0.6)
-            .foregroundStyle(isDimmed ? Color.textSecondary : Color.textPrimary)
+            .foregroundStyle(isDimmed ? Color.textTertiary : Color.textPrimary)
             .padding(.horizontal, 6)
             .frame(minWidth: size == .compact ? 40 : 56, minHeight: size == .compact ? 44 : 64)
-            .background(.surfaceSelected, in: RoundedRectangle(cornerRadius: 10))
+            .background(.surfaceInset, in: RoundedRectangle(cornerRadius: Radius.control))
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.m) {
         ForEach(MockData.matches.prefix(12)) { match in
             ScoreBoxes(match: match)

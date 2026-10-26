@@ -17,15 +17,15 @@ struct SelectorLabel: View {
         }
         .padding(.horizontal, Spacing.m)
         .frame(minHeight: 48)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.control))
+        .background(.surfaceInset, in: RoundedRectangle(cornerRadius: Radius.control))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.control)
-                .strokeBorder(.borderStrong, lineWidth: value == nil ? 0 : 1.5)
+                .strokeBorder(.actionPrimary, lineWidth: value == nil ? 0 : 1.5)
         }
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.m) {
         SelectorLabel(value: nil, placeholder: "Todas as modalidades")
         SelectorLabel(value: "Basquete", placeholder: "Todas as modalidades")

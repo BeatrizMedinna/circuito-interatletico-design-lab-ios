@@ -22,7 +22,7 @@ struct FlowChips<Option: Hashable>: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     @Previewable @State var selected: String? = "Feminino"
     FlowChips(options: ["Masculino", "Feminino", "Misto"], selection: $selected) { $0 }
         .padding()

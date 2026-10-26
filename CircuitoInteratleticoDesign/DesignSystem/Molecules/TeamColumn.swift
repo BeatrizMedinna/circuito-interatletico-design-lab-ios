@@ -6,14 +6,16 @@ struct TeamColumn: View {
     let athletic: Athletic?
     var badgeSize: AthleticBadge.Size = .medium
     var isDimmed = false
+    @Environment(\.favoriteAthleticID) private var favoriteAthleticID
 
     var body: some View {
         let name = athletic?.name ?? "A definir"
         VStack(spacing: Spacing.xs) {
-            AthleticBadge(size: badgeSize, isUndefined: athletic == nil)
+            AthleticBadge(size: badgeSize, isUndefined: athletic == nil,
+                          isFavorite: athletic != nil && athletic?.id == favoriteAthleticID)
             Text(name)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(athletic == nil || isDimmed ? Color.textSecondary : Color.textPrimary)
+                .foregroundStyle(athletic == nil || isDimmed ? Color.textTertiary : Color.textPrimary)
                 .multilineTextAlignment(.center)
                 // Nome de uma palavra só encolhe em vez de quebrar com hífen.
                 .lineLimit(name.contains(" ") ? 2 : 1)
@@ -24,7 +26,7 @@ struct TeamColumn: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     HStack(spacing: Spacing.m) {
         TeamColumn(athletic: MockData.athletic("ath-bufalos"))
         TeamColumn(athletic: nil)

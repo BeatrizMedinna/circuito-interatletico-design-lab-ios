@@ -10,17 +10,19 @@ struct LiveBadge: View {
                 .foregroundStyle(.live)
                 .symbolEffect(.pulse)
             Text("Ao vivo")
-                .font(.subheadline.weight(.semibold))
+                .textCase(.uppercase)
+                .font(.caption.weight(.bold))
+                .tracking(0.6)
         }
         .foregroundStyle(.textPrimary)
         .padding(.horizontal, Spacing.s)
         .padding(.vertical, 6)
-        .background(.appBackground, in: Capsule())
+        .background(Color.live.opacity(0.16), in: Capsule())
         .accessibilityElement(children: .combine)
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     LiveBadge()
         .padding()
         .background(Color.canvas)

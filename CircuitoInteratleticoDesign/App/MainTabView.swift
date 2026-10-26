@@ -53,6 +53,7 @@ struct MainTabView: View {
             if request != nil { schedulePath = NavigationPath() }
         }
         .environment(appState)
+        .environment(\.favoriteAthleticID, appState.favoriteAthletic?.id)
         .task { await appState.load() }
     }
 }

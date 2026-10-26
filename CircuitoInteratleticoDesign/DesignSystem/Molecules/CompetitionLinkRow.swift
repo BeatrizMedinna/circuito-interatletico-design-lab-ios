@@ -9,7 +9,7 @@ struct CompetitionLinkRow: View {
             Image(systemName: "point.3.connected.trianglepath.dotted")
                 .font(.body.weight(.medium))
                 .frame(width: 44, height: 44)
-                .background(.appBackground, in: Circle())
+                .background(.surfaceInset, in: Circle())
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Ver chave e classificação")
@@ -27,12 +27,12 @@ struct CompetitionLinkRow: View {
         .foregroundStyle(.textPrimary)
         .padding(Spacing.s)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
+        .cardSurface()
         .accessibilityElement(children: .combine)
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     let competition = MockData.competitions[0]
     CompetitionLinkRow(competition: competition)
         .padding()

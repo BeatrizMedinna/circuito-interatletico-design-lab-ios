@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Linha de escolha única. A seleção aparece no fundo, na borda e no ícone,
-/// não só no tom de cinza.
+/// Linha de escolha única. A seleção aparece no fundo, no contorno Lime e no ✓,
+/// não só na cor.
 struct SelectionRow<Leading: View>: View {
     let title: String
     var subtitle: String? = nil
@@ -27,7 +27,7 @@ struct SelectionRow<Leading: View>: View {
                 Spacer(minLength: Spacing.xs)
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(isSelected ? Color.textPrimary : Color.textSecondary)
+                    .foregroundStyle(isSelected ? Color.brandPrimary : Color.textTertiary)
                     .accessibilityHidden(true)
             }
             .padding(Spacing.s)
@@ -36,7 +36,8 @@ struct SelectionRow<Leading: View>: View {
                         in: RoundedRectangle(cornerRadius: Radius.card))
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.card)
-                    .strokeBorder(.borderStrong, lineWidth: isSelected ? 2 : 0)
+                    .strokeBorder(isSelected ? Color.actionPrimary : Color.separatorLine,
+                                  lineWidth: isSelected ? 2 : 1)
             }
             .contentShape(RoundedRectangle(cornerRadius: Radius.card))
         }
@@ -45,7 +46,7 @@ struct SelectionRow<Leading: View>: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.s) {
         SelectionRow(title: "Opção Selecionada", subtitle: "Detalhes aqui", isSelected: true, action: {}) {
             Image(systemName: "star.fill").frame(width: 44, height: 44)

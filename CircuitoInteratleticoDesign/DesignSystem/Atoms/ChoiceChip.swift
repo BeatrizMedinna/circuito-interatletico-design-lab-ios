@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Opção de escolha única em formato de pílula (Categoria, Divisão).
-/// Selecionada: fundo preto, texto branco e ✓; tocar de novo desmarca.
+/// Selecionada: Lime com texto On Lime e ✓; tocar de novo desmarca.
 struct ChoiceChip: View {
     let title: String
     let isSelected: Bool
@@ -21,7 +21,8 @@ struct ChoiceChip: View {
             .foregroundStyle(isSelected ? Color.textOnAccent : Color.textPrimary)
             .padding(.horizontal, Spacing.m)
             .frame(minHeight: 40)
-            .background(isSelected ? Color.actionPrimary : Color.surface, in: Capsule())
+            .background(isSelected ? Color.actionPrimary : Color.surfaceInset, in: Capsule())
+            .overlay { Capsule().strokeBorder(Color.separatorLine, lineWidth: isSelected ? 0 : 1) }
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -29,7 +30,7 @@ struct ChoiceChip: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     HStack {
         ChoiceChip(title: "Masculino", isSelected: true) {}
         ChoiceChip(title: "Feminino", isSelected: false) {}

@@ -24,7 +24,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .foregroundStyle(.textPrimary)
             .padding(.horizontal, Spacing.l)
             .frame(minHeight: 44)
-            .background(.appBackground, in: RoundedRectangle(cornerRadius: Radius.control))
+            .background(.surfaceInset, in: RoundedRectangle(cornerRadius: Radius.control))
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.control)
                     .strokeBorder(.borderStrong, lineWidth: 1.5)
@@ -43,6 +43,26 @@ struct PressableCardStyle: ButtonStyle {
     }
 }
 
+/// Link de seção ("Ver mais", "Ver todos"): Lime com chevron, para ler como tocável.
+struct SectionLinkStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 2) {
+            configuration.label
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.bold))
+                .accessibilityHidden(true)
+        }
+        .font(.subheadline.weight(.semibold))
+        .foregroundStyle(.brandPrimary)
+        .opacity(configuration.isPressed ? 0.6 : 1)
+        .contentShape(Rectangle())
+    }
+}
+
+extension ButtonStyle where Self == SectionLinkStyle {
+    static var sectionLink: SectionLinkStyle { SectionLinkStyle() }
+}
+
 extension ButtonStyle where Self == PressableCardStyle {
     static var pressableCard: PressableCardStyle { PressableCardStyle() }
 }
@@ -55,7 +75,7 @@ extension ButtonStyle where Self == SecondaryButtonStyle {
     static var secondary: SecondaryButtonStyle { SecondaryButtonStyle() }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     VStack(spacing: Spacing.m) {
         Button("Entrar") {}.buttonStyle(.primary)
         Button("Entrar") {}.buttonStyle(.primary).disabled(true)

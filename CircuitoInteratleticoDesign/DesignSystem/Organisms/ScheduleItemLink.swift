@@ -26,7 +26,7 @@ struct ScheduleItemLink: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     NavigationStack {
         VStack(spacing: Spacing.s) {
             ScheduleItemLink(item: .match(MockData.matches[0]))

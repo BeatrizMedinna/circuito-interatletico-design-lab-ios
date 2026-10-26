@@ -11,7 +11,7 @@ struct AthleticSummaryCard<Action: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.m) {
             HStack(spacing: Spacing.m) {
-                AthleticBadge(size: .large, fill: .surface)
+                AthleticBadge(size: .large, isFavorite: isFavorite)
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(athletic.name)
                         .font(.title3.bold())
@@ -23,7 +23,7 @@ struct AthleticSummaryCard<Action: View>: View {
                     if isFavorite {
                         Label("Sua atlética", systemImage: "heart.fill")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(.textPrimary)
+                            .foregroundStyle(.favoriteAccent)
                             .padding(.top, 2)
                     }
                 }
@@ -35,12 +35,12 @@ struct AthleticSummaryCard<Action: View>: View {
                     GridRow { stat(pointsText, "Pontos"); stat(fansText, "Torcedores") }
                 }
             }
-            Divider()
+            Rectangle().fill(Color.separatorLine).frame(height: 1)
             action
         }
         .padding(Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.appBackground, in: RoundedRectangle(cornerRadius: Radius.card))
+        .cardSurface()
     }
 
     @ViewBuilder
@@ -67,7 +67,7 @@ struct AthleticSummaryCard<Action: View>: View {
     private func stat(_ value: String, _ label: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.headline)
+                .font(.sportNumber())
                 .monospacedDigit()
                 .foregroundStyle(.textPrimary)
                 .lineLimit(1)
@@ -82,7 +82,7 @@ struct AthleticSummaryCard<Action: View>: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     let athletic = MockData.athletic("ath-bufalos")
     AthleticSummaryCard(athletic: athletic, entry: MockData.rankings[0].entries[1], profile: MockData.profile(for: athletic.id), isFavorite: true) {
         Button("Ação") {}

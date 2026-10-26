@@ -48,7 +48,7 @@ struct PlayHistorySection: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     PlayHistorySection(match: MockData.matches[0])
         .padding()
         .background(Color.canvas)

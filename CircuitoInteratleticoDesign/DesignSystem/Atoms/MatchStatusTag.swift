@@ -11,12 +11,22 @@ struct MatchStatusTag: View {
             }
             Text(status.title.uppercased())
         }
-        .font(.caption2.weight(.semibold))
-        .foregroundStyle(status == .live ? Color.live : Color.textSecondary)
+        .font(.eyebrow)
+        .tracking(0.6)
+        .foregroundStyle(color)
+    }
+
+    /// Ao vivo > a iniciar > encerrado.
+    private var color: Color {
+        switch status {
+        case .live: .live
+        case .scheduled: .textSecondary
+        case .finished: .textTertiary
+        }
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     HStack(spacing: Spacing.m) {
         MatchStatusTag(status: .live)
         MatchStatusTag(status: .scheduled)

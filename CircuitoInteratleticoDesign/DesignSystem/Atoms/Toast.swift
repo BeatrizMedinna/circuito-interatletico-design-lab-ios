@@ -8,21 +8,23 @@ struct Toast: View {
     var body: some View {
         HStack(spacing: Spacing.xs) {
             Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.success)
                 .accessibilityHidden(true)
             Text(message)
                 .multilineTextAlignment(.leading)
         }
         .font(.subheadline.weight(.semibold))
-        .foregroundStyle(.textOnAccent)
+        .foregroundStyle(.textPrimary)
         .padding(.horizontal, Spacing.m)
         .padding(.vertical, Spacing.s)
-        .background(.actionPrimary, in: Capsule())
-        .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+        .background(.surfaceSelected, in: Capsule())
+        .overlay { Capsule().strokeBorder(Color.white.opacity(0.06), lineWidth: 1) }
+        .shadow(color: .black.opacity(0.5), radius: 16, y: 8)
         .padding(.horizontal, Spacing.l)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     Toast(message: "Agora você torce por Búfalos")
 }

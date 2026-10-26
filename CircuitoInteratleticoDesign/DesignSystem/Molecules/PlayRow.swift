@@ -5,6 +5,7 @@ struct PlayRow: View {
     let play: Play
     let match: Match
     @ScaledMetric(relativeTo: .caption) private var timeColumnWidth: CGFloat = 64
+    @Environment(\.favoriteAthleticID) private var favoriteAthleticID
 
     var body: some View {
         let team = match.team(play.side)
@@ -25,10 +26,10 @@ struct PlayRow: View {
             .frame(width: timeColumnWidth)
             .padding(.vertical, Spacing.s)
 
-            Rectangle().fill(Color.canvas).frame(width: 1)
+            Rectangle().fill(Color.separatorLine).frame(width: 1)
 
             HStack(spacing: Spacing.s) {
-                AthleticBadge(size: .small)
+                AthleticBadge(size: .small, isFavorite: team != nil && team?.id == favoriteAthleticID)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(play.description)
                         .font(.headline)
@@ -54,7 +55,7 @@ struct PlayRow: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     let match = MockData.matches[0]
     if let play = match.plays.first {
         PlayRow(play: play, match: match)

@@ -11,11 +11,11 @@ struct CircleIconLabel: View {
             .font(.body.weight(.semibold))
             .foregroundStyle(isActive ? Color.textOnAccent : Color.textPrimary)
             .frame(width: 44, height: 44)
-            .background(isActive ? Color.actionPrimary : Color.surface, in: Circle())
+            .background(isActive ? Color.actionPrimary : Color.surfaceInset, in: Circle())
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     HStack(spacing: Spacing.m) {
         CircleIconLabel(systemName: "bell")
         CircleIconLabel(systemName: "line.3.horizontal.decrease", isActive: true)

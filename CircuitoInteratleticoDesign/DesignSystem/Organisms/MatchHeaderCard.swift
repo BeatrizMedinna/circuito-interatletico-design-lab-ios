@@ -20,7 +20,7 @@ struct MatchHeaderCard: View {
 
             VStack(spacing: 2) {
                 Text(match.sport.name)
-                    .font(.headline)
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(.textPrimary)
                 Text(match.sport.gender.label)
                     .font(.subheadline)
@@ -37,18 +37,12 @@ struct MatchHeaderCard: View {
                     .foregroundStyle(.textPrimary)
                     .padding(.horizontal, Spacing.s)
                     .padding(.vertical, 6)
-                    .background(.surfaceSelected, in: Capsule())
+                    .background(.surfaceInset, in: Capsule())
             }
         }
         .padding(Spacing.m)
         .frame(maxWidth: .infinity)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card)
-                .strokeBorder(.borderStrong, lineWidth: match.status == .live ? 1.5 : 0)
-        }
-        .teamSideBars()
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .cardSurface(.emphasized, highlighted: match.status == .live)
     }
 
     @ViewBuilder
@@ -98,7 +92,7 @@ struct MatchHeaderCard: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     ScrollView {
         VStack(spacing: Spacing.m) {
             MatchHeaderCard(match: MockData.matches[0], showsLiveBadge: true)

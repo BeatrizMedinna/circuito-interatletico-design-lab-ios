@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Abas de texto com sublinhado ("Minha atlética | Geral", períodos da partida).
-/// A selecionada usa peso, cor e sublinhado; cada aba tem no mínimo 44 pt de altura.
+/// A selecionada usa peso, cor e sublinhado em Lime; cada aba tem no mínimo 44 pt de altura.
 struct UnderlineTabs<Item: Hashable>: View {
     let items: [Item]
     @Binding var selection: Item
@@ -45,7 +45,7 @@ struct UnderlineTabs<Item: Hashable>: View {
                             Capsule().fill(.clear).frame(height: 3)
                             if isSelected {
                                 Capsule()
-                                    .fill(.textPrimary)
+                                    .fill(.brandPrimary)
                                     .frame(height: 3)
                                     .matchedGeometryEffect(id: "underline", in: underline)
                             }
@@ -63,7 +63,7 @@ struct UnderlineTabs<Item: Hashable>: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     @Previewable @State var selection = "Minha atlética"
     UnderlineTabs(items: ["Minha atlética", "Geral"], selection: $selection) { $0 }
         .padding()

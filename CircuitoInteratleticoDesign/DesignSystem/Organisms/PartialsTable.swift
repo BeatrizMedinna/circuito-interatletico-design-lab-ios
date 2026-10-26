@@ -5,6 +5,7 @@ import SwiftUI
 struct PartialsTable: View {
     let match: Match
     @ScaledMetric(relativeTo: .body) private var cellWidth: CGFloat = 40
+    @Environment(\.favoriteAthleticID) private var favoriteAthleticID
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -22,12 +23,12 @@ struct PartialsTable: View {
                 }
             }
             .accessibilityHidden(true)
-            Divider()
+            Rectangle().fill(Color.separatorLine).frame(height: 1)
             row(.a)
-            Divider()
+            Rectangle().fill(Color.separatorLine).frame(height: 1)
             row(.b)
         }
-        .background(.appBackground, in: RoundedRectangle(cornerRadius: Radius.control))
+        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.control))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.control)
                 .strokeBorder(Color.separatorLine, lineWidth: 1)
@@ -39,7 +40,8 @@ struct PartialsTable: View {
         let team = match.team(side)
         return HStack(spacing: 0) {
             HStack(spacing: Spacing.xs) {
-                AthleticBadge(size: .small, fill: .surface, isUndefined: team == nil)
+                AthleticBadge(size: .small, isUndefined: team == nil,
+                              isFavorite: team != nil && team?.id == favoriteAthleticID)
                 Text(team?.name ?? "A definir")
                     .font(.subheadline)
                     .foregroundStyle(.textPrimary)
@@ -67,6 +69,12 @@ struct PartialsTable: View {
             .overlay(alignment: .leading) {
                 Rectangle().fill(Color.separatorLine).frame(width: 1)
             }
+            // Período atual marcado em Lime no cabeçalho.
+            .overlay(alignment: .top) {
+                if isHeader && isCurrent {
+                    Rectangle().fill(.actionPrimary).frame(height: 2)
+                }
+            }
     }
 
     private func rowAccessibilityLabel(_ side: MatchSide, team: Athletic?) -> String {
@@ -77,7 +85,7 @@ struct PartialsTable: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     PartialsTable(match: MockData.matches[0])
         .padding()
         .background(Color.canvas)

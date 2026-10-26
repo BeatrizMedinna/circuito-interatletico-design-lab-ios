@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Barra de filtros ativos: botão preto "limpar tudo" fixo à esquerda, separado
+/// Barra de filtros ativos: botão Lime "limpar tudo" fixo à esquerda, separado
 /// por um traço, e as pílulas (cada uma com seu ✕) rolando na horizontal.
 struct ActiveFiltersBar<Chips: View>: View {
     let onClearAll: () -> Void
@@ -21,7 +21,7 @@ struct ActiveFiltersBar<Chips: View>: View {
             .accessibilityLabel("Limpar todos os filtros")
 
             Rectangle()
-                .fill(.surfaceSelected)
+                .fill(.separatorLine)
                 .frame(width: 1, height: 24)
                 .accessibilityHidden(true)
 
@@ -35,7 +35,7 @@ struct ActiveFiltersBar<Chips: View>: View {
     }
 }
 
-#Preview {
+#Preview(traits: .appAppearance) {
     ActiveFiltersBar(onClearAll: {}) {
         RemovableChip(title: "Futsal") {}
         RemovableChip(title: "Masculino") {}
