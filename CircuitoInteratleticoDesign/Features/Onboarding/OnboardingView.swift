@@ -44,8 +44,9 @@ struct OnboardingView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Spacing.xxs) {
+            // Mesmo estilo dos títulos das telas principais (Início, Cronograma, Ranking).
             Text("Escolha sua Atlética")
-                .font(.title2.bold())
+                .font(.title.bold())
                 .foregroundStyle(.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             if let editionName {
@@ -71,7 +72,8 @@ struct OnboardingView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Carregando atléticas")
         case .loaded(let athletics):
-            AthleticPicker(athletics: athletics, selectedID: $selectedID, query: $query)
+            AthleticPicker(athletics: athletics, selectedID: $selectedID, query: $query,
+                           stacksRowsAtAccessibilitySizes: true)
         case .failed:
             ContentUnavailableView {
                 Label("Não foi possível carregar as atléticas", systemImage: "wifi.exclamationmark")

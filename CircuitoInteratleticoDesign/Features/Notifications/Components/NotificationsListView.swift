@@ -56,11 +56,15 @@ struct NotificationsListView: View {
                     Section {
                         ForEach(group.items) { notification in
                             row(notification)
-                            Divider().padding(.leading, Spacing.l)
+                            Rectangle().fill(Color.separatorLine).frame(height: 1)
+                                .padding(.leading, Spacing.l)
                         }
                     } header: {
+                        // Dia no estilo eyebrow, como os rótulos de seção dos cartões.
                         Text(Formatters.dayLabel(group.day))
-                            .font(.subheadline.weight(.semibold))
+                            .textCase(.uppercase)
+                            .font(.eyebrow)
+                            .tracking(0.6)
                             .foregroundStyle(.textSecondary)
                             .padding(.horizontal, Spacing.l)
                             .padding(.vertical, Spacing.xs)

@@ -27,20 +27,29 @@ struct PermissionCard: View {
             }
             .foregroundStyle(.textPrimary)
 
-            HStack(spacing: Spacing.s) {
-                Button(primaryTitle, action: primaryAction)
-                    .buttonStyle(.secondary)
-                if let secondaryTitle, let secondaryAction {
-                    Button(secondaryTitle, action: secondaryAction)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.textPrimary)
-                        .frame(minHeight: 44)
-                }
+            // Lado a lado quando cabem; senão, um abaixo do outro (sem quebrar "notificações").
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Spacing.s) { buttons }
+                VStack(alignment: .leading, spacing: Spacing.xs) { buttons }
             }
         }
         .padding(Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
+        .cardSurface()
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
+        Button(primaryTitle, action: primaryAction)
+            .buttonStyle(.secondary)
+            .fixedSize()
+        if let secondaryTitle, let secondaryAction {
+            Button(secondaryTitle, action: secondaryAction)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.textPrimary)
+                .frame(minHeight: 44)
+                .fixedSize()
+        }
     }
 }
 

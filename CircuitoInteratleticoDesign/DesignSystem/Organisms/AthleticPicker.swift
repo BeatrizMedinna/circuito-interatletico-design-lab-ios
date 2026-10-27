@@ -9,6 +9,8 @@ struct AthleticPicker: View {
     var label = "Qual atlética é a sua?"
     /// Primeira linha que limpa a escolha (ex.: "Todas as atléticas" no filtro).
     var allOptionTitle: String? = nil
+    /// Linhas empilhadas em tamanhos de acessibilidade (ver `SelectionRow`). Opcional: só o onboarding liga.
+    var stacksRowsAtAccessibilitySizes = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -46,7 +48,8 @@ struct AthleticPicker: View {
                             }
                         }
                         ForEach(filtered) { athletic in
-                            AthleticSelectionRow(athletic: athletic, isSelected: athletic.id == selectedID) {
+                            AthleticSelectionRow(athletic: athletic, isSelected: athletic.id == selectedID,
+                                                 stacksAtAccessibilitySizes: stacksRowsAtAccessibilitySizes) {
                                 selectedID = athletic.id
                             }
                         }

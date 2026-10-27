@@ -5,6 +5,7 @@ struct NotificationRow: View {
     let notification: AppNotification
     let isRead: Bool
     let opensMatch: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.s) {
@@ -12,24 +13,27 @@ struct NotificationRow: View {
             Circle()
                 .fill(isRead ? Color.clear : Color.actionPrimary)
                 .frame(width: 8, height: 8)
-                .padding(.top, 7)
+                .padding(.top, 14)
                 .accessibilityHidden(true)
+            // Ícone em círculo, como nas demais listas; atenção em amarelo.
             Image(systemName: notification.kind.symbol)
-                .font(.body.weight(.medium))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(iconColor)
-                .frame(width: 28)
+                .frame(width: 36, height: 36)
+                .background(.surfaceInset, in: Circle())
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: Spacing.xxs) {
-                HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                    Text(notification.title)
-                        .font(isRead ? .body : .headline)
-                        .foregroundStyle(.textPrimary)
-                    Spacer(minLength: 0)
-                    Text(Formatters.time(notification.date))
-                        .font(.subheadline)
-                        .monospacedDigit()
-                        .foregroundStyle(.textSecondary)
+                // Em tamanhos de acessibilidade o horário vai para baixo do título.
+                if dynamicTypeSize.isAccessibilitySize {
+                    title
+                    time
+                } else {
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                        title
+                        Spacer(minLength: 0)
+                        time
+                    }
                 }
                 Text(notification.message)
                     .font(.subheadline)
@@ -41,8 +45,8 @@ struct NotificationRow: View {
             if opensMatch {
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.textSecondary)
-                    .padding(.top, 4)
+                    .foregroundStyle(.textTertiary)
+                    .padding(.top, 10)
                     .accessibilityHidden(true)
             }
         }
@@ -55,6 +59,20 @@ struct NotificationRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityValue(isRead ? "" : "Não lida")
         .accessibilityHint(opensMatch ? "Abre a partida" : "")
+    }
+
+    private var title: some View {
+        Text(notification.title)
+            .font(isRead ? .body : .headline)
+            .foregroundStyle(.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var time: some View {
+        Text(Formatters.time(notification.date))
+            .font(.subheadline)
+            .monospacedDigit()
+            .foregroundStyle(.textSecondary)
     }
 
     /// Mudança de horário ou local em amarelo de atenção; os demais avisos em cinza.

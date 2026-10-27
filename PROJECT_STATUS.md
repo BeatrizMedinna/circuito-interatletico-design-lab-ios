@@ -72,6 +72,17 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 8: Telas complementares e consistência (27/10/2026) — em validação
+8A — Onboarding: título no estilo das telas principais (`.title`); `SelectionRow` ganhou `stacksAtAccessibilitySizes` (opcional, ligado só no onboarding via `AthleticPicker.stacksRowsAtAccessibilitySizes`): escudo e ✓ numa linha, nome inteiro abaixo. Seleção Lime, busca, estados e "Entrar" sem mudança. Sheet da atlética de coração e filtro de atlética do Cronograma mantêm o layout anterior.
+8B — Notificações: ícone em círculo (`surfaceInset`), ponto Lime alinhado, chevron terciário, horário abaixo do título em acessibilidade, separadores do token, dia em eyebrow; `PermissionCard` com botões empilhados quando não cabem (antes "notifica-ções") e superfície padrão. Regras de leitura, "Ler todas" e destinos inalterados.
+8C — Consistência: botão de filtros do Cronograma com a solução de Modalidades (não cresce acima de xxxLarge, visualizador ampliado). Cabeçalhos de `MatchCard` e `TrialCard`: em tamanhos de acessibilidade o selo de situação sobe e o cabeçalho não é cortado ("BASQUETE MASCULINO" inteiro). Vale para todos os consumidores, só em tamanhos de acessibilidade; tamanhos padrão inalterados.
+
+Testes (iPhone 17 Pro, toques reais): onboarding → Búfalos → Entrar → Início; Notificações → Ler todas → abrir "Vai começar!" (partida ao vivo); Cronograma → Série Ouro → aplicar → Feminino → ✕ (aplicado preservado). Capturas: onboarding padrão e acessibilidade L, Notificações e Cronograma em acessibilidade L, Modalidades (agenda) em acessibilidade L, iPhone 16e Início em acessibilidade L. VoiceOver e Reduzir movimento não testados.
+
+Pendências:
+- Estado vazio de Notificações e erro do onboarding não exibidos nesta rodada (sem mudança de código neles).
+- Cabeçalho da Início ocupa muito espaço no maior tamanho de acessibilidade (pendência da Etapa 4, aguarda decisão).
+
 ### Alta fidelidade — Etapa 7: Modalidades (27/10/2026) — em validação
 7A — Lista e filtros: filtros de Modalidades com `FlowChips(keepsLayoutStable:)` (chips não mudam de lugar); `CompetitionRow` com selo "Ao vivo" descendo de linha quando não cabe e nomes sem corte; trilho sob o cabeçalho; botão de filtros limitado ao maior tamanho padrão (contador não cobre o ícone) com visualizador ampliado. `ActiveFiltersBar` (compartilhado com o Cronograma): ✕ "limpar tudo" limitado ao maior tamanho padrão para não sair do círculo.
 
@@ -394,3 +405,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-26 — Alta fidelidade, Etapa 5 (Cronograma e Detalhe da Partida): abas de dias em Lime, trilho discreto, nomes longos empilhados, parciais e lances adaptáveis ao texto grande; fluxos 1–7 testados no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 6 (Ranking e Atléticas): pódio com empate visível e lista em texto grande, linhas empilháveis, título com o nome da atlética, cabeçalho e estatísticas adaptáveis, agenda sem cortar nomes; fluxos A, B, C e E testados no iPhone 17 Pro e 16e.
 - 2026-10-27 — Alta fidelidade, Etapa 7 (Modalidades): chips estáveis, lista e cabeçalho adaptáveis, título com o nome da modalidade, Teal nos resultados e na chave, resultados e informações da prova adaptáveis; testado no iPhone 17 Pro e 16e.
+- 2026-10-27 — Alta fidelidade, Etapa 8 (onboarding, notificações e consistência): linhas de escolha empilhadas em texto grande, notificações com ícones em círculo e permissão adaptável, filtro do Cronograma sem sobreposição, cabeçalhos de cartões sem corte; testado no iPhone 17 Pro e 16e.

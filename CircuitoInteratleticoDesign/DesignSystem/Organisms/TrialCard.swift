@@ -10,23 +10,18 @@ struct TrialCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                Text(Formatters.cardHeader(start: competition.trial?.startDate ?? .now, title: competition.title, date: date))
-                    .font(.caption.weight(.semibold))
-                    .tracking(0.3)
-                    .foregroundStyle(.textSecondary)
-                    .lineLimit(2)
-                Spacer(minLength: 0)
-                Label {
-                    Text(status.uppercased())
-                } icon: {
-                    if isPartial { Image(systemName: "exclamationmark.triangle.fill") }
+            // Em tamanhos de acessibilidade a situação sobe e o cabeçalho não é cortado.
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    statusLabel
+                    headerText.fixedSize(horizontal: false, vertical: true)
                 }
-                .labelStyle(.titleAndIcon)
-                .font(.eyebrow)
-                .tracking(0.6)
-                .foregroundStyle(statusColor)
-                .fixedSize()
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                    headerText.lineLimit(2)
+                    Spacer(minLength: 0)
+                    statusLabel
+                }
             }
             HStack(spacing: Spacing.s) {
                 Image(systemName: competition.sport.symbol)
@@ -58,6 +53,28 @@ struct TrialCard: View {
         .cardSurface()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Prova, \(competition.title), \(status), \(headline), \(detail)")
+    }
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var headerText: some View {
+        Text(Formatters.cardHeader(start: competition.trial?.startDate ?? .now, title: competition.title, date: date))
+            .font(.caption.weight(.semibold))
+            .tracking(0.3)
+            .foregroundStyle(.textSecondary)
+    }
+
+    private var statusLabel: some View {
+        Label {
+            Text(status.uppercased())
+        } icon: {
+            if isPartial { Image(systemName: "exclamationmark.triangle.fill") }
+        }
+        .labelStyle(.titleAndIcon)
+        .font(.eyebrow)
+        .tracking(0.6)
+        .foregroundStyle(statusColor)
+        .fixedSize()
     }
 
     private var isPartial: Bool { competition.trial?.hasPartialResults ?? false }

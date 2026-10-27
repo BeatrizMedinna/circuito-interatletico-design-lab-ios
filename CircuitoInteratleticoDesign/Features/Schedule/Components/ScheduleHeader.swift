@@ -23,7 +23,14 @@ struct ScheduleHeader: View {
                             .overlay(alignment: .topTrailing) { CountBadge(count: filters.activeCount, onAccent: true) }
                     }
                     .buttonStyle(.pressableCard)
+                    // Mesma solução de Modalidades: botão fixo de 44 pt que para de crescer
+                    // no maior tamanho padrão; tocar e segurar mostra o rótulo ampliado.
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .accessibilityLabel(filters.isEmpty ? "Filtros" : "Filtros, \(filters.activeCount) ativos")
+                    .accessibilityShowsLargeContentViewer {
+                        Label(filters.isEmpty ? "Filtros" : "Filtros, \(filters.activeCount) ativos",
+                              systemImage: "line.3.horizontal.decrease")
+                    }
                 }
             }
             .padding(.horizontal, Spacing.l)

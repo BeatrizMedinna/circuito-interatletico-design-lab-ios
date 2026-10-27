@@ -20,6 +20,21 @@ struct MatchCard: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    private var headerText: some View {
+        Text(caption ?? Formatters.cardHeader(match, date: date))
+            .font(.caption.weight(.semibold))
+            .tracking(0.3)
+            .foregroundStyle(.textSecondary)
+    }
+
+    @ViewBuilder
+    private var statusTag: some View {
+        if showsStatus || match.status == .live {
+            MatchStatusTag(status: match.status)
+                .fixedSize()
+        }
+    }
+
     private var isStacked: Bool {
         // O cartão do carrossel é estreito: já no maior tamanho padrão (xxxLarge) os nomes truncavam.
         (stacksAtAccessibilitySizes && dynamicTypeSize >= .xxxLarge)
@@ -28,16 +43,18 @@ struct MatchCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                Text(caption ?? Formatters.cardHeader(match, date: date))
-                    .font(.caption.weight(.semibold))
-                    .tracking(0.3)
-                    .foregroundStyle(.textSecondary)
-                    .lineLimit(2)
-                Spacer(minLength: 0)
-                if showsStatus || match.status == .live {
-                    MatchStatusTag(status: match.status)
-                        .fixedSize()
+            // Em tamanhos de acessibilidade o selo de situação sobe e o cabeçalho
+            // ("BASQUETE MASCULINO · …") usa a largura toda, sem reticências.
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    statusTag
+                    headerText.fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                    headerText.lineLimit(2)
+                    Spacer(minLength: 0)
+                    statusTag
                 }
             }
             if isStacked {
