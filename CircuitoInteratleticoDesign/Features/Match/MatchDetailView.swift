@@ -47,7 +47,7 @@ struct MatchDetailView: View {
             VStack(alignment: .leading, spacing: Spacing.xl) {
                 VStack(spacing: Spacing.s) {
                     MatchHeaderCard(match: match, lastRefresh: appState.lastRefresh, linksTeams: true,
-                                    stacksAtAccessibilitySizes: true, stacksLongNames: true)
+                                    stacksAtAccessibilitySizes: true)
                     if let note = statusNote(for: match) {
                         InlineNote(systemImage: note.symbol, text: note.text)
                     }

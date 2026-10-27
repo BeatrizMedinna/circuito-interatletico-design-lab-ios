@@ -17,9 +17,12 @@ struct TeamColumn: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(athletic == nil || isDimmed ? Color.textTertiary : Color.textPrimary)
                 .multilineTextAlignment(.center)
-                // Nome de uma palavra só encolhe em vez de quebrar com hífen.
+                // Nome com várias palavras: mesmo tamanho dos demais, até 2 linhas
+                // e "…" no fim. Nome de uma palavra só encolhe em vez de quebrar com hífen.
+                // O nome completo fica no rótulo de acessibilidade do cartão.
                 .lineLimit(name.contains(" ") ? 2 : 1)
-                .minimumScaleFactor(0.7)
+                .truncationMode(.tail)
+                .minimumScaleFactor(name.contains(" ") ? 1 : 0.7)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)

@@ -11,15 +11,12 @@ struct MatchHeaderCard: View {
     /// por linhas empilhadas para os nomes não truncarem. Opcional: a Início e o
     /// detalhe da partida usam.
     var stacksAtAccessibilitySizes = false
-    /// Empilha também quando um dos nomes é longo demais para a coluna
-    /// (ver `TeamRow.isLongName`). Opcional: hoje só o detalhe da partida usa.
-    var stacksLongNames = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var isStacked: Bool {
-        (stacksAtAccessibilitySizes && dynamicTypeSize.isAccessibilitySize)
-            || (stacksLongNames && (TeamRow.isLongName(match.teamA) || TeamRow.isLongName(match.teamB)))
+        // Nome longo não muda o layout: colunas sempre, nome em até 2 linhas com "…".
+        stacksAtAccessibilitySizes && dynamicTypeSize.isAccessibilitySize
     }
 
     var body: some View {

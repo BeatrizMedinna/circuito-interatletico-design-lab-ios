@@ -14,9 +14,6 @@ struct MatchCard: View {
     /// Em textos muito grandes (a partir de xxxLarge), empilha time A, placar e time B em linhas
     /// (nomes inteiros, sem truncar). Opcional: hoje os carrosséis da Início e o Cronograma usam.
     var stacksAtAccessibilitySizes = false
-    /// Empilha também quando um dos nomes é longo demais para a coluna
-    /// (ver `TeamRow.isLongName`). Opcional: hoje só o Cronograma usa.
-    var stacksLongNames = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -37,8 +34,9 @@ struct MatchCard: View {
 
     private var isStacked: Bool {
         // O cartão do carrossel é estreito: já no maior tamanho padrão (xxxLarge) os nomes truncavam.
-        (stacksAtAccessibilitySizes && dynamicTypeSize >= .xxxLarge)
-            || (stacksLongNames && (TeamRow.isLongName(match.teamA) || TeamRow.isLongName(match.teamB)))
+        // Nome longo não muda o layout: o cartão fica sempre em colunas e o nome
+        // usa até 2 linhas, terminando em "…" (texto completo no VoiceOver).
+        stacksAtAccessibilitySizes && dynamicTypeSize >= .xxxLarge
     }
 
     var body: some View {
