@@ -5,17 +5,25 @@ import SwiftUI
 struct ChoiceChip: View {
     let title: String
     let isSelected: Bool
+    /// Reserva a largura do ✓ também quando desmarcada, para a pílula não
+    /// crescer ao ser escolhida (e não empurrar as vizinhas). Opcional.
+    var keepsWidthStable = false
     let action: () -> Void
+
+    init(title: String, isSelected: Bool, keepsWidthStable: Bool = false, action: @escaping () -> Void) {
+        self.title = title
+        self.isSelected = isSelected
+        self.keepsWidthStable = keepsWidthStable
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: Spacing.xxs) {
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.caption.weight(.bold))
+            ZStack {
+                if keepsWidthStable {
+                    label(showsCheckmark: true).hidden()
                 }
-                Text(title)
-                    .lineLimit(1)
+                label(showsCheckmark: isSelected)
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(isSelected ? Color.textOnAccent : Color.textPrimary)
@@ -27,6 +35,17 @@ struct ChoiceChip: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func label(showsCheckmark: Bool) -> some View {
+        HStack(spacing: Spacing.xxs) {
+            if showsCheckmark {
+                Image(systemName: "checkmark")
+                    .font(.caption.weight(.bold))
+            }
+            Text(title)
+                .lineLimit(1)
+        }
     }
 }
 

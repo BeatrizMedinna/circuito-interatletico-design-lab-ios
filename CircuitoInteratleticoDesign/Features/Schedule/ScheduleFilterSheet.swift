@@ -29,7 +29,8 @@ struct ScheduleFilterSheet: View {
                     }
 
                     field("Categoria") {
-                        FlowChips(options: genderOptions, selection: $draft.gender) { $0.label }
+                        FlowChips(options: genderOptions, selection: $draft.gender,
+                                  keepsLayoutStable: true) { $0.label }
                     }
 
                     field("Atlética") {
@@ -51,7 +52,8 @@ struct ScheduleFilterSheet: View {
                         FlowChips(options: MockData.divisions,
                                   selection: Binding(
                                     get: { MockData.divisions.first { $0.id == draft.divisionID } },
-                                    set: { draft.divisionID = $0?.id })) { $0.name }
+                                    set: { draft.divisionID = $0?.id }),
+                                  keepsLayoutStable: true) { $0.name }
                     }
                 }
                 .padding(Spacing.l)

@@ -92,8 +92,8 @@ Testes (iPhone 17 Pro, toques reais com pausas): fluxos 1 (Início → Ver mais)
 
 Pendências:
 - Nome longo ainda abrevia na tabela de parciais horizontal (2 linhas) e quebra sílabas na tabela vertical; nome completo no cabeçalho e no VoiceOver.
-- Abas de período do Histórico em texto grande rolam e a selecionada pode começar fora da tela (`UnderlineTabs`, compartilhado).
-- `FlowChips` quebra as divisões em coluna quando uma fica selecionada (salto de layout na sheet de filtros).
+- ~~Abas de período fora da tela~~ — corrigido (26/10/2026): quando as abas rolam, `UnderlineTabs` leva a selecionada à área visível ao abrir e ao trocar (só rola o necessário). Vale para todas as abas que rolam.
+- ~~Chips de divisão pulando~~ — corrigido (26/10/2026) nos filtros do Cronograma: `ChoiceChip.keepsWidthStable` reserva o espaço do ✓ e `FlowChips.keepsLayoutStable` usa o novo `ChipFlowLayout` (quebra linha uma pílula por vez). Divisões ficam em 2 + 1 linhas, sem mover ao selecionar. Filtros de Modalidades seguem com o comportamento anterior (pendente).
 - Carrosséis da Início podem ligar `stacksLongNames` (uma linha) — depende de aprovação, pois a Início ficou fora desta etapa.
 
 ### Alta fidelidade — Etapa 4: Início (26/10/2026) — em validação

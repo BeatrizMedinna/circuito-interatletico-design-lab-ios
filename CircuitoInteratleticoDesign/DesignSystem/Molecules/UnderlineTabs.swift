@@ -15,8 +15,17 @@ struct UnderlineTabs<Item: Hashable>: View {
     var body: some View {
         ViewThatFits(in: .horizontal) {
             tabs
-            ScrollView(.horizontal) { tabs.padding(.horizontal, Spacing.xs) }
-                .scrollIndicators(.hidden)
+            // Quando rolam, a aba escolhida aparece ao abrir e continua visível ao
+            // trocar. `scrollTo` sem âncora só rola o necessário: se a aba já está
+            // na tela (por exemplo, recém-tocada), nada se move.
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) { tabs.padding(.horizontal, Spacing.xs) }
+                    .scrollIndicators(.hidden)
+                    .onAppear { proxy.scrollTo(selection) }
+                    .onChange(of: selection) { _, item in
+                        withAnimation(.snappy) { proxy.scrollTo(item) }
+                    }
+            }
         }
         .sensoryFeedback(.selection, trigger: selection)
     }
@@ -58,6 +67,7 @@ struct UnderlineTabs<Item: Hashable>: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+                .id(item)
             }
         }
     }
