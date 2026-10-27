@@ -7,15 +7,29 @@ struct MatchHeaderCard: View {
     var showsLiveBadge = false
     /// No detalhe da partida, cada time abre a atlética (não usar dentro de outro link).
     var linksTeams = false
+    /// Em tamanhos de acessibilidade, troca as três colunas (time, placar, time)
+    /// por linhas empilhadas para os nomes não truncarem. Opcional: hoje só a
+    /// Início usa; o detalhe da partida mantém o layout em colunas.
+    var stacksAtAccessibilitySizes = false
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var isStacked: Bool {
+        stacksAtAccessibilitySizes && dynamicTypeSize.isAccessibilitySize && !linksTeams
+    }
 
     var body: some View {
         VStack(spacing: Spacing.s) {
             if match.status == .live {
-                HStack {
+                let status = isStacked
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.xs))
+                    : AnyLayout(HStackLayout())
+                status {
                     if showsLiveBadge { LiveBadge() }
-                    Spacer(minLength: Spacing.xs)
+                    if !isStacked { Spacer(minLength: Spacing.xs) }
                     UpdatedAgoText(date: lastRefresh)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             VStack(spacing: 2) {
@@ -47,6 +61,21 @@ struct MatchHeaderCard: View {
 
     @ViewBuilder
     private var teamsAndScore: some View {
+        if isStacked {
+            VStack(spacing: Spacing.s) {
+                TeamRow(athletic: match.teamA, isDimmed: match.isLoser(.a))
+                ScoreBoxes(match: match, size: .large)
+                TeamRow(athletic: match.teamB, isDimmed: match.isLoser(.b))
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(scoreAccessibilityLabel)
+        } else {
+            columns
+        }
+    }
+
+    @ViewBuilder
+    private var columns: some View {
         let row = HStack(alignment: .top, spacing: Spacing.xs) {
             team(.a)
             ScoreBoxes(match: match, size: .large)

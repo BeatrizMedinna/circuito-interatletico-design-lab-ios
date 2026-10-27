@@ -16,6 +16,8 @@ struct HomeLoadingSkeleton: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, Spacing.l)
+        // O esqueleto não destaca atlética nem estado: sem anel Teal enquanto carrega.
+        .environment(\.favoriteAthleticID, nil)
         .redacted(reason: .placeholder)
         .disabled(true)
         .accessibilityElement(children: .ignore)

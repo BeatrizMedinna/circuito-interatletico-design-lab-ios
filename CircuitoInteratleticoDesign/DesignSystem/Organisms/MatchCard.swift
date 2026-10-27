@@ -11,6 +11,11 @@ struct MatchCard: View {
     var caption: String? = nil
     /// Local da partida no rodapé (cronograma, onde jogos simultâneos se distinguem pelo local).
     var showsVenue = false
+    /// Em textos muito grandes (a partir de xxxLarge), empilha time A, placar e time B em linhas
+    /// (nomes inteiros, sem truncar). Opcional: hoje só os carrosséis da Início usam.
+    var stacksAtAccessibilitySizes = false
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -26,10 +31,19 @@ struct MatchCard: View {
                         .fixedSize()
                 }
             }
-            HStack(alignment: .top, spacing: Spacing.xs) {
-                TeamColumn(athletic: match.teamA, isDimmed: match.isLoser(.a))
-                ScoreBoxes(match: match)
-                TeamColumn(athletic: match.teamB, isDimmed: match.isLoser(.b))
+            // O cartão do carrossel é estreito: já no maior tamanho padrão (xxxLarge) os nomes truncavam.
+            if stacksAtAccessibilitySizes && dynamicTypeSize >= .xxxLarge {
+                VStack(alignment: .leading, spacing: Spacing.s) {
+                    TeamRow(athletic: match.teamA, isDimmed: match.isLoser(.a))
+                    ScoreBoxes(match: match)
+                    TeamRow(athletic: match.teamB, isDimmed: match.isLoser(.b))
+                }
+            } else {
+                HStack(alignment: .top, spacing: Spacing.xs) {
+                    TeamColumn(athletic: match.teamA, isDimmed: match.isLoser(.a))
+                    ScoreBoxes(match: match)
+                    TeamColumn(athletic: match.teamB, isDimmed: match.isLoser(.b))
+                }
             }
             if showsVenue {
                 Label(match.venue, systemImage: "mappin.and.ellipse")

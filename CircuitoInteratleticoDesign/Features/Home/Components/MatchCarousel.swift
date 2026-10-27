@@ -9,7 +9,7 @@ struct MatchCarousel: View {
             LazyHStack(alignment: .top, spacing: Spacing.s) {
                 ForEach(matches) { match in
                     NavigationLink(value: AppRoute.match(match.id)) {
-                        MatchCard(match: match)
+                        MatchCard(match: match, stacksAtAccessibilitySizes: true)
                     }
                     .buttonStyle(.pressableCard)
                     .containerRelativeFrame(.horizontal, count: 7, span: 6, spacing: Spacing.s)

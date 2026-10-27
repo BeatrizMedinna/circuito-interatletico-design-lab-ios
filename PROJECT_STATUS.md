@@ -72,6 +72,22 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 4: Início (26/10/2026) — em validação
+Diagnóstico: cabeçalho fixo (edição, sino com contador, seletor da atlética de coração, abas "Minha atlética | Geral" quando há atlética e jogos), carrossel ao vivo paginado (ou nota "sem jogo ao vivo"), "Próximos jogos" e "Últimos jogos" em carrosséis com "Ver mais" (até 5 cartões, borda do próximo visível). Estados: carregando, erro, sem edição, cronograma não publicado, atlética sem jogos, seções vazias. A Início só mostra partidas (provas ficam no Cronograma). Problemas: no texto de acessibilidade o sino crescia além do círculo e o contador o cobria, "Atlética de coração" quebrava e truncava, nomes truncavam nos cartões; indicador de página inativo com 1,45:1; esqueleto de carregamento mostrava anéis Teal.
+
+Implementado:
+- Cabeçalho (`HomeHeader`): sino e contador limitados ao maior tamanho padrão (xxxLarge), com visualizador de conteúdo ampliado do sistema ao tocar e segurar; seletor com anel Teal no escudo, seta junto do nome, nome em até 2 linhas; trilho de 1 pt sob as abas (como em Notificações); título reduz até 75% só quando uma palavra não cabe (maior tamanho de acessibilidade). Large Title nativo avaliado e descartado: mudaria a estrutura (sino na barra, seletor e abas fora dela).
+- Ao vivo (`LiveCarousel`): indicador de página com inativos em cinza terciário (6,1:1) e atual mais longo; animação desligada com Reduzir movimento.
+- Cartões: `MatchHeaderCard` e `MatchCard` ganharam a opção `stacksAtAccessibilitySizes` (padrão desligado), que empilha time A, placar e time B com a nova molécula `TeamRow` — ligada só na Início (cartão ao vivo em tamanhos de acessibilidade; cartões dos carrosséis a partir de xxxLarge). Detalhe da partida, Cronograma, Atlética e Modalidades continuam iguais.
+- Esqueleto de carregamento sem destaque Teal.
+
+Testes (iPhone 17 Pro, toques reais com pausas): Minha atlética e Geral (mesmos placares, horários e seções), "Ver mais" em Geral (Cronograma sem filtro) e em Minha atlética (filtrado por Búfalos, dia de hoje), detalhe da partida, troca da atlética pela sheet (Teal e nome longo em 2 linhas, nota "sem jogo ao vivo"), sino → Notificações e **"Ler todas" funcionando** (pendência da Etapa 3 resolvida). Capturas: carregando, Poraquê sem jogos, xxxLarge, acessibilidade L e XXXL, Aumentar contraste; iPhone 16e (iOS 26) padrão, xxxLarge e acessibilidade XL. Reduzir movimento e VoiceOver não testados.
+
+Pendências:
+- Nomes longos de atlética ainda truncam no `MatchCard` em tamanho padrão (avaliar sigla ou 3 linhas na Etapa 5, pois o cartão é compartilhado).
+- No maior tamanho de acessibilidade o cabeçalho fixo ocupa quase metade da tela; deixar o cabeçalho rolar junto exigiria mudar a estrutura (pedir decisão).
+- `SectionHeader` quebra o título em 2 linhas ao lado de "Ver mais" em tamanhos de acessibilidade (componente compartilhado).
+
 ### Alta fidelidade — Etapa 3: Navegação global (26/10/2026) — em validação
 Diagnóstico: a navegação já usava os componentes nativos do iOS 26 — `TabView` com `Tab` (4 abas, cada uma com sua `NavigationStack`), barra de abas em Liquid Glass com seleção Lime e ícones preenchidos pelo sistema, botão Voltar nativo (monocromático), títulos em linha nos detalhes e efeito de borda nativo no topo. Sem fundos personalizados nas barras, sem vidro na camada de conteúdo. Rotas, destinos, `schedulePath`, filtros e a atlética de coração não foram alterados.
 
@@ -313,3 +329,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-26 — Alta fidelidade, Etapa 1 (fundações): Color Sets com variantes, tokens remapeados, app em Dark fixo; compilado e conferido no iPhone 17 Pro (inclusive com Aumentar contraste).
 - 2026-10-26 — Alta fidelidade, Etapa 2 (componentes): tipografia Rounded, cartões sem barras laterais, links Lime, destaque Teal automático da atlética de coração, estados de ao vivo/não lida/atenção; compilado e testado no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 3 (navegação global): diagnóstico da navegação nativa, controles das barras monocromáticos com ação principal em Lime, borda forte sob a barra de abas; atlética de coração validada com troca em tempo real; testado no iPhone 17 Pro e 16e.
+- 2026-10-26 — Alta fidelidade, Etapa 4 (Início): cabeçalho adaptável ao texto grande, seletor com Teal, indicador de página legível, cartões empilhados em tamanhos de acessibilidade (opção só na Início); testado no iPhone 17 Pro e 16e.

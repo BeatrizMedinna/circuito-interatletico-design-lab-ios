@@ -13,16 +13,14 @@ struct HomeHeader: View {
                     .font(.title.bold())
                     .foregroundStyle(.textPrimary)
                     .lineLimit(2)
+                    // Só no maior tamanho de acessibilidade uma palavra longa
+                    // ("Universitária") não cabe na linha; aí o título reduz um pouco.
+                    .minimumScaleFactor(0.75)
                     .accessibilityAddTraits(.isHeader)
 
                 Spacer(minLength: 0)
 
-                NavigationLink(value: AppRoute.notifications) {
-                    CircleIconLabel(systemName: "bell")
-                        .overlay(alignment: .topTrailing) { CountBadge(count: appState.unreadCount) }
-                }
-                .buttonStyle(.pressableCard)
-                .accessibilityLabel(appState.unreadCount > 0 ? "Notificações, \(appState.unreadCount) não lidas" : "Notificações")
+                notificationsButton
             }
 
             favoriteButton
@@ -35,43 +33,85 @@ struct HomeHeader: View {
         .padding(.horizontal, Spacing.l)
         .padding(.top, Spacing.xs)
         .padding(.bottom, showsScopeTabs ? 0 : Spacing.s)
+        // Trilho das abas de ponta a ponta, como em Notificações: separa o cabeçalho do feed.
+        .overlay(alignment: .bottom) {
+            if showsScopeTabs {
+                Rectangle().fill(.separatorLine).frame(height: 1)
+            }
+        }
         .background(Color.appBackground.ignoresSafeArea(edges: .top))
     }
 
+    /// Sino com contador Lime. O círculo tem tamanho fixo (44 pt), como um botão de
+    /// barra: o ícone e o contador param de crescer no maior tamanho padrão (xxxLarge)
+    /// para o número não cobrir o sino; acima disso, tocar e segurar mostra o
+    /// visualizador de conteúdo ampliado do sistema (Large Content Viewer).
+    private var notificationsButton: some View {
+        NavigationLink(value: AppRoute.notifications) {
+            CircleIconLabel(systemName: "bell")
+                .overlay(alignment: .topTrailing) { CountBadge(count: appState.unreadCount) }
+        }
+        .buttonStyle(.pressableCard)
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .accessibilityLabel(notificationsLabel)
+        .accessibilityShowsLargeContentViewer {
+            Label(notificationsLabel, systemImage: "bell")
+        }
+    }
+
+    private var notificationsLabel: String {
+        appState.unreadCount > 0 ? "Notificações, \(appState.unreadCount) não lidas" : "Notificações"
+    }
+
     /// Atlética de coração; tocar abre a troca ou a remoção (RN-86).
+    /// O escudo ganha o anel Teal da atlética de coração e a seta fica junto do
+    /// nome, para o rótulo "Atlética de coração" usar a largura toda em textos grandes.
     private var favoriteButton: some View {
         Button(action: onPickFavorite) {
-            HStack(spacing: Spacing.xs) {
+            HStack(spacing: Spacing.s) {
                 if let favorite = appState.favoriteAthletic {
-                    AthleticBadge(size: .small, fill: .surface)
+                    AthleticBadge(size: .small, isFavorite: true)
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Atlética de coração")
                             .font(.caption)
                             .foregroundStyle(.textSecondary)
-                        Text(favorite.name)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.textPrimary)
-                            .lineLimit(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(alignment: .firstTextBaseline, spacing: Spacing.xxs) {
+                            Text(favorite.name)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.textPrimary)
+                                .lineLimit(2)
+                            chevron
+                        }
                     }
                 } else {
                     Image(systemName: "heart")
                         .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.textSecondary)
                         .frame(width: 32, height: 32)
-                        .background(.surface, in: Circle())
-                    Text("Escolher atlética de coração")
-                        .font(.subheadline.weight(.semibold))
+                        .background(.surfaceInset, in: Circle())
+                        .accessibilityHidden(true)
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xxs) {
+                        Text("Escolher atlética de coração")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.textPrimary)
+                        chevron
+                    }
                 }
-                Image(systemName: "chevron.down")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.textSecondary)
             }
-            .foregroundStyle(.textPrimary)
             .frame(minHeight: 44)
             .contentShape(Rectangle())
         }
         .buttonStyle(.pressableCard)
         .accessibilityLabel(appState.favoriteAthletic.map { "Atlética de coração: \($0.name)" } ?? "Escolher atlética de coração")
         .accessibilityHint("Abre a escolha da atlética")
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.down")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.textSecondary)
+            .accessibilityHidden(true)
     }
 
     /// As abas só aparecem com atlética de coração e jogos para filtrar.
