@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Cabeçalho da tela de Início: edição, botão de notificações, seletor da atlética de coração e abas de escopo.
+/// Cabeçalho da tela de Início: edição, botão de notificações e seletor da atlética de coração.
+/// Rola junto com o conteúdo; as abas de escopo ficam em `HomeScopeTabs`, fixas no topo.
 struct HomeHeader: View {
     @Environment(AppState.self) private var appState
     @Binding var scope: HomeScope
@@ -25,21 +26,10 @@ struct HomeHeader: View {
 
             favoriteButton
                 .frame(maxWidth: .infinity, alignment: .leading)
-
-            if showsScopeTabs {
-                UnderlineTabs(items: HomeScope.allCases, selection: $scope) { $0.title }
-            }
         }
         .padding(.horizontal, Spacing.l)
         .padding(.top, Spacing.xs)
-        .padding(.bottom, showsScopeTabs ? 0 : Spacing.s)
-        // Trilho das abas de ponta a ponta, como em Notificações: separa o cabeçalho do feed.
-        .overlay(alignment: .bottom) {
-            if showsScopeTabs {
-                Rectangle().fill(.separatorLine).frame(height: 1)
-            }
-        }
-        .background(Color.appBackground.ignoresSafeArea(edges: .top))
+        .padding(.bottom, HomeScopeTabs.isVisible(appState) ? Spacing.xxs : Spacing.s)
     }
 
     /// Sino com contador Lime. O círculo tem tamanho fixo (44 pt), como um botão de
@@ -114,11 +104,6 @@ struct HomeHeader: View {
             .accessibilityHidden(true)
     }
 
-    /// As abas só aparecem com atlética de coração e jogos para filtrar.
-    private var showsScopeTabs: Bool {
-        guard appState.favoriteAthletic != nil, case .loaded(let matches) = appState.matchesState else { return false }
-        return !matches.isEmpty
-    }
 }
 
 #Preview {

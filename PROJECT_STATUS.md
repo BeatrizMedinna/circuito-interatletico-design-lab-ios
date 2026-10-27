@@ -72,6 +72,16 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Correção complementar: cabeçalho da Início (27/10/2026) — em validação
+Decisão aprovada pela designer: cabeçalho rola com o conteúdo; abas "Minha atlética | Geral" fixas.
+- `HomeView`: uma única rolagem com `LazyVStack(pinnedViews: [.sectionHeaders])` — `HomeHeader` rola, `HomeScopeTabs` é o cabeçalho fixo da seção; faixa de fundo na área da barra de status para o conteúdo não passar atrás do relógio; "puxar para atualizar" só quando há jogos, como antes; estados vazio/erro/sem edição com altura mínima para continuarem centralizados.
+- `HomeScopeTabs` (novo): abas com trilho e fundo sólido; mesma regra de exibição (atlética de coração e jogos).
+- `HomeHeader`: abas e trilho saíram dele; sino, contador e seletor sem mudança.
+- `HomeFeedView`: sem `ScrollView` próprio; regra dos jogos visíveis extraída em `visibleMatches` (mesma lógica).
+Resultado: no maior tamanho de acessibilidade, ao rolar, só as abas ficam (~10% da tela, antes ~45%).
+
+Testes (toques reais, iPhone 17 Pro): padrão — rolagem, abas fixas, troca para Geral com as abas fixadas, "Ver mais" (Cronograma sem filtro em Geral), partida → Voltar (posição preservada), sino → Notificações, troca para Corsários (Teal, conteúdo e toast); acessibilidade L e tamanho extremo (cabeçalho rola, abas fixas, puxar para atualizar). iPhone 16e em acessibilidade L. Limitação: o simulador perdeu a conexão de toques duas vezes e precisou ser reiniciado (sem relação com o app).
+
 ### Alta fidelidade — Etapa 9: Auditoria final (27/10/2026) — em validação
 Correções (só apresentação):
 - Perfil da Atlética e detalhe da Modalidade: ao mudar o tamanho do texto, a rolagem volta ao topo (`ScrollPosition`). Antes, com a aba Agenda rolada, reduzir o texto deixava a tela vazia (reproduzido e corrigido no iPhone 17 Pro).
@@ -423,3 +433,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-27 — Alta fidelidade, Etapa 7 (Modalidades): chips estáveis, lista e cabeçalho adaptáveis, título com o nome da modalidade, Teal nos resultados e na chave, resultados e informações da prova adaptáveis; testado no iPhone 17 Pro e 16e.
 - 2026-10-27 — Alta fidelidade, Etapa 8 (onboarding, notificações e consistência): linhas de escolha empilhadas em texto grande, notificações com ícones em círculo e permissão adaptável, filtro do Cronograma sem sobreposição, cabeçalhos de cartões sem corte; testado no iPhone 17 Pro e 16e.
 - 2026-10-27 — Alta fidelidade, Etapa 9 (auditoria final): rolagem segura ao mudar o tamanho do texto nos detalhes, cabeçalho de seção adaptável; fluxos críticos e estados raros verificados; cabeçalho da Início aguarda decisão.
+- 2026-10-27 — Correção complementar: cabeçalho da Início rola com o conteúdo e as abas ficam fixas; testado no iPhone 17 Pro e 16e.
