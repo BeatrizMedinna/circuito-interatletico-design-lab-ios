@@ -72,6 +72,30 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 5: Cronograma e Detalhe da Partida (26/10/2026) — em validação
+Diagnóstico: abas de dias com sublinhado branco; trilho da linha do tempo branco (pesado no Dark); nomes longos ("Atlética Acadêmica Nicolau Carvalho Esteves") truncados e reduzidos mesmo no cartão de largura total; no detalhe, rótulos de Informações mais fortes que os valores, duas colunas em texto grande, tabela de parciais rolando na horizontal com períodos escondidos em texto grande **e com nome longo em qualquer tamanho** (defeito anterior: os períodos saíam da tela); lances com coluna de horário estreita em texto grande.
+
+5A — Cronograma:
+- `DayTabs`: dia selecionado com sublinhado Lime; demais neutros; trilho de 1 pt sob as abas (`ScheduleHeader`).
+- `ScheduleTimeline`: horário em `subheadline` semibold; trilho em cinza forte nos horários iniciados e discreto nos próximos.
+- Cartões: `MatchCard` ganhou `stacksLongNames` (opcional, padrão desligado) e `ScheduleItemLink` ganhou `adaptsMatchLayout` (padrão desligado), ligado só na linha do tempo — nomes longos (> 20 caracteres, `TeamRow.isLongName`) e texto ≥ xxxLarge empilham os times. Agendas de Atlética e Modalidade seguem em colunas.
+- Provas (`TrialCard`), filtros, sheet e estados vazios conferidos sem mudança: já seguiam o Design System (✕ neutro, ✓ Lime, "Limpar" secundário). Fundo da sheet mantido (`appBackground`, cor sólida da paleta, sem material personalizado).
+
+5B — Detalhe da Partida:
+- `MatchHeaderCard`: `stacksLongNames` (opcional) e layout empilhado agora também com os links para a atlética; o detalhe liga as duas opções.
+- `MatchInfoSection`: valor em texto primário semibold, rótulo secundário; uma coluna em tamanhos de acessibilidade.
+- `PartialsTable`: números em SF Pro Rounded; nome em até 2 linhas; tabela sempre na largura da tela (corrige períodos fora da tela com nome longo); em tamanhos de acessibilidade vira tabela vertical (linha por período, coluna por time, período atual com faixa Lime).
+- `PlayRow`: em tamanhos de acessibilidade, período · minuto · placar numa linha acima do lance.
+- Consumidores: `PartialsTable`, `PlayRow`/`PlayHistorySection` e `MatchInfoSection` só existem no detalhe da partida.
+
+Testes (iPhone 17 Pro, toques reais com pausas): fluxos 1 (Início → Ver mais), 2 (Ranking → Atlética → Agenda → Ver todos), 3 (Modalidade → Jogos → Ver todos: Basquete, Masculino, Série Ouro), 4 (Cronograma → Partida → Voltar com filtros mantidos), 5 (filtros combinados → aplicar → Limpar → ✕ mantém os aplicados), 6 (Detalhe → Ver chave → modalidade) e 7 (trocar atlética → Teal no cartão e no detalhe); dia sem eventos e "Nada com esses filtros"; ao vivo, encerrado, a iniciar e prova parcial; mesmos placares, parciais e ordem dos lances do baseline. Capturas: acessibilidade L (detalhe, parciais verticais, lances), Aumentar contraste, iPhone 16e (Cronograma e detalhe). Início conferida: igual à Etapa 4. VoiceOver e Reduzir movimento não testados.
+
+Pendências:
+- Nome longo ainda abrevia na tabela de parciais horizontal (2 linhas) e quebra sílabas na tabela vertical; nome completo no cabeçalho e no VoiceOver.
+- Abas de período do Histórico em texto grande rolam e a selecionada pode começar fora da tela (`UnderlineTabs`, compartilhado).
+- `FlowChips` quebra as divisões em coluna quando uma fica selecionada (salto de layout na sheet de filtros).
+- Carrosséis da Início podem ligar `stacksLongNames` (uma linha) — depende de aprovação, pois a Início ficou fora desta etapa.
+
 ### Alta fidelidade — Etapa 4: Início (26/10/2026) — em validação
 Diagnóstico: cabeçalho fixo (edição, sino com contador, seletor da atlética de coração, abas "Minha atlética | Geral" quando há atlética e jogos), carrossel ao vivo paginado (ou nota "sem jogo ao vivo"), "Próximos jogos" e "Últimos jogos" em carrosséis com "Ver mais" (até 5 cartões, borda do próximo visível). Estados: carregando, erro, sem edição, cronograma não publicado, atlética sem jogos, seções vazias. A Início só mostra partidas (provas ficam no Cronograma). Problemas: no texto de acessibilidade o sino crescia além do círculo e o contador o cobria, "Atlética de coração" quebrava e truncava, nomes truncavam nos cartões; indicador de página inativo com 1,45:1; esqueleto de carregamento mostrava anéis Teal.
 
@@ -330,3 +354,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-26 — Alta fidelidade, Etapa 2 (componentes): tipografia Rounded, cartões sem barras laterais, links Lime, destaque Teal automático da atlética de coração, estados de ao vivo/não lida/atenção; compilado e testado no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 3 (navegação global): diagnóstico da navegação nativa, controles das barras monocromáticos com ação principal em Lime, borda forte sob a barra de abas; atlética de coração validada com troca em tempo real; testado no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 4 (Início): cabeçalho adaptável ao texto grande, seletor com Teal, indicador de página legível, cartões empilhados em tamanhos de acessibilidade (opção só na Início); testado no iPhone 17 Pro e 16e.
+- 2026-10-26 — Alta fidelidade, Etapa 5 (Cronograma e Detalhe da Partida): abas de dias em Lime, trilho discreto, nomes longos empilhados, parciais e lances adaptáveis ao texto grande; fluxos 1–7 testados no iPhone 17 Pro e 16e.

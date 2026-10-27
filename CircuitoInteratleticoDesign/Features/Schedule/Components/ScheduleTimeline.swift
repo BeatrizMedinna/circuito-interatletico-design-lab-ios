@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Jogos agrupados por horário de início. A linha fica preta nos horários que já
-/// começaram e cinza nos próximos; hoje, a lista abre no jogo ao vivo ou no próximo.
+/// Jogos agrupados por horário de início. O trilho fica em cinza forte nos horários
+/// que já começaram e discreto nos próximos; hoje, a lista abre no jogo ao vivo ou no próximo.
 struct ScheduleTimeline: View {
     let items: [ScheduleItem]
     /// "Últimos jogos" abre no encerrado mais recente; nos demais casos, no que está por vir.
@@ -51,7 +51,7 @@ struct ScheduleTimeline: View {
     @ViewBuilder
     private func slotRow(_ slot: (start: Date, items: [ScheduleItem])) -> some View {
         let time = Text(Formatters.time(slot.start))
-            .font(.footnote.weight(.semibold))
+            .font(.subheadline.weight(.semibold))
             .monospacedDigit()
             .foregroundStyle(.textPrimary)
             .accessibilityAddTraits(.isHeader)
@@ -76,14 +76,17 @@ struct ScheduleTimeline: View {
         let hasStarted = slot.start <= .now
         return VStack(spacing: Spacing.s) {
             ForEach(slot.items) { item in
-                ScheduleItemLink(item: item)
+                // Nomes longos e texto grande empilham os times em vez de truncar.
+                ScheduleItemLink(item: item, adaptsMatchLayout: true)
             }
         }
         .padding(.leading, Spacing.s)
         .padding(.bottom, Spacing.m)
+        // Trilho: horários já iniciados em cinza forte (4,1:1), próximos em cinza discreto.
+        // Antes era branco, pesado demais no Dark; a diferença continua visível.
         .overlay(alignment: .leading) {
             Rectangle()
-                .fill(hasStarted ? Color.textPrimary : Color.surfaceSelected)
+                .fill(hasStarted ? Color.borderStrong : Color.separatorLine)
                 .frame(width: 2)
                 .accessibilityHidden(true)
         }

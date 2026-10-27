@@ -8,14 +8,18 @@ struct MatchHeaderCard: View {
     /// No detalhe da partida, cada time abre a atlética (não usar dentro de outro link).
     var linksTeams = false
     /// Em tamanhos de acessibilidade, troca as três colunas (time, placar, time)
-    /// por linhas empilhadas para os nomes não truncarem. Opcional: hoje só a
-    /// Início usa; o detalhe da partida mantém o layout em colunas.
+    /// por linhas empilhadas para os nomes não truncarem. Opcional: a Início e o
+    /// detalhe da partida usam.
     var stacksAtAccessibilitySizes = false
+    /// Empilha também quando um dos nomes é longo demais para a coluna
+    /// (ver `TeamRow.isLongName`). Opcional: hoje só o detalhe da partida usa.
+    var stacksLongNames = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var isStacked: Bool {
-        stacksAtAccessibilitySizes && dynamicTypeSize.isAccessibilitySize && !linksTeams
+        (stacksAtAccessibilitySizes && dynamicTypeSize.isAccessibilitySize)
+            || (stacksLongNames && (TeamRow.isLongName(match.teamA) || TeamRow.isLongName(match.teamB)))
     }
 
     var body: some View {
@@ -62,15 +66,39 @@ struct MatchHeaderCard: View {
     @ViewBuilder
     private var teamsAndScore: some View {
         if isStacked {
-            VStack(spacing: Spacing.s) {
-                TeamRow(athletic: match.teamA, isDimmed: match.isLoser(.a))
+            let stack = VStack(spacing: Spacing.s) {
+                stackedTeam(.a)
                 ScoreBoxes(match: match, size: .large)
-                TeamRow(athletic: match.teamB, isDimmed: match.isLoser(.b))
+                    .overlay {
+                        if linksTeams {
+                            Color.clear
+                                .accessibilityElement()
+                                .accessibilityLabel(scoreAccessibilityLabel)
+                        }
+                    }
+                stackedTeam(.b)
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(scoreAccessibilityLabel)
+            if linksTeams {
+                stack.accessibilityElement(children: .contain)
+            } else {
+                stack.accessibilityElement(children: .ignore)
+                    .accessibilityLabel(scoreAccessibilityLabel)
+            }
         } else {
             columns
+        }
+    }
+
+    /// Linha do time no layout empilhado; no detalhe continua abrindo a atlética.
+    @ViewBuilder
+    private func stackedTeam(_ side: MatchSide) -> some View {
+        let row = TeamRow(athletic: match.team(side), isDimmed: match.isLoser(side))
+        if linksTeams, let athletic = match.team(side) {
+            NavigationLink(value: AppRoute.athletic(athletic.id)) { row }
+                .buttonStyle(.pressableCard)
+                .accessibilityLabel("\(athletic.name), ver atlética")
+        } else {
+            row
         }
     }
 

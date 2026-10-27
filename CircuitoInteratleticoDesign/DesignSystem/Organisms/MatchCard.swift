@@ -12,10 +12,19 @@ struct MatchCard: View {
     /// Local da partida no rodapé (cronograma, onde jogos simultâneos se distinguem pelo local).
     var showsVenue = false
     /// Em textos muito grandes (a partir de xxxLarge), empilha time A, placar e time B em linhas
-    /// (nomes inteiros, sem truncar). Opcional: hoje só os carrosséis da Início usam.
+    /// (nomes inteiros, sem truncar). Opcional: hoje os carrosséis da Início e o Cronograma usam.
     var stacksAtAccessibilitySizes = false
+    /// Empilha também quando um dos nomes é longo demais para a coluna
+    /// (ver `TeamRow.isLongName`). Opcional: hoje só o Cronograma usa.
+    var stacksLongNames = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var isStacked: Bool {
+        // O cartão do carrossel é estreito: já no maior tamanho padrão (xxxLarge) os nomes truncavam.
+        (stacksAtAccessibilitySizes && dynamicTypeSize >= .xxxLarge)
+            || (stacksLongNames && (TeamRow.isLongName(match.teamA) || TeamRow.isLongName(match.teamB)))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -31,8 +40,7 @@ struct MatchCard: View {
                         .fixedSize()
                 }
             }
-            // O cartão do carrossel é estreito: já no maior tamanho padrão (xxxLarge) os nomes truncavam.
-            if stacksAtAccessibilitySizes && dynamicTypeSize >= .xxxLarge {
+            if isStacked {
                 VStack(alignment: .leading, spacing: Spacing.s) {
                     TeamRow(athletic: match.teamA, isDimmed: match.isLoser(.a))
                     ScoreBoxes(match: match)

@@ -9,6 +9,13 @@ struct TeamRow: View {
     var isDimmed = false
     @Environment(\.favoriteAthleticID) private var favoriteAthleticID
 
+    /// Nome que não cabe em duas linhas da coluna de um cartão (ex.: "Atlética
+    /// Acadêmica Nicolau Carvalho Esteves"). Os nomes curtos dos mocks têm até 16
+    /// caracteres; acima de 20 a coluna truncava mesmo no tamanho padrão.
+    static func isLongName(_ athletic: Athletic?) -> Bool {
+        (athletic?.name.count ?? 0) > 20
+    }
+
     var body: some View {
         HStack(spacing: Spacing.s) {
             AthleticBadge(size: badgeSize, isUndefined: athletic == nil,

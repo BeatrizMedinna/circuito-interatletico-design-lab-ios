@@ -8,13 +8,19 @@ struct ScheduleItemLink: View {
     var showsVenue = true
     /// Substitui o cabeçalho do cartão de partida (ex.: "SEMIFINAL · HOJE, 10:30").
     var matchCaption: ((Match) -> String)? = nil
+    /// Cartão de partida empilha os times com nome longo ou texto muito grande.
+    /// Opcional: hoje só a linha do tempo do Cronograma liga; as agendas de
+    /// Atlética e Modalidade continuam com o layout em colunas.
+    var adaptsMatchLayout = false
 
     var body: some View {
         switch item {
         case .match(let match):
             NavigationLink(value: AppRoute.match(match.id)) {
                 MatchCard(match: match, showsStatus: true, date: date, caption: matchCaption?(match),
-                          showsVenue: showsVenue)
+                          showsVenue: showsVenue,
+                          stacksAtAccessibilitySizes: adaptsMatchLayout,
+                          stacksLongNames: adaptsMatchLayout)
             }
             .buttonStyle(.pressableCard)
         case .trial(let competition):

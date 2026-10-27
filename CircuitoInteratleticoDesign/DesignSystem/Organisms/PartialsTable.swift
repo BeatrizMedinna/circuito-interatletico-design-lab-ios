@@ -1,18 +1,34 @@
 import SwiftUI
 
 /// Tabela de pontos por período. Ao vivo, a coluna do período atual fica destacada.
-/// Com fonte muito grande, a tabela passa a rolar na horizontal.
+/// Em tamanhos de acessibilidade, a tabela vira vertical: uma linha por período e
+/// uma coluna por time, para nenhum período ficar escondido fora da tela.
 struct PartialsTable: View {
     let match: Match
     @ScaledMetric(relativeTo: .body) private var cellWidth: CGFloat = 40
     @Environment(\.favoriteAthleticID) private var favoriteAthleticID
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            table
-            ScrollView(.horizontal) { table }
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                verticalTable
+            } else {
+                // Sempre na largura da tela: o nome do time cede espaço (até 2 linhas)
+                // e os períodos ficam visíveis. Antes, um nome longo fazia a tabela
+                // virar rolagem horizontal com os períodos fora da tela.
+                table
+            }
         }
+        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.control))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.control)
+                .strokeBorder(Color.separatorLine, lineWidth: 1)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Radius.control))
     }
+
+    // MARK: - Horizontal (padrão)
 
     private var table: some View {
         VStack(spacing: 0) {
@@ -23,31 +39,26 @@ struct PartialsTable: View {
                 }
             }
             .accessibilityHidden(true)
-            Rectangle().fill(Color.separatorLine).frame(height: 1)
+            divider
             row(.a)
-            Rectangle().fill(Color.separatorLine).frame(height: 1)
+            divider
             row(.b)
         }
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.control))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.control)
-                .strokeBorder(Color.separatorLine, lineWidth: 1)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: Radius.control))
     }
 
     private func row(_ side: MatchSide) -> some View {
         let team = match.team(side)
         return HStack(spacing: 0) {
             HStack(spacing: Spacing.xs) {
-                AthleticBadge(size: .small, isUndefined: team == nil,
-                              isFavorite: team != nil && team?.id == favoriteAthleticID)
+                badge(team)
                 Text(team?.name ?? "A definir")
                     .font(.subheadline)
-                    .foregroundStyle(.textPrimary)
-                    .lineLimit(1)
+                    .foregroundStyle(team == nil ? Color.textTertiary : Color.textPrimary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, Spacing.xs)
             .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
             ForEach(match.periods, id: \.number) { period in
                 cell(String(side == .a ? period.a : period.b), period: period.number, isHeader: false)
@@ -58,11 +69,11 @@ struct PartialsTable: View {
     }
 
     private func cell(_ text: String, period: Int, isHeader: Bool) -> some View {
-        let isCurrent = match.status == .live && period == match.currentPeriod
+        let isCurrent = isCurrentPeriod(period)
         return Text(text)
-            .font(isHeader || isCurrent ? .subheadline.weight(.semibold) : .subheadline)
+            .font(isHeader ? .subheadline.weight(.semibold) : .sportNumber(.subheadline))
             .monospacedDigit()
-            .foregroundStyle(.textPrimary)
+            .foregroundStyle(isHeader && !isCurrent ? Color.textSecondary : Color.textPrimary)
             .frame(width: cellWidth)
             .frame(maxHeight: .infinity)
             .background(isCurrent ? Color.surfaceSelected : Color.clear)
@@ -77,6 +88,73 @@ struct PartialsTable: View {
             }
     }
 
+    // MARK: - Vertical (tamanhos de acessibilidade)
+
+    private var verticalTable: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: Spacing.s) {
+                Color.clear.frame(width: 0, height: 0).frame(maxWidth: .infinity)
+                verticalTeamHeader(.a)
+                verticalTeamHeader(.b)
+            }
+            .padding(Spacing.s)
+            .accessibilityHidden(true)
+            ForEach(match.periods, id: \.number) { period in
+                divider
+                let isCurrent = isCurrentPeriod(period.number)
+                HStack(spacing: Spacing.s) {
+                    Text(match.sport.periodLabel(period.number))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(isCurrent ? Color.textPrimary : Color.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(String(period.a))
+                        .font(.sportNumber(.body))
+                        .frame(maxWidth: .infinity)
+                    Text(String(period.b))
+                        .font(.sportNumber(.body))
+                        .frame(maxWidth: .infinity)
+                }
+                .monospacedDigit()
+                .foregroundStyle(.textPrimary)
+                .padding(Spacing.s)
+                .background(isCurrent ? Color.surfaceSelected : Color.clear)
+                .overlay(alignment: .leading) {
+                    if isCurrent { Rectangle().fill(.actionPrimary).frame(width: 3) }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(match.sport.periodLabel(period.number)): \(match.teamA?.name ?? "A definir") \(period.a), \(match.teamB?.name ?? "A definir") \(period.b)")
+            }
+        }
+    }
+
+    private func verticalTeamHeader(_ side: MatchSide) -> some View {
+        let team = match.team(side)
+        return VStack(spacing: Spacing.xxs) {
+            badge(team)
+            Text(team?.name ?? "A definir")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(team == nil ? Color.textTertiary : Color.textPrimary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Partes comuns
+
+    private var divider: some View {
+        Rectangle().fill(Color.separatorLine).frame(height: 1)
+    }
+
+    private func badge(_ team: Athletic?) -> some View {
+        AthleticBadge(size: .small, isUndefined: team == nil,
+                      isFavorite: team != nil && team?.id == favoriteAthleticID)
+    }
+
+    private func isCurrentPeriod(_ period: Int) -> Bool {
+        match.status == .live && period == match.currentPeriod
+    }
+
     private func rowAccessibilityLabel(_ side: MatchSide, team: Athletic?) -> String {
         let scores = match.periods.map { period in
             "\(match.sport.periodLabel(period.number)): \(side == .a ? period.a : period.b)"
@@ -89,4 +167,11 @@ struct PartialsTable: View {
     PartialsTable(match: MockData.matches[0])
         .padding()
         .background(Color.canvas)
+}
+
+#Preview("Texto de acessibilidade", traits: .appAppearance) {
+    PartialsTable(match: MockData.matches[0])
+        .padding()
+        .background(Color.canvas)
+        .dynamicTypeSize(.accessibility2)
 }

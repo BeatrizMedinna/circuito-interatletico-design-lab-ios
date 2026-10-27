@@ -30,6 +30,10 @@ struct ScheduleHeader: View {
 
             if hasSchedule {
                 DayTabs(days: MockData.scheduleDays, selection: $selectedDay)
+                    // Trilho das abas de ponta a ponta, como na Início e em Notificações.
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(.separatorLine).frame(height: 1)
+                    }
                 if !filters.isEmpty {
                     activeFilters
                 }

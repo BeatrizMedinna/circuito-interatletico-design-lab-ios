@@ -34,8 +34,9 @@ struct DayTabs: View {
                 Text(Formatters.dayTab(day))
                     .font(.subheadline.weight(isSelected ? .semibold : .regular))
                     .foregroundStyle(isSelected ? Color.textPrimary : Color.textSecondary)
+                // Seleção em Lime (como as demais abas); os outros dias ficam neutros.
                 Capsule()
-                    .fill(isSelected ? Color.textPrimary : .clear)
+                    .fill(isSelected ? Color.brandPrimary : .clear)
                     .frame(height: 3)
                     .padding(.top, 4)
             }
