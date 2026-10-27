@@ -72,6 +72,22 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 9: Auditoria final (27/10/2026) — em validação
+Correções (só apresentação):
+- Perfil da Atlética e detalhe da Modalidade: ao mudar o tamanho do texto, a rolagem volta ao topo (`ScrollPosition`). Antes, com a aba Agenda rolada, reduzir o texto deixava a tela vazia (reproduzido e corrigido no iPhone 17 Pro).
+- `SectionHeader` (compartilhado): título e ação ficam lado a lado só quando cabem; senão a ação desce. Remove a hifenização ("encer-rado") ao lado de "Ver todos" em texto extremo. Tamanho padrão inalterado (conferido na Início do 17 Pro e do 16e).
+
+Verificado nesta etapa (toques reais, iPhone 17 Pro): fluxos 2 (Início → Ver mais), 3 (Ranking → Imortal → Agenda → Ver todos), 4 (Modalidade → Jogos → Ver todos com Basquete/Masculino/Série Ouro), 5 (Cronograma → partida), 6 (Partida → Ver chave → Classificação), 7 (Torcer para Imortal → Teal e toast); estado vazio de Notificações (`-labScenario empty`); prova por equipe (Revezamento 4x50m: "Por equipe", atléticas inscritas). Fluxos 1, 8 e 9 foram testados na Etapa 8 sem mudanças de código posteriores. iPhone 16e: Início no padrão e em acessibilidade L.
+
+Não testado / limitações:
+- VoiceOver: não operado no simulador (rótulos revisados só no código).
+- Reduzir movimento e Reduzir transparência: sem comando confiável no simulador; tentativa por preferências não teve efeito verificável. Código respeita Reduzir movimento no indicador de página da Início e no pulso do "Ao vivo" (símbolo do sistema).
+- Erro do onboarding: o cenário `-labScenario` não afeta o carregamento das atléticas; só visível pelo #Preview.
+- Resultados de prova por equipe: os mocks não têm resultados por equipe registrados.
+
+Pendente de decisão:
+- Cabeçalho da Início no maior tamanho de acessibilidade ocupa ~45% da tela. Recomendação: o cabeçalho (edição, sino, atlética) rolar junto com o conteúdo e só as abas "Minha atlética | Geral" ficarem fixas (seção fixa do `LazyVStack`). Exige reorganizar `HomeView`/`HomeFeedView` (inclusive estados vazio/erro/carregando); não implementado.
+
 ### Alta fidelidade — Etapa 8: Telas complementares e consistência (27/10/2026) — em validação
 8A — Onboarding: título no estilo das telas principais (`.title`); `SelectionRow` ganhou `stacksAtAccessibilitySizes` (opcional, ligado só no onboarding via `AthleticPicker.stacksRowsAtAccessibilitySizes`): escudo e ✓ numa linha, nome inteiro abaixo. Seleção Lime, busca, estados e "Entrar" sem mudança. Sheet da atlética de coração e filtro de atlética do Cronograma mantêm o layout anterior.
 8B — Notificações: ícone em círculo (`surfaceInset`), ponto Lime alinhado, chevron terciário, horário abaixo do título em acessibilidade, separadores do token, dia em eyebrow; `PermissionCard` com botões empilhados quando não cabem (antes "notifica-ções") e superfície padrão. Regras de leitura, "Ler todas" e destinos inalterados.
@@ -406,3 +422,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-26 — Alta fidelidade, Etapa 6 (Ranking e Atléticas): pódio com empate visível e lista em texto grande, linhas empilháveis, título com o nome da atlética, cabeçalho e estatísticas adaptáveis, agenda sem cortar nomes; fluxos A, B, C e E testados no iPhone 17 Pro e 16e.
 - 2026-10-27 — Alta fidelidade, Etapa 7 (Modalidades): chips estáveis, lista e cabeçalho adaptáveis, título com o nome da modalidade, Teal nos resultados e na chave, resultados e informações da prova adaptáveis; testado no iPhone 17 Pro e 16e.
 - 2026-10-27 — Alta fidelidade, Etapa 8 (onboarding, notificações e consistência): linhas de escolha empilhadas em texto grande, notificações com ícones em círculo e permissão adaptável, filtro do Cronograma sem sobreposição, cabeçalhos de cartões sem corte; testado no iPhone 17 Pro e 16e.
+- 2026-10-27 — Alta fidelidade, Etapa 9 (auditoria final): rolagem segura ao mudar o tamanho do texto nos detalhes, cabeçalho de seção adaptável; fluxos críticos e estados raros verificados; cabeçalho da Início aguarda decisão.

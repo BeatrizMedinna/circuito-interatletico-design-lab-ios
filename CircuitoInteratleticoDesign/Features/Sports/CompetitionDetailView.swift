@@ -31,6 +31,10 @@ struct CompetitionDetailView: View {
     @State private var tab: Tab?
     /// Nome na barra só depois que o cartão do topo sai da tela (como no perfil da atlética).
     @State private var showsBarTitle = false
+    /// Posição da rolagem: ao mudar o tamanho do texto, o conteúdo encolhe ou cresce e
+    /// a posição antiga podia ficar além do fim (tela vazia até rolar). Volta ao topo.
+    @State private var scrollPosition = ScrollPosition(edge: .top)
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         Group {
@@ -105,6 +109,10 @@ struct CompetitionDetailView: View {
                         }
                 }
             }
+        }
+        .scrollPosition($scrollPosition)
+        .onChange(of: dynamicTypeSize) { _, _ in
+            scrollPosition.scrollTo(edge: .top)
         }
         .onScrollGeometryChange(for: Bool.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top > 56

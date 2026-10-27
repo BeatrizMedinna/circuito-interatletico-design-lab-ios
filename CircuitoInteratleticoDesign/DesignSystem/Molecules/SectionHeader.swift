@@ -7,15 +7,31 @@ struct SectionHeader<Trailing: View>: View {
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .font(.sectionTitle)
-                .foregroundStyle(.textPrimary)
-                .accessibilityAddTraits(.isHeader)
-            Spacer(minLength: Spacing.xs)
-            trailing
-                .buttonStyle(.sectionLink)
+        // Título e ação lado a lado quando cabem numa linha; senão a ação desce,
+        // em vez de o título quebrar com hífen ("encer-rado") em texto grande.
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline) {
+                titleText
+                Spacer(minLength: Spacing.xs)
+                trailingAction
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                titleText.fixedSize(horizontal: false, vertical: true)
+                trailingAction
+            }
         }
+    }
+
+    private var titleText: some View {
+        Text(title)
+            .font(.sectionTitle)
+            .foregroundStyle(.textPrimary)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    private var trailingAction: some View {
+        trailing
+            .buttonStyle(.sectionLink)
     }
 }
 
