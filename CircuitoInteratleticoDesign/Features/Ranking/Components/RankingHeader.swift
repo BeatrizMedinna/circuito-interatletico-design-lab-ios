@@ -19,6 +19,11 @@ struct RankingHeader: View {
                     UnderlineTabs(items: MockData.divisions.map(\.id), selection: $divisionID) { id in
                         MockData.divisions.first { $0.id == id }?.name ?? ""
                     }
+                    // Trilho das abas de ponta a ponta, como na Início e no Cronograma.
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(.separatorLine).frame(height: 1)
+                            .padding(.horizontal, -Spacing.l)
+                    }
                 }
             }
         }

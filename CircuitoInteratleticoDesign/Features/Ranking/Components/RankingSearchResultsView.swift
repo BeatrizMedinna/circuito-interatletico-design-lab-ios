@@ -43,7 +43,8 @@ struct RankingSearchResultsView: View {
                             detail: [athletic.division.name, entry.map { Formatters.points($0.points) } ?? "sem classificação"]
                                 .joined(separator: " · "),
                             isTied: entry?.isTied ?? false,
-                            isFavorite: athletic.id == appState.favoriteAthletic?.id
+                            isFavorite: athletic.id == appState.favoriteAthletic?.id,
+                            stacksAtAccessibilitySizes: true
                         )
                     }
                     .buttonStyle(.pressableCard)

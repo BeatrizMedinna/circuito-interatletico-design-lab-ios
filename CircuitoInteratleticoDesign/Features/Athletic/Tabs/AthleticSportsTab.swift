@@ -21,8 +21,11 @@ struct AthleticSportsTab: View {
                         .buttonStyle(.pressableCard)
                     }
                 }
-                .background(Color.canvas)
+                .background(Color.separatorLine)
                 .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+                .overlay {
+                    RoundedRectangle(cornerRadius: Radius.card).strokeBorder(Color.separatorLine, lineWidth: 1)
+                }
             }
         }
     }
@@ -31,17 +34,19 @@ struct AthleticSportsTab: View {
         let competition = standing.competition
         let isHighlight = standing.status == "Campeã" || standing.status.hasPrefix("1º")
         return HStack(spacing: Spacing.s) {
+            // Título ou 1º lugar: troféu em Lime, como o líder do pódio (o texto também diz).
             Image(systemName: isHighlight ? "trophy.fill" : competition.sport.symbol)
                 .font(.body.weight(.medium))
-                .foregroundStyle(.textPrimary)
+                .foregroundStyle(isHighlight ? Color.brandPrimary : Color.textPrimary)
                 .frame(width: 44, height: 44)
-                .background(.surface, in: Circle())
+                .background(.surfaceInset, in: Circle())
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(competition.title)
                     .font(.headline)
                     .foregroundStyle(.textPrimary)
                     .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(standing.status)
                     .font(.subheadline.weight(isHighlight ? .semibold : .regular))
                     .foregroundStyle(isHighlight ? Color.textPrimary : Color.textSecondary)
@@ -52,12 +57,12 @@ struct AthleticSportsTab: View {
             Spacer(minLength: Spacing.xs)
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(.textSecondary)
+                .foregroundStyle(.textTertiary)
                 .accessibilityHidden(true)
         }
         .padding(Spacing.s)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.appBackground)
+        .background(.surface)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityHint("Abre a modalidade")

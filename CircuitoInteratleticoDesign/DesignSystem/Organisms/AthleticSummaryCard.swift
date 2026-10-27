@@ -7,19 +7,27 @@ struct AthleticSummaryCard<Action: View>: View {
     let profile: AthleticProfile
     let isFavorite: Bool
     @ViewBuilder var action: Action
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        // Em tamanhos de acessibilidade, o escudo vai para cima do nome: o nome
+        // usa a largura toda e não é cortado (HIG: empilhar em vez de truncar).
+        let identity = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.s))
+            : AnyLayout(HStackLayout(spacing: Spacing.m))
         VStack(alignment: .leading, spacing: Spacing.m) {
-            HStack(spacing: Spacing.m) {
+            identity {
                 AthleticBadge(size: .large, isFavorite: isFavorite)
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(athletic.name)
                         .font(.title3.bold())
                         .foregroundStyle(.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
                     Text(athletic.institution)
                         .font(.subheadline)
                         .foregroundStyle(.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                     if isFavorite {
                         Label("Sua atlética", systemImage: "heart.fill")
                             .font(.caption.weight(.semibold))
@@ -33,6 +41,13 @@ struct AthleticSummaryCard<Action: View>: View {
                 Grid(alignment: .leading, horizontalSpacing: Spacing.m, verticalSpacing: Spacing.s) {
                     GridRow { stat(athletic.division.name, "Divisão"); stat(place, "Lugar") }
                     GridRow { stat(pointsText, "Pontos"); stat(fansText, "Torcedores") }
+                }
+                // Último recurso (maiores tamanhos): uma linha por número, rótulo à esquerda.
+                VStack(alignment: .leading, spacing: Spacing.s) {
+                    statRow(athletic.division.name, "Divisão")
+                    statRow(place, "Lugar")
+                    statRow(pointsText, "Pontos")
+                    statRow(fansText, "Torcedores")
                 }
             }
             Rectangle().fill(Color.separatorLine).frame(height: 1)
@@ -62,6 +77,22 @@ struct AthleticSummaryCard<Action: View>: View {
 
     private var fansText: String {
         profile.fanCount.map { $0.formatted(.number.locale(Locale(identifier: "pt_BR"))) } ?? "—"
+    }
+
+    private func statRow(_ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.textSecondary)
+            Text(value)
+                .font(.sportNumber())
+                .monospacedDigit()
+                .foregroundStyle(.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(label): \(value == "—" ? "sem dados" : value.replacingOccurrences(of: " =", with: ", empatada"))")
     }
 
     private func stat(_ value: String, _ label: String) -> some View {

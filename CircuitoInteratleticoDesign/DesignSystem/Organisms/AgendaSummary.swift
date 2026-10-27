@@ -36,6 +36,10 @@ struct AgendaSummary: View {
     let originName: String
     /// Cabeçalho alternativo para partidas (ex.: fase dentro da modalidade).
     var matchCaption: ((Match) -> String)? = nil
+    /// Só apresentação: cartões de partida empilham nomes longos e texto muito
+    /// grande (ver `ScheduleItemLink.adaptsMatchLayout`). A seleção dos eventos,
+    /// a ordem e o "Ver todos" não mudam. Opcional: hoje só o perfil da Atlética liga.
+    var adaptsMatchLayout = false
 
     var body: some View {
         let selection = AgendaSelection(items)
@@ -62,7 +66,7 @@ struct AgendaSummary: View {
             }
             ForEach(items) { item in
                 ScheduleItemLink(item: item, date: .dayAndTime, showsVenue: false,
-                                 matchCaption: matchCaption)
+                                 matchCaption: matchCaption, adaptsMatchLayout: adaptsMatchLayout)
             }
         }
     }

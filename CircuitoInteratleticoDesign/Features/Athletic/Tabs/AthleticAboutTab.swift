@@ -15,7 +15,7 @@ struct AthleticAboutTab: View {
                 }
                 .padding(Spacing.m)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
+                .cardSurface()
             }
             VStack(alignment: .leading, spacing: Spacing.s) {
                 SectionHeader(title: "Descrição")
@@ -33,12 +33,13 @@ struct AthleticAboutTab: View {
 
     private func item(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
+            // Mesmo padrão das Informações da partida: rótulo secundário, valor em destaque.
             Text(label)
+                .font(.footnote)
+                .foregroundStyle(.textSecondary)
+            Text(value)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.textPrimary)
-            Text(value)
-                .font(.subheadline)
-                .foregroundStyle(.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

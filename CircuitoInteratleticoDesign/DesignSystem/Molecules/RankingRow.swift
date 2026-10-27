@@ -11,7 +11,12 @@ struct RankingRow: View {
     var isFavorite = false
     /// Falso quando nenhuma linha da lista tem posição (ex.: mata-mata em andamento).
     var showsPosition = true
+    /// Em tamanhos de acessibilidade, posição e escudo ficam numa linha e o nome
+    /// usa a largura toda abaixo (HIG: empilhar em vez de cortar). Opcional:
+    /// hoje só o Ranking liga; Modalidades mantém a linha única.
+    var stacksAtAccessibilitySizes = false
     @Environment(\.favoriteAthleticID) private var favoriteAthleticID
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var showsFavorite: Bool { isFavorite || athletic.id == favoriteAthleticID }
 
@@ -20,35 +25,26 @@ struct RankingRow: View {
     }
 
     var body: some View {
-        HStack(spacing: Spacing.s) {
-            if showsPosition {
-                Text(position.map { "\($0)º" } ?? "—")
-                    .font(.sportNumber())
-                    .monospacedDigit()
-                    .foregroundStyle(position == nil ? Color.textTertiary : Color.textPrimary)
-                    .frame(minWidth: 36, alignment: .leading)
-            }
-            AthleticBadge(size: .medium, isFavorite: showsFavorite)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Spacing.xxs) {
-                    Text(athletic.name)
-                        .font(.headline)
-                        .foregroundStyle(.textPrimary)
-                        .multilineTextAlignment(.leading)
-                    if showsFavorite {
-                        Image(systemName: "heart.fill")
-                            .font(.caption)
-                            .foregroundStyle(.favoriteAccent)
+        Group {
+            if stacksAtAccessibilitySizes && dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    HStack(spacing: Spacing.s) {
+                        positionText
+                        AthleticBadge(size: .medium, isFavorite: showsFavorite)
+                        Spacer(minLength: Spacing.xs)
+                        chevron
                     }
+                    texts
                 }
-                Text("\([detail, isTied ? "empate" : nil].compactMap { $0 }.joined(separator: " · "))\(favoriteSuffix)")
-                    .font(.subheadline)
-                    .foregroundStyle(.textSecondary)
+            } else {
+                HStack(spacing: Spacing.s) {
+                    positionText
+                    AthleticBadge(size: .medium, isFavorite: showsFavorite)
+                    texts
+                    Spacer(minLength: Spacing.xs)
+                    chevron
+                }
             }
-            Spacer(minLength: Spacing.xs)
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.textTertiary)
         }
         .padding(.vertical, Spacing.s)
         .padding(.leading, Spacing.m)
@@ -64,6 +60,44 @@ struct RankingRow: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityHint("Abre a atlética")
+    }
+
+    @ViewBuilder
+    private var positionText: some View {
+        if showsPosition {
+            Text(position.map { "\($0)º" } ?? "—")
+                .font(.sportNumber())
+                .monospacedDigit()
+                .foregroundStyle(position == nil ? Color.textTertiary : Color.textPrimary)
+                .frame(minWidth: 36, alignment: .leading)
+        }
+    }
+
+    private var texts: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: Spacing.xxs) {
+                Text(athletic.name)
+                    .font(.headline)
+                    .foregroundStyle(.textPrimary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                if showsFavorite {
+                    Image(systemName: "heart.fill")
+                        .font(.caption)
+                        .foregroundStyle(.favoriteAccent)
+                }
+            }
+            Text("\([detail, isTied ? "empate" : nil].compactMap { $0 }.joined(separator: " · "))\(favoriteSuffix)")
+                .font(.subheadline)
+                .foregroundStyle(.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.right")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(.textTertiary)
     }
 
     private var accessibilityText: String {

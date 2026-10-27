@@ -43,7 +43,8 @@ struct DivisionRankingContent: View {
                             NavigationLink(value: AppRoute.athletic(entry.athletic.id)) {
                                 RankingRow(position: entry.position, athletic: entry.athletic,
                                            detail: Formatters.points(entry.points), isTied: entry.isTied,
-                                           isFavorite: entry.athletic.id == appState.favoriteAthletic?.id)
+                                           isFavorite: entry.athletic.id == appState.favoriteAthletic?.id,
+                                           stacksAtAccessibilitySizes: true)
                             }
                             .buttonStyle(.pressableCard)
                         }

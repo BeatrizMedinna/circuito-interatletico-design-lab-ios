@@ -26,6 +26,9 @@ struct AthleticDetailView: View {
     @Environment(AppState.self) private var appState
     let athleticID: Athletic.ID
     @State private var tab: Tab = .about
+    /// O nome aparece na barra só depois que o cartão do topo sai da tela,
+    /// para não repetir o cabeçalho (padrão das telas de perfil do iOS).
+    @State private var showsBarTitle = false
 
     var body: some View {
         Group {
@@ -41,8 +44,20 @@ struct AthleticDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.canvas.ignoresSafeArea())
-        .navigationTitle("Atlética")
+        // O título usa o nome da atlética (também no menu do botão Voltar e no VoiceOver).
+        .navigationTitle(MockData.athletics.first { $0.id == athleticID }?.name ?? "Atlética")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(MockData.athletics.first { $0.id == athleticID }?.name ?? "Atlética")
+                    .font(.headline)
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
+                    .opacity(showsBarTitle ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.2), value: showsBarTitle)
+                    .accessibilityHidden(!showsBarTitle)
+            }
+        }
     }
 
     private func content(_ athletic: Athletic) -> some View {
@@ -68,8 +83,17 @@ struct AthleticDetailView: View {
                     UnderlineTabs(items: Tab.allCases, selection: $tab, systemImage: \.symbol) { $0.title }
                         .padding(.horizontal, Spacing.l)
                         .background(Color.canvas)
+                        // Trilho de ponta a ponta, como nas demais abas do app.
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(.separatorLine).frame(height: 1)
+                        }
                 }
             }
+        }
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > 56
+        } action: { _, isPastHeader in
+            showsBarTitle = isPastHeader
         }
         .refreshable { await appState.refresh() }
     }

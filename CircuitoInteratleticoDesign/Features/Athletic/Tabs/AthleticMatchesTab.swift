@@ -28,7 +28,8 @@ struct AthleticMatchesTab: View {
                 InlineNote(systemImage: "calendar",
                            text: "\(athletic.name) ainda não tem jogos nem provas no cronograma publicado.")
             } else {
-                AgendaSummary(items: items, filters: ScheduleFilters(athleticID: athletic.id), originName: athletic.name)
+                AgendaSummary(items: items, filters: ScheduleFilters(athleticID: athletic.id), originName: athletic.name,
+                              adaptsMatchLayout: true)
             }
         }
     }

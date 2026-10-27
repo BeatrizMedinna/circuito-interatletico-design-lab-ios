@@ -72,6 +72,31 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 6: Ranking e Atléticas (26/10/2026) — em validação
+Conferência prévia: `UnderlineTabs` (scroll até a aba escolhida) só age quando as abas rolam — chave e abas da modalidade em texto grande mostram a selecionada; `FlowChips`/`ChoiceChip` estáveis só no Cronograma (opção desligada nos filtros de Modalidades, comportamento antigo preservado).
+
+Diagnóstico: empate do pódio só aparecia repetindo a posição (sem rótulo); em texto de acessibilidade o pódio cortava nomes e pontos ("Diastól…", "1.040…") e as linhas apertavam o nome; título genérico "Atlética"; nome longo cortado no cabeçalho do perfil e no cartão da agenda; rótulos da aba Sobre mais fortes que os valores; linhas da aba Modalidades sem superfície.
+
+6A — Ranking:
+- `Podium`: rótulo "= Empate" nos degraus empatados (mesmo dado `isTied` das linhas); pontos sem redução; em tamanhos de acessibilidade, lista na ordem da classificação (líder com faixa Lime). Posições, ordem e pontos inalterados.
+- `RankingRow`: opção `stacksAtAccessibilitySizes` (padrão desligado), ligada só no Ranking (lista e busca). Modalidades mantém a linha única.
+- `RankingHeader`: trilho de 1 pt sob as divisões. Busca, divisão inicial e troca de divisão sem mudança.
+
+6B — Perfil da Atlética:
+- Título da barra com o nome da atlética (antes "Atlética"), visível só quando o cartão sai da tela; nome completo no menu do Voltar e no VoiceOver.
+- `AthleticSummaryCard`: escudo acima do nome em tamanhos de acessibilidade; números em uma coluna quando nem a grade 2×2 cabe.
+- Abas com trilho; Sobre com valor em destaque; Modalidades em cartões de superfície (troféu Lime em título/1º lugar, o texto já diz).
+- `AgendaSummary`: opção `adaptsMatchLayout` (só apresentação, padrão desligado), ligada no perfil da Atlética — nome longo empilha em vez de cortar. Seleção, ordem e "Ver todos" inalterados; Modalidade não usa.
+
+Testes (iPhone 17 Pro, toques reais): divisões Ouro/Prata/Bronze (vazia), empates (Lobos/Tubarões 4º; Diastólica/Pantera 2º), busca com nomes longos, sem resultado e "Limpar busca"; fluxos A (Agenda → Ver todos → Cronograma por Búfalos), B (Modalidades → Basquete → Classificação), C (torcer por Poraquê → Teal no Ranking, Início e Cronograma), E (Busca → perfil → Voltar); prova parcial na agenda de Poraquê; texto de acessibilidade L e XXXL, Aumentar contraste; iPhone 16e (Ranking e perfil). Dados iguais ao baseline.
+
+Pendências:
+- Fluxo D sem dado: todas as atléticas dos mocks têm ao menos um evento; o estado vazio da agenda existe no código mas não foi exibido (mocks não alterados).
+- Ao mudar o tamanho do texto com o perfil rolado, a área de conteúdo pode ficar vazia até rolar (posição de rolagem do SwiftUI); não ocorre no uso normal.
+- Cabeçalho do `MatchCard` limitado a 2 linhas corta em texto grande ("FUTSAL MAS…").
+- Cabeçalho da modalidade quebra "Semi-final" com hífen em texto grande; filtros de Modalidades ainda pulam (Etapa 7).
+- VoiceOver e Reduzir movimento não testados.
+
 ### Alta fidelidade — Etapa 5: Cronograma e Detalhe da Partida (26/10/2026) — em validação
 Diagnóstico: abas de dias com sublinhado branco; trilho da linha do tempo branco (pesado no Dark); nomes longos ("Atlética Acadêmica Nicolau Carvalho Esteves") truncados e reduzidos mesmo no cartão de largura total; no detalhe, rótulos de Informações mais fortes que os valores, duas colunas em texto grande, tabela de parciais rolando na horizontal com períodos escondidos em texto grande **e com nome longo em qualquer tamanho** (defeito anterior: os períodos saíam da tela); lances com coluna de horário estreita em texto grande.
 
@@ -355,3 +380,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-26 — Alta fidelidade, Etapa 3 (navegação global): diagnóstico da navegação nativa, controles das barras monocromáticos com ação principal em Lime, borda forte sob a barra de abas; atlética de coração validada com troca em tempo real; testado no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 4 (Início): cabeçalho adaptável ao texto grande, seletor com Teal, indicador de página legível, cartões empilhados em tamanhos de acessibilidade (opção só na Início); testado no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 5 (Cronograma e Detalhe da Partida): abas de dias em Lime, trilho discreto, nomes longos empilhados, parciais e lances adaptáveis ao texto grande; fluxos 1–7 testados no iPhone 17 Pro e 16e.
+- 2026-10-26 — Alta fidelidade, Etapa 6 (Ranking e Atléticas): pódio com empate visível e lista em texto grande, linhas empilháveis, título com o nome da atlética, cabeçalho e estatísticas adaptáveis, agenda sem cortar nomes; fluxos A, B, C e E testados no iPhone 17 Pro e 16e.
