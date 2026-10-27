@@ -29,6 +29,8 @@ struct CompetitionDetailView: View {
     @Environment(AppState.self) private var appState
     let competitionID: Competition.ID
     @State private var tab: Tab?
+    /// Nome na barra só depois que o cartão do topo sai da tela (como no perfil da atlética).
+    @State private var showsBarTitle = false
 
     var body: some View {
         Group {
@@ -44,8 +46,24 @@ struct CompetitionDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.canvas.ignoresSafeArea())
-        .navigationTitle("Modalidade")
+        // O título usa o nome da modalidade (também no menu do Voltar e no VoiceOver).
+        .navigationTitle(barTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(barTitle)
+                    .font(.headline)
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
+                    .opacity(showsBarTitle ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.2), value: showsBarTitle)
+                    .accessibilityHidden(!showsBarTitle)
+            }
+        }
+    }
+
+    private var barTitle: String {
+        appState.competition(id: competitionID)?.title ?? "Modalidade"
     }
 
     private func tabs(for competition: Competition) -> [Tab] {
@@ -82,8 +100,16 @@ struct CompetitionDetailView: View {
                     UnderlineTabs(items: tabs(for: competition), selection: selected, systemImage: \.symbol) { $0.title }
                         .padding(.horizontal, Spacing.l)
                         .background(Color.canvas)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(.separatorLine).frame(height: 1)
+                        }
                 }
             }
+        }
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > 56
+        } action: { _, isPastHeader in
+            showsBarTitle = isPastHeader
         }
         .refreshable { await appState.refresh() }
     }

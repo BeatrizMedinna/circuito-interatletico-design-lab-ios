@@ -5,10 +5,15 @@ struct CompetitionSummaryCard: View {
     let competition: Competition
     let progress: CompetitionProgress
     let isLive: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        // Em tamanhos de acessibilidade o ícone vai para cima do nome (como no perfil da atlética).
+        let identity = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.s))
+            : AnyLayout(HStackLayout(spacing: Spacing.m))
         VStack(alignment: .leading, spacing: Spacing.m) {
-            HStack(spacing: Spacing.m) {
+            identity {
                 Image(systemName: competition.sport.symbol)
                     .font(.system(size: 34, weight: .medium))
                     .foregroundStyle(.textPrimary)
@@ -19,6 +24,7 @@ struct CompetitionSummaryCard: View {
                     Text(competition.eventName ?? competition.sport.name)
                         .font(.title3.bold())
                         .foregroundStyle(.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
                     Text(competition.eventName == nil ? competition.sport.gender.label
                          : "\(competition.sport.name) \(competition.sport.gender.label)")
@@ -33,10 +39,19 @@ struct CompetitionSummaryCard: View {
                         .padding(.top, 2)
                 }
             }
-            HStack(alignment: .top, spacing: Spacing.xs) {
-                stat(competition.division.name, "Divisão")
-                stat(stageValue, competition.isElimination ? "Etapa" : "Situação")
-                stat(competition.registeredAthletes.map(String.init) ?? "—", "Atletas")
+            // Três colunas só quando cabem sem quebrar palavras ("Semi-final");
+            // senão, uma linha por número, rótulo acima do valor.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: Spacing.xs) {
+                    stat(competition.division.name, "Divisão")
+                    stat(stageValue, stageLabel)
+                    stat(athletesText, "Atletas")
+                }
+                VStack(alignment: .leading, spacing: Spacing.s) {
+                    statRow(competition.division.name, "Divisão")
+                    statRow(stageValue, stageLabel)
+                    statRow(athletesText, "Atletas")
+                }
             }
             if isLive {
                 HStack(spacing: Spacing.xs) {
@@ -67,6 +82,9 @@ struct CompetitionSummaryCard: View {
         .cardSurface()
     }
 
+    private var stageLabel: String { competition.isElimination ? "Etapa" : "Situação" }
+    private var athletesText: String { competition.registeredAthletes.map(String.init) ?? "—" }
+
     private var stageValue: String {
         switch progress {
         case .notGenerated: "—"
@@ -76,14 +94,30 @@ struct CompetitionSummaryCard: View {
         }
     }
 
+    private func statRow(_ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.textSecondary)
+            Text(value)
+                .font(.headline)
+                .foregroundStyle(.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(label): \(value == "—" ? "sem dados" : value)")
+    }
+
     private func stat(_ value: String, _ label: String) -> some View {
         VStack(spacing: 2) {
+            // Uma linha, sem reduzir: se não couber, o ViewThatFits usa a coluna única.
             Text(value)
                 .font(.headline)
                 .foregroundStyle(.textPrimary)
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+                .fixedSize()
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.textSecondary)

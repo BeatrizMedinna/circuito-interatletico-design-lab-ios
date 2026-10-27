@@ -54,6 +54,7 @@ private struct MatchupCard: View {
     let number: Int
     let nextPhase: String?
     let matches: [Match]
+    @Environment(\.favoriteAthleticID) private var favoriteAthleticID
 
     var body: some View {
         let match = competition.match(of: matchup, in: matches)
@@ -79,7 +80,7 @@ private struct MatchupCard: View {
                     .padding(.horizontal, Spacing.m)
                     .padding(.vertical, Spacing.s)
             } else {
-                Divider().padding(.leading, Spacing.m)
+                Rectangle().fill(Color.separatorLine).frame(height: 1).padding(.leading, Spacing.m)
                 teamRow(teams.b, score: match?.scoreB, side: .b, match: match, winner: winner)
             }
 
@@ -95,12 +96,8 @@ private struct MatchupCard: View {
                     .background(Color.surfaceSelected.opacity(0.5))
             }
         }
-        .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card)
-                .strokeBorder(.borderStrong, lineWidth: match?.status == .live ? 1.5 : 0)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        // Mesmo cartão do app: contorno discreto; ao vivo, contorno cinza forte.
+        .cardSurface(highlighted: match?.status == .live)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText(teams: teams, match: match, winner: winner))
     }
@@ -108,17 +105,18 @@ private struct MatchupCard: View {
     @ViewBuilder
     private func statusLabel(_ match: Match?) -> some View {
         if matchup.isBye {
-            Text("BYE").font(.caption2.weight(.semibold)).foregroundStyle(.textSecondary)
+            Text("BYE").font(.eyebrow).tracking(0.6).foregroundStyle(.textSecondary)
         } else if let match {
             if match.status == .scheduled {
                 Text("\(Formatters.dayLabel(match.startDate)), \(Formatters.time(match.startDate))".uppercased())
-                    .font(.caption2.weight(.semibold))
+                    .font(.eyebrow)
+                    .tracking(0.6)
                     .foregroundStyle(.textSecondary)
             } else {
                 MatchStatusTag(status: match.status)
             }
         } else {
-            Text("A DEFINIR").font(.caption2.weight(.semibold)).foregroundStyle(.textSecondary)
+            Text("A DEFINIR").font(.eyebrow).tracking(0.6).foregroundStyle(.textSecondary)
         }
     }
 
@@ -126,11 +124,12 @@ private struct MatchupCard: View {
         let isWinner = athletic != nil && athletic?.id == winner?.id
         let isLoser = winner != nil && athletic != nil && !isWinner
         return HStack(spacing: Spacing.s) {
-            AthleticBadge(size: .small, isUndefined: athletic == nil)
+            AthleticBadge(size: .small, isUndefined: athletic == nil,
+                          isFavorite: athletic != nil && athletic?.id == favoriteAthleticID)
             Text(athletic?.name ?? "A definir")
                 .font(isWinner ? .headline : .body)
                 .foregroundStyle(athletic == nil || isLoser ? Color.textSecondary : Color.textPrimary)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             if isWinner {
                 Image(systemName: "checkmark")
                     .font(.caption.weight(.bold))
@@ -138,7 +137,8 @@ private struct MatchupCard: View {
             }
             Spacer(minLength: Spacing.xs)
             Text(scoreText(score, side: side, match: match))
-                .font(isWinner ? .headline.monospacedDigit() : .body.monospacedDigit())
+                .font(.sportNumber(isWinner ? .headline : .body))
+                .monospacedDigit()
                 .foregroundStyle(isLoser ? Color.textSecondary : Color.textPrimary)
         }
         .padding(.horizontal, Spacing.m)

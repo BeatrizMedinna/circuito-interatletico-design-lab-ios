@@ -72,6 +72,18 @@ Criados na tela 01:
 Previstos (criados só quando a tela precisar): IconTabs, RankingRow, ListRowWithIcon, EntityHeaderCard, FilterSheet/ChipGroup, Podium.
 
 ## Telas em desenvolvimento
+### Alta fidelidade — Etapa 7: Modalidades (27/10/2026) — em validação
+7A — Lista e filtros: filtros de Modalidades com `FlowChips(keepsLayoutStable:)` (chips não mudam de lugar); `CompetitionRow` com selo "Ao vivo" descendo de linha quando não cabe e nomes sem corte; trilho sob o cabeçalho; botão de filtros limitado ao maior tamanho padrão (contador não cobre o ícone) com visualizador ampliado. `ActiveFiltersBar` (compartilhado com o Cronograma): ✕ "limpar tudo" limitado ao maior tamanho padrão para não sair do círculo.
+
+7B — Detalhe: `CompetitionSummaryCard` sem reduzir/hifenizar ("Semi-final"): três colunas só quando cabem, senão uma linha por número; ícone acima do nome em acessibilidade. Título da barra com o nome da modalidade após rolar (como no perfil da atlética); trilho sob as abas. Resultados de prova: atlética de coração agora em **Teal** (antes branco, contrariando a decisão 6), marcas em SF Pro Rounded, cartão com superfície, marca abaixo do nome em acessibilidade; desistência continua sem posição, em itálico secundário. Informações da prova com valor em destaque e uma coluna em acessibilidade. Chave: anel Teal na atlética de coração, placares Rounded, rótulos BYE/A DEFINIR/data no estilo eyebrow, separador do token, nomes sem limite de linhas, cartão padrão (contorno cinza forte ao vivo). Classificação e "Aguardando resultado" ligam `RankingRow.stacksAtAccessibilitySizes`.
+
+Testes (iPhone 17 Pro, toques reais): selecionar, aplicar, Limpar e ✕ (filtro aplicado preservado); busca vazia e em Geral; Basquete Masculino — abas Jogos/Chave, fases Quartas/Semifinal, partida pela chave (64:58) e pelo último encerrado (71:68), "Ver todos" → Cronograma com Basquete, Masculino, Série Ouro; prova Salto em distância (parcial, desistência, aguardando) e aba Prova; texto de acessibilidade L no detalhe, resultados e prova; iPhone 16e (lista e sheet, padrão e acessibilidade). Componentes do Ranking/Atléticas não mudaram de comportamento (opções já existentes ligadas só aqui). VoiceOver e Reduzir movimento não testados.
+
+Pendências:
+- Botão de filtros do Cronograma (`ScheduleHeader`) ainda deixa o contador cobrir o ícone em texto de acessibilidade (mesma correção de uma linha, fora do escopo).
+- Cabeçalho do `MatchCard` limitado a 2 linhas corta em texto grande ("BASQUETE MASCULI…").
+- Provas por equipe não testadas: os mocks visitados só tinham prova individual.
+
 ### Alta fidelidade — Etapa 6: Ranking e Atléticas (26/10/2026) — em validação
 Conferência prévia: `UnderlineTabs` (scroll até a aba escolhida) só age quando as abas rolam — chave e abas da modalidade em texto grande mostram a selecionada; `FlowChips`/`ChoiceChip` estáveis só no Cronograma (opção desligada nos filtros de Modalidades, comportamento antigo preservado).
 
@@ -381,3 +393,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-26 — Alta fidelidade, Etapa 4 (Início): cabeçalho adaptável ao texto grande, seletor com Teal, indicador de página legível, cartões empilhados em tamanhos de acessibilidade (opção só na Início); testado no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 5 (Cronograma e Detalhe da Partida): abas de dias em Lime, trilho discreto, nomes longos empilhados, parciais e lances adaptáveis ao texto grande; fluxos 1–7 testados no iPhone 17 Pro e 16e.
 - 2026-10-26 — Alta fidelidade, Etapa 6 (Ranking e Atléticas): pódio com empate visível e lista em texto grande, linhas empilháveis, título com o nome da atlética, cabeçalho e estatísticas adaptáveis, agenda sem cortar nomes; fluxos A, B, C e E testados no iPhone 17 Pro e 16e.
+- 2026-10-27 — Alta fidelidade, Etapa 7 (Modalidades): chips estáveis, lista e cabeçalho adaptáveis, título com o nome da modalidade, Teal nos resultados e na chave, resultados e informações da prova adaptáveis; testado no iPhone 17 Pro e 16e.

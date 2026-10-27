@@ -21,12 +21,13 @@ struct SportsFilterSheet: View {
                     field("Categoria") {
                         FlowChips(options: [Gender.male, .female, .mixed].filter { gender in
                             competitions.contains { $0.sport.gender == gender }
-                        }, selection: $draft.gender) { $0.label }
+                        }, selection: $draft.gender, keepsLayoutStable: true) { $0.label }
                     }
                     field("Divisão") {
                         FlowChips(options: MockData.divisions,
                                   selection: Binding(get: { MockData.divisions.first { $0.id == draft.divisionID } },
-                                                     set: { draft.divisionID = $0?.id })) { $0.name }
+                                                     set: { draft.divisionID = $0?.id }),
+                                  keepsLayoutStable: true) { $0.name }
                     }
                 }
                 .padding(Spacing.l)

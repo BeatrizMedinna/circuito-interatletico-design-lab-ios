@@ -18,7 +18,13 @@ struct ActiveFiltersBar<Chips: View>: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.pressableCard)
+            // O ✕ fica dentro de um círculo fixo de 32 pt: sem limite, crescia além dele
+            // em texto de acessibilidade. Tocar e segurar mostra o rótulo ampliado.
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .accessibilityLabel("Limpar todos os filtros")
+            .accessibilityShowsLargeContentViewer {
+                Label("Limpar todos os filtros", systemImage: "xmark")
+            }
 
             Rectangle()
                 .fill(.separatorLine)

@@ -3,21 +3,25 @@ import SwiftUI
 /// Aba de informações da prova classificatória (data, local, critério, unidade, disputa).
 struct TrialInfoTab: View {
     let competition: Competition
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        let pair = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.m))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: Spacing.m))
         if let trial = competition.trial, case .ranking(let criterion, let unit, let isTeam) = competition.format {
             VStack(alignment: .leading, spacing: Spacing.s) {
                 SectionHeader(title: "Informações")
                 VStack(alignment: .leading, spacing: Spacing.m) {
-                    HStack(alignment: .top, spacing: Spacing.m) {
+                    pair {
                         item("Data", Formatters.fullDay(trial.startDate))
                         item("Horário", Formatters.time(trial.startDate))
                     }
-                    HStack(alignment: .top, spacing: Spacing.m) {
+                    pair {
                         item("Situação", trial.isClosed ? "Encerrada" : trial.hasPartialResults ? "Resultados parciais" : "Agendada")
                         item("Disputa", isTeam ? "Por equipe" : "Individual")
                     }
-                    HStack(alignment: .top, spacing: Spacing.m) {
+                    pair {
                         item("Critério", criterion.label)
                         item("Unidade", unit.label)
                     }
@@ -25,7 +29,7 @@ struct TrialInfoTab: View {
                 }
                 .padding(Spacing.m)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.surface, in: RoundedRectangle(cornerRadius: Radius.card))
+                .cardSurface()
             }
         } else {
             InlineNote(systemImage: "calendar", text: "A prova desta modalidade ainda não foi agendada.")
@@ -34,12 +38,13 @@ struct TrialInfoTab: View {
 
     private func item(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
+            // Mesmo padrão das Informações da partida: rótulo secundário, valor em destaque.
             Text(label)
+                .font(.footnote)
+                .foregroundStyle(.textSecondary)
+            Text(value)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.textPrimary)
-            Text(value)
-                .font(.subheadline)
-                .foregroundStyle(.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

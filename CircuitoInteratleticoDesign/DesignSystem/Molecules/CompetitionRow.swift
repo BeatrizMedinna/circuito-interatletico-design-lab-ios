@@ -7,6 +7,18 @@ struct CompetitionRow: View {
     let progress: CompetitionProgress
     let isLive: Bool
 
+    private var detail: some View {
+        Text("\(competition.division.name) · \(progress.shortLabel(isElimination: competition.isElimination))")
+            .font(.subheadline)
+            .foregroundStyle(.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder
+    private var liveTag: some View {
+        if isLive { MatchStatusTag(status: .live).fixedSize() }
+    }
+
     var body: some View {
         HStack(spacing: Spacing.s) {
             Image(systemName: competition.sport.symbol)
@@ -20,11 +32,12 @@ struct CompetitionRow: View {
                     .font(.headline)
                     .foregroundStyle(.textPrimary)
                     .multilineTextAlignment(.leading)
-                HStack(spacing: Spacing.xs) {
-                    Text("\(competition.division.name) · \(progress.shortLabel(isElimination: competition.isElimination))")
-                        .font(.subheadline)
-                        .foregroundStyle(.textSecondary)
-                    if isLive { MatchStatusTag(status: .live).fixedSize() }
+                    .fixedSize(horizontal: false, vertical: true)
+                // O selo "Ao vivo" desce para a linha de baixo quando não cabe ao lado
+                // (texto grande), em vez de apertar a divisão e a etapa.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Spacing.xs) { detail; liveTag }
+                    VStack(alignment: .leading, spacing: Spacing.xxs) { detail; liveTag }
                 }
             }
             Spacer(minLength: Spacing.xs)

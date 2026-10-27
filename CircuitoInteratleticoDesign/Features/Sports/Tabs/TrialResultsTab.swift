@@ -6,46 +6,76 @@ struct ResultRow: View {
     let unit: MarkUnit
     let isTeam: Bool
     let isFavorite: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        let result = ranked.result
-        HStack(spacing: Spacing.s) {
-            Text(ranked.position.map { ranked.isTied ? "\($0)º=" : "\($0)º" } ?? "—")
-                .font(.headline)
-                .monospacedDigit()
-                .foregroundStyle(.textPrimary)
-                .frame(minWidth: 40, alignment: .leading)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Spacing.xxs) {
-                    Text(isTeam ? result.athletic.name : (result.athleteName ?? result.athletic.name))
-                        .font(.headline)
-                        .foregroundStyle(.textPrimary)
-                    if isFavorite {
-                        Image(systemName: "heart.fill").font(.caption).foregroundStyle(.textPrimary)
-                    }
+        // Em tamanhos de acessibilidade a marca desce para baixo do nome.
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    positionText
+                    names
+                    markText
                 }
-                if !isTeam {
-                    Text(result.athletic.name)
-                        .font(.subheadline)
-                        .foregroundStyle(.textSecondary)
+            } else {
+                HStack(spacing: Spacing.s) {
+                    positionText
+                    names
+                    Spacer(minLength: Spacing.xs)
+                    markText
                 }
             }
-            Spacer(minLength: Spacing.xs)
-            Text(result.situation == .valid ? result.mark.map(unit.format) ?? "—" : result.situation.label)
-                .font(result.situation == .valid ? .headline.monospacedDigit() : .subheadline.italic())
-                .foregroundStyle(result.situation == .valid ? Color.textPrimary : Color.textSecondary)
         }
         .padding(.vertical, Spacing.s)
         .padding(.leading, Spacing.m)
         .padding(.trailing, Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.appBackground)
+        .background(.surface)
+        // Atlética de coração em Teal (faixa e coração), como no Ranking.
         .overlay(alignment: .leading) {
-            Rectangle().fill(isFavorite ? Color.textPrimary : .clear).frame(width: 4)
+            Rectangle().fill(isFavorite ? Color.favoriteAccent : .clear).frame(width: 3)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityHint("Abre a atlética")
+    }
+
+    private var positionText: some View {
+        Text(ranked.position.map { ranked.isTied ? "\($0)º=" : "\($0)º" } ?? "—")
+            .font(.sportNumber())
+            .monospacedDigit()
+            .foregroundStyle(ranked.position == nil ? Color.textTertiary : Color.textPrimary)
+            .frame(minWidth: 40, alignment: .leading)
+    }
+
+    private var names: some View {
+        let result = ranked.result
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: Spacing.xxs) {
+                Text(isTeam ? result.athletic.name : (result.athleteName ?? result.athletic.name))
+                    .font(.headline)
+                    .foregroundStyle(.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if isFavorite {
+                    Image(systemName: "heart.fill").font(.caption).foregroundStyle(.favoriteAccent)
+                }
+            }
+            if !isTeam {
+                Text(result.athletic.name)
+                    .font(.subheadline)
+                    .foregroundStyle(.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    /// Marca válida em número arredondado; situações (desistência etc.) em itálico secundário.
+    private var markText: some View {
+        let result = ranked.result
+        return Text(result.situation == .valid ? result.mark.map(unit.format) ?? "—" : result.situation.label)
+            .font(result.situation == .valid ? .sportNumber() : .subheadline.italic())
+            .monospacedDigit()
+            .foregroundStyle(result.situation == .valid ? Color.textPrimary : Color.textSecondary)
     }
 
     private var accessibilityText: String {
@@ -83,8 +113,11 @@ struct TrialResultsTab: View {
                             .buttonStyle(.pressableCard)
                         }
                     }
-                    .background(Color.canvas)
+                    .background(Color.separatorLine)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: Radius.card).strokeBorder(Color.separatorLine, lineWidth: 1)
+                    }
                 }
 
                 let pending = trial.isClosed ? [] : trial.pendingParticipants
@@ -96,7 +129,7 @@ struct TrialResultsTab: View {
                                 NavigationLink(value: AppRoute.athletic(athletic.id)) {
                                     RankingRow(position: nil, athletic: athletic, detail: athletic.institution,
                                                isFavorite: athletic.id == appState.favoriteAthletic?.id,
-                                               showsPosition: false)
+                                               showsPosition: false, stacksAtAccessibilitySizes: true)
                                 }
                                 .buttonStyle(.pressableCard)
                             }

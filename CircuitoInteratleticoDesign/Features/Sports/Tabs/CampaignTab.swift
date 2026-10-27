@@ -19,7 +19,8 @@ struct CampaignTab: View {
                         NavigationLink(value: AppRoute.athletic(entry.athletic.id)) {
                             RankingRow(position: entry.position, athletic: entry.athletic, detail: entry.status,
                                        isFavorite: entry.athletic.id == appState.favoriteAthletic?.id,
-                                       showsPosition: entries.contains { $0.position != nil })
+                                       showsPosition: entries.contains { $0.position != nil },
+                                       stacksAtAccessibilitySizes: true)
                         }
                         .buttonStyle(.pressableCard)
                     }

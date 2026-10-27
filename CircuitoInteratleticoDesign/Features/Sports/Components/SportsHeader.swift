@@ -25,7 +25,14 @@ struct SportsHeader: View {
                             .overlay(alignment: .topTrailing) { CountBadge(count: filters.activeCount, onAccent: true) }
                     }
                     .buttonStyle(.pressableCard)
+                    // Botão de tamanho fixo (44 pt): o ícone e o contador param de crescer no
+                    // maior tamanho padrão; acima disso, tocar e segurar amplia (como o sino da Início).
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .accessibilityLabel(filters.isEmpty ? "Filtros" : "Filtros, \(filters.activeCount) ativos")
+                    .accessibilityShowsLargeContentViewer {
+                        Label(filters.isEmpty ? "Filtros" : "Filtros, \(filters.activeCount) ativos",
+                              systemImage: "line.3.horizontal.decrease")
+                    }
                 }
             }
 
@@ -44,6 +51,12 @@ struct SportsHeader: View {
         .padding(.horizontal, Spacing.l)
         .padding(.top, Spacing.xs)
         .padding(.bottom, Spacing.s)
+        // Trilho de ponta a ponta sob o cabeçalho, como na Início e no Ranking.
+        .overlay(alignment: .bottom) {
+            if hasCompetitions {
+                Rectangle().fill(.separatorLine).frame(height: 1)
+            }
+        }
         .background(Color.appBackground.ignoresSafeArea(edges: .top))
     }
 
