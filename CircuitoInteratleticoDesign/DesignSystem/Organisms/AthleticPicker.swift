@@ -1,16 +1,50 @@
 import SwiftUI
 
-/// Busca + lista de atléticas com escolha única. Usada no onboarding,
-/// na troca da atlética de coração e no filtro do cronograma.
+/// Busca + lista de atléticas. Escolha única no onboarding e na troca da atlética
+/// de coração; escolha múltipla no filtro do cronograma.
 struct AthleticPicker: View {
     let athletics: [Athletic]
-    @Binding var selectedID: Athletic.ID?
+    /// `nil` representa a opção "todas" (`allOptionTitle`).
+    private let isSelected: (Athletic.ID?) -> Bool
+    private let select: (Athletic.ID?) -> Void
     @Binding var query: String
-    var label = "Qual atlética é a sua?"
+    var label: String
     /// Primeira linha que limpa a escolha (ex.: "Todas as atléticas" no filtro).
-    var allOptionTitle: String? = nil
+    var allOptionTitle: String?
     /// Linhas empilhadas em tamanhos de acessibilidade (ver `SelectionRow`). Opcional: só o onboarding liga.
     var stacksRowsAtAccessibilitySizes = false
+    @State private var feedbackTrigger = 0
+
+    /// Escolha única (onboarding, atlética de coração).
+    init(athletics: [Athletic], selectedID: Binding<Athletic.ID?>, query: Binding<String>,
+         label: String = "Qual atlética é a sua?", allOptionTitle: String? = nil,
+         stacksRowsAtAccessibilitySizes: Bool = false) {
+        self.athletics = athletics
+        isSelected = { $0 == selectedID.wrappedValue }
+        select = { selectedID.wrappedValue = $0 }
+        _query = query
+        self.label = label
+        self.allOptionTitle = allOptionTitle
+        self.stacksRowsAtAccessibilitySizes = stacksRowsAtAccessibilitySizes
+    }
+
+    /// Escolha múltipla (filtro do cronograma): tocar marca ou desmarca; "todas" limpa.
+    init(athletics: [Athletic], selectedIDs: Binding<Set<Athletic.ID>>, query: Binding<String>,
+         label: String, allOptionTitle: String) {
+        self.athletics = athletics
+        isSelected = { id in id.map { selectedIDs.wrappedValue.contains($0) } ?? selectedIDs.wrappedValue.isEmpty }
+        select = { id in
+            guard let id else { selectedIDs.wrappedValue = []; return }
+            if selectedIDs.wrappedValue.contains(id) {
+                selectedIDs.wrappedValue.remove(id)
+            } else {
+                selectedIDs.wrappedValue.insert(id)
+            }
+        }
+        _query = query
+        self.label = label
+        self.allOptionTitle = allOptionTitle
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,7 +73,7 @@ struct AthleticPicker: View {
                 ScrollView {
                     LazyVStack(spacing: Spacing.s) {
                         if let allOptionTitle, query.isEmpty {
-                            SelectionRow(title: allOptionTitle, isSelected: selectedID == nil, action: { selectedID = nil }) {
+                            SelectionRow(title: allOptionTitle, isSelected: isSelected(nil), action: { choose(nil) }) {
                                 Image(systemName: "person.3")
                                     .font(.body.weight(.medium))
                                     .foregroundStyle(.textPrimary)
@@ -48,9 +82,9 @@ struct AthleticPicker: View {
                             }
                         }
                         ForEach(filtered) { athletic in
-                            AthleticSelectionRow(athletic: athletic, isSelected: athletic.id == selectedID,
+                            AthleticSelectionRow(athletic: athletic, isSelected: isSelected(athletic.id),
                                                  stacksAtAccessibilitySizes: stacksRowsAtAccessibilitySizes) {
-                                selectedID = athletic.id
+                                choose(athletic.id)
                             }
                         }
                     }
@@ -60,7 +94,12 @@ struct AthleticPicker: View {
                 .scrollDismissesKeyboard(.interactively)
             }
         }
-        .sensoryFeedback(.selection, trigger: selectedID)
+        .sensoryFeedback(.selection, trigger: feedbackTrigger)
+    }
+
+    private func choose(_ id: Athletic.ID?) {
+        select(id)
+        feedbackTrigger += 1
     }
 
     /// Busca por nome ou sigla, ignorando maiúsculas e acentos.

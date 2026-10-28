@@ -54,17 +54,18 @@ struct ScheduleHeader: View {
     /// Filtros aplicados como pílulas removíveis, mais "Limpar".
     private var activeFilters: some View {
         ActiveFiltersBar(onClearAll: { withAnimation { filters = ScheduleFilters() } }) {
-            if let sport = filters.sportName {
-                RemovableChip(title: sport) { withAnimation { filters.sportName = nil } }
+            // Uma pílula por escolha, em ordem estável; cada uma sai sozinha.
+            ForEach(filters.sportNames.sorted(), id: \.self) { sport in
+                RemovableChip(title: sport) { withAnimation { _ = filters.sportNames.remove(sport) } }
             }
-            if let gender = filters.gender {
-                RemovableChip(title: gender.label) { withAnimation { filters.gender = nil } }
+            ForEach([Gender.male, .female, .mixed].filter(filters.genders.contains), id: \.self) { gender in
+                RemovableChip(title: gender.label) { withAnimation { _ = filters.genders.remove(gender) } }
             }
-            if let athletic = MockData.athletics.first(where: { $0.id == filters.athleticID }) {
-                RemovableChip(title: athletic.name) { withAnimation { filters.athleticID = nil } }
+            ForEach(MockData.athletics.filter { filters.athleticIDs.contains($0.id) }) { athletic in
+                RemovableChip(title: athletic.name) { withAnimation { _ = filters.athleticIDs.remove(athletic.id) } }
             }
-            if let division = MockData.divisions.first(where: { $0.id == filters.divisionID }) {
-                RemovableChip(title: division.name) { withAnimation { filters.divisionID = nil } }
+            ForEach(MockData.divisions.filter { filters.divisionIDs.contains($0.id) }) { division in
+                RemovableChip(title: division.name) { withAnimation { _ = filters.divisionIDs.remove(division.id) } }
             }
         }
     }

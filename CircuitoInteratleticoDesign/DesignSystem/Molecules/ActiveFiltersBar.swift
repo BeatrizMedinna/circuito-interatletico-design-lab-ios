@@ -4,6 +4,8 @@ import SwiftUI
 /// por um traço, e as pílulas (cada uma com seu ✕) rolando na horizontal.
 struct ActiveFiltersBar<Chips: View>: View {
     let onClearAll: () -> Void
+    /// Rótulo do botão "limpar tudo" no VoiceOver.
+    var clearAllLabel = "Limpar todos os filtros"
     @ViewBuilder var chips: Chips
 
     var body: some View {
@@ -21,9 +23,9 @@ struct ActiveFiltersBar<Chips: View>: View {
             // O ✕ fica dentro de um círculo fixo de 32 pt: sem limite, crescia além dele
             // em texto de acessibilidade. Tocar e segurar mostra o rótulo ampliado.
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .accessibilityLabel("Limpar todos os filtros")
+            .accessibilityLabel(clearAllLabel)
             .accessibilityShowsLargeContentViewer {
-                Label("Limpar todos os filtros", systemImage: "xmark")
+                Label(clearAllLabel, systemImage: "xmark")
             }
 
             Rectangle()

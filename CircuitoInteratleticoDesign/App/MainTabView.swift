@@ -6,6 +6,9 @@ enum AppRoute: Hashable {
     case notifications
     case athletic(Athletic.ID)
     case competition(Competition.ID)
+    /// Cronograma filtrado aberto dentro da pilha atual ("Ver todos" do perfil da
+    /// atlética e da modalidade): o Voltar retorna à origem.
+    case schedule(ScheduleFilters, ScheduleFocus)
 }
 
 /// App depois do onboarding: quatro abas, cada uma com sua pilha de navegação.
@@ -70,6 +73,7 @@ private extension View {
             case .notifications: NotificationsView()
             case .athletic(let id): AthleticDetailView(athleticID: id)
             case .competition(let id): CompetitionDetailView(competitionID: id)
+            case .schedule(let filters, let focus): ScheduleView(initialFilters: filters, initialFocus: focus)
             }
         }
     }

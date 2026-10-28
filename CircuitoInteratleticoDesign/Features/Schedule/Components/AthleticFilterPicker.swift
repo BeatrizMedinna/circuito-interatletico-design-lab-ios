@@ -1,26 +1,27 @@
 import SwiftUI
 
-/// Escolha da atlética com busca para o filtro do cronograma; tocar volta para os filtros.
+/// Escolha das atléticas (uma ou várias) para o filtro do cronograma.
+/// Tocar marca ou desmarca; "Todas as atléticas" limpa; Voltar retorna aos filtros.
 struct AthleticFilterPicker: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var selection: Athletic.ID?
+    @Binding var selection: Set<Athletic.ID>
     @State private var query = ""
 
     var body: some View {
         AthleticPicker(athletics: MockData.athletics,
-                       selectedID: Binding(get: { selection }, set: { selection = $0; dismiss() }),
+                       selectedIDs: $selection,
                        query: $query,
-                       label: "Jogos de qual atlética?",
+                       label: "Jogos de quais atléticas?",
                        allOptionTitle: "Todas as atléticas")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.canvas.ignoresSafeArea())
-            .navigationTitle("Atlética")
+            .navigationTitle("Atléticas")
             .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
+    @Previewable @State var selection: Set<Athletic.ID> = ["ath-bufalos"]
     NavigationStack {
-        AthleticFilterPicker(selection: .constant(nil))
+        AthleticFilterPicker(selection: $selection)
     }
 }

@@ -62,11 +62,11 @@ struct SportsHeader: View {
 
     private var activeFilters: some View {
         ActiveFiltersBar(onClearAll: { withAnimation { filters = SportsFilters() } }) {
-            if let gender = filters.gender {
-                RemovableChip(title: gender.label) { withAnimation { filters.gender = nil } }
+            ForEach([Gender.male, .female, .mixed].filter(filters.genders.contains), id: \.self) { gender in
+                RemovableChip(title: gender.label) { withAnimation { _ = filters.genders.remove(gender) } }
             }
-            if let division = MockData.divisions.first(where: { $0.id == filters.divisionID }) {
-                RemovableChip(title: division.name) { withAnimation { filters.divisionID = nil } }
+            ForEach(MockData.divisions.filter { filters.divisionIDs.contains($0.id) }) { division in
+                RemovableChip(title: division.name) { withAnimation { _ = filters.divisionIDs.remove(division.id) } }
             }
         }
         .padding(.horizontal, -Spacing.l)

@@ -25,10 +25,9 @@ struct AgendaSelection {
 }
 
 /// Resumo de agenda com "Ao vivo e próximos" e "Último encerrado". Cada
-/// "Ver todos" abre o Cronograma com os filtros de origem e o foco da seção;
+/// "Ver todos" abre o Cronograma (na pilha atual) com os filtros de origem e o foco da seção;
 /// só aparece quando há mais eventos do que os mostrados. Seções vazias somem.
 struct AgendaSummary: View {
-    @Environment(AppState.self) private var appState
     let items: [ScheduleItem]
     /// Filtros que reproduzem a origem no Cronograma (atlética ou modalidade).
     let filters: ScheduleFilters
@@ -58,7 +57,8 @@ struct AgendaSummary: View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             SectionHeader(title: title) {
                 if showsAll {
-                    Button("Ver todos") { appState.openSchedule(filters: filters, focus: focus) }
+                    // Abre o Cronograma filtrado na pilha atual: Voltar retorna ao perfil.
+                    NavigationLink("Ver todos", value: AppRoute.schedule(filters, focus))
                         .frame(minHeight: 44)
                         .accessibilityLabel("Ver todos: \(title.lowercased()) de \(originName)")
                         .accessibilityHint("Abre o cronograma filtrado")

@@ -15,14 +15,14 @@ struct MatchInfoSection: View {
             SectionHeader(title: "Informações")
             VStack(alignment: .leading, spacing: Spacing.m) {
                 pair {
-                    item("Data", Formatters.fullDay(match.startDate))
-                    item("Horário", Formatters.time(match.startDate))
+                    item("Data", Formatters.fullDay(match.startDate), symbol: "calendar")
+                    item("Horário", Formatters.time(match.startDate), symbol: "clock")
                 }
                 pair {
-                    item("Etapa", match.phase)
-                    item("Divisão", match.division.name)
+                    item("Etapa", match.phase, symbol: "point.3.connected.trianglepath.dotted")
+                    item("Divisão", match.division.name, symbol: "shield")
                 }
-                item("Local", match.venue)
+                item("Local", match.venue, symbol: "mappin.and.ellipse")
             }
             .padding(Spacing.m)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -30,9 +30,11 @@ struct MatchInfoSection: View {
         }
     }
 
-    private func item(_ label: String, _ value: String) -> some View {
+    /// Ícone junto do rótulo, no mesmo tom secundário, para achar a informação de relance.
+    private func item(_ label: String, _ value: String, symbol: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label)
+            Label(label, systemImage: symbol)
+                .labelStyle(InfoLabelStyle())
                 .font(.footnote)
                 .foregroundStyle(.textSecondary)
             Text(value)

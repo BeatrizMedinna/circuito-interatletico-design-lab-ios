@@ -8,6 +8,8 @@ struct AthleticSportsTab: View {
 
     var body: some View {
         let standings = MockData.standings(for: athletic.id, matches: appState.matches)
+        // Coluna de posição só quando alguma modalidade já define a colocação.
+        let showsPosition = standings.contains { position(in: $0.competition) != nil }
         VStack(alignment: .leading, spacing: Spacing.s) {
             SectionHeader(title: "Modalidades")
             if standings.isEmpty {
@@ -16,7 +18,7 @@ struct AthleticSportsTab: View {
                 VStack(spacing: 1) {
                     ForEach(standings) { standing in
                         NavigationLink(value: AppRoute.competition(standing.competition.id)) {
-                            row(standing)
+                            row(standing, showsPosition: showsPosition)
                         }
                         .buttonStyle(.pressableCard)
                     }
@@ -30,10 +32,34 @@ struct AthleticSportsTab: View {
         }
     }
 
-    private func row(_ standing: SportStanding) -> some View {
+    /// Posição já definida pelos resultados: 1º/2º quando a chave termina; na prova,
+    /// a colocação da melhor marca válida. Sem posição definida, nada é inventado.
+    private func position(in competition: Competition) -> Int? {
+        switch competition.format {
+        case .elimination:
+            return competition.campaign(matches: appState.matches).first { $0.athletic.id == athletic.id }?.position
+        case .ranking(let criterion, _, _):
+            return competition.trial?.ranked(by: criterion)
+                .first { $0.result.athletic.id == athletic.id && $0.position != nil }?.position
+        }
+    }
+
+    private func row(_ standing: SportStanding, showsPosition: Bool) -> some View {
         let competition = standing.competition
-        let isHighlight = standing.status == "Campeã" || standing.status.hasPrefix("1º")
+        let place = position(in: competition)
+        let isHighlight = standing.status == "Campeã" || place == 1
+        // Na prova, a posição sai do texto ("1º lugar · 5,12 m" → "5,12 m"): o número fica na coluna.
+        let prefix = place.map { "\($0)º lugar · " } ?? ""
+        let status = !prefix.isEmpty && standing.status.hasPrefix(prefix)
+            ? String(standing.status.dropFirst(prefix.count)) : standing.status
         return HStack(spacing: Spacing.s) {
+            if showsPosition {
+                Text(place.map { "\($0)º" } ?? "—")
+                    .font(.sportNumber())
+                    .monospacedDigit()
+                    .foregroundStyle(place == nil ? Color.textTertiary : Color.textPrimary)
+                    .frame(minWidth: 36, alignment: .leading)
+            }
             // Título ou 1º lugar: troféu em Lime, como o líder do pódio (o texto também diz).
             Image(systemName: isHighlight ? "trophy.fill" : competition.sport.symbol)
                 .font(.body.weight(.medium))
@@ -47,7 +73,7 @@ struct AthleticSportsTab: View {
                     .foregroundStyle(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(standing.status)
+                Text(status)
                     .font(.subheadline.weight(isHighlight ? .semibold : .regular))
                     .foregroundStyle(isHighlight ? Color.textPrimary : Color.textSecondary)
                 Text("\(competition.division.name) · \(competition.format.label)")

@@ -19,15 +19,14 @@ struct SportsFilterSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     field("Categoria") {
-                        FlowChips(options: [Gender.male, .female, .mixed].filter { gender in
+                        MultiFlowChips(options: [Gender.male, .female, .mixed].filter { gender in
                             competitions.contains { $0.sport.gender == gender }
-                        }, selection: $draft.gender, keepsLayoutStable: true) { $0.label }
+                        }, selection: $draft.genders) { $0.label }
                     }
                     field("Divisão") {
-                        FlowChips(options: MockData.divisions,
-                                  selection: Binding(get: { MockData.divisions.first { $0.id == draft.divisionID } },
-                                                     set: { draft.divisionID = $0?.id }),
-                                  keepsLayoutStable: true) { $0.name }
+                        MultiFlowChips(options: MockData.divisions.map(\.id), selection: $draft.divisionIDs) { id in
+                            MockData.divisions.first { $0.id == id }?.name ?? ""
+                        }
                     }
                 }
                 .padding(Spacing.l)

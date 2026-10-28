@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Linha de classificação: posição, escudo, nome, pontos e seta.
-/// A atlética de coração (por parâmetro ou pelo ambiente) ganha faixa, anel,
-/// coração e "Sua atlética" em Teal.
+/// A atlética de coração (por parâmetro ou pelo ambiente) ganha faixa, anel e
+/// coração em Teal (o VoiceOver diz "sua atlética").
 struct RankingRow: View {
     let position: Int?
     let athletic: Athletic
@@ -19,10 +19,6 @@ struct RankingRow: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var showsFavorite: Bool { isFavorite || athletic.id == favoriteAthleticID }
-
-    private var favoriteSuffix: Text {
-        Text(showsFavorite ? " · Sua atlética" : "").foregroundStyle(Color.favoriteAccent)
-    }
 
     var body: some View {
         Group {
@@ -87,7 +83,7 @@ struct RankingRow: View {
                         .foregroundStyle(.favoriteAccent)
                 }
             }
-            Text("\([detail, isTied ? "empate" : nil].compactMap { $0 }.joined(separator: " · "))\(favoriteSuffix)")
+            Text([detail, isTied ? "empate" : nil].compactMap { $0 }.joined(separator: " · "))
                 .font(.subheadline)
                 .foregroundStyle(.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -26,8 +26,14 @@ struct FavoriteChoice: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.secondary)
-                Text(current.map { "Hoje você torce por \($0.name). Clique se deseja trocar sua torcida." }
-                     ?? "Você acompanha uma atlética por vez e pode trocar quando quiser.")
+                // Nome da atlética atual em Teal (cor da atlética de coração); o botão já diz a ação.
+                Group {
+                    if let current {
+                        Text("Você torce por \(Text(current.name).foregroundStyle(Color.favoriteAccent).fontWeight(.semibold)).")
+                    } else {
+                        Text("Você acompanha uma atlética por vez e pode trocar quando quiser.")
+                    }
+                }
                     .font(.footnote)
                     .foregroundStyle(.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

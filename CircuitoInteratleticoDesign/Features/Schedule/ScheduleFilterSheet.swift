@@ -21,39 +21,59 @@ struct ScheduleFilterSheet: View {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     field("Modalidade") {
                         NavigationLink {
-                            SportFilterPicker(sports: sportOptions, selection: $draft.sportName)
+                            SportFilterPicker(sports: sportOptions, selection: $draft.sportNames)
                         } label: {
-                            SelectorLabel(value: draft.sportName, placeholder: "Todas as modalidades")
+                            SelectorLabel(value: summary(draft.sportNames.count, one: "modalidade", many: "modalidades"),
+                                          placeholder: "Todas as modalidades")
                         }
                         .buttonStyle(.pressableCard)
+                        // Escolhas uma a uma, removíveis, com "limpar" à esquerda (como na tela).
+                        if !draft.sportNames.isEmpty {
+                            selectedChips(clearAllLabel: "Limpar modalidades", onClearAll: { draft.sportNames = [] }) {
+                                ForEach(sportOptions.map(\.name).filter(draft.sportNames.contains), id: \.self) { name in
+                                    RemovableChip(title: name) { withAnimation { _ = draft.sportNames.remove(name) } }
+                                }
+                            }
+                        }
                     }
 
                     field("Categoria") {
-                        FlowChips(options: genderOptions, selection: $draft.gender,
-                                  keepsLayoutStable: true) { $0.label }
+                        MultiFlowChips(options: genderOptions, selection: $draft.genders) { $0.label }
                     }
 
                     field("Atlética") {
                         if let favorite = appState.favoriteAthletic {
-                            ChoiceChip(title: "Minha atlética · \(favorite.name)", isSelected: draft.athleticID == favorite.id) {
-                                draft.athleticID = draft.athleticID == favorite.id ? nil : favorite.id
+                            ChoiceChip(title: "Minha atlética · \(favorite.name)",
+                                       isSelected: draft.athleticIDs.contains(favorite.id)) {
+                                if draft.athleticIDs.contains(favorite.id) {
+                                    draft.athleticIDs.remove(favorite.id)
+                                } else {
+                                    draft.athleticIDs.insert(favorite.id)
+                                }
                             }
                         }
                         NavigationLink {
-                            AthleticFilterPicker(selection: $draft.athleticID)
+                            AthleticFilterPicker(selection: $draft.athleticIDs)
                         } label: {
-                            SelectorLabel(value: MockData.athletics.first { $0.id == draft.athleticID }?.name,
+                            SelectorLabel(value: summary(draft.athleticIDs.count, one: "atlética", many: "atléticas"),
                                           placeholder: "Todas as atléticas")
                         }
                         .buttonStyle(.pressableCard)
+                        if !draft.athleticIDs.isEmpty {
+                            selectedChips(clearAllLabel: "Limpar atléticas", onClearAll: { draft.athleticIDs = [] }) {
+                                ForEach(MockData.athletics.filter { draft.athleticIDs.contains($0.id) }) { athletic in
+                                    RemovableChip(title: athletic.name) {
+                                        withAnimation { _ = draft.athleticIDs.remove(athletic.id) }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     field("Divisão") {
-                        FlowChips(options: MockData.divisions,
-                                  selection: Binding(
-                                    get: { MockData.divisions.first { $0.id == draft.divisionID } },
-                                    set: { draft.divisionID = $0?.id }),
-                                  keepsLayoutStable: true) { $0.name }
+                        MultiFlowChips(options: MockData.divisions.map(\.id), selection: $draft.divisionIDs) { id in
+                            MockData.divisions.first { $0.id == id }?.name ?? ""
+                        }
                     }
                 }
                 .padding(Spacing.l)
@@ -81,6 +101,20 @@ struct ScheduleFilterSheet: View {
             }
         }
         .sensoryFeedback(.selection, trigger: draft)
+    }
+
+    /// Texto do campo: "1 modalidade", "3 atléticas"; vazio mostra o "Todas…".
+    private func summary(_ count: Int, one: String, many: String) -> String? {
+        count == 0 ? nil : "\(count) \(count == 1 ? one : many)"
+    }
+
+    /// Barra de escolhas do campo, de ponta a ponta da sheet.
+    private func selectedChips<Chips: View>(clearAllLabel: String, onClearAll: @escaping () -> Void,
+                                            @ViewBuilder chips: () -> Chips) -> some View {
+        ActiveFiltersBar(onClearAll: { withAnimation { onClearAll() } }, clearAllLabel: clearAllLabel) {
+            chips()
+        }
+        .padding(.horizontal, -Spacing.l)
     }
 
     private var resultCount: Int { items.filter(draft.includes).count }

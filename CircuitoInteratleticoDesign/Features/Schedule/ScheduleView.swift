@@ -8,6 +8,20 @@ struct ScheduleView: View {
     @State private var filters = ScheduleFilters()
     @State private var isShowingFilters = false
     @State private var focus: ScheduleFocus = .upcoming
+    /// Aberto pela pilha de outra aba (perfil, modalidade): mostra o Voltar nativo
+    /// e não usa o pedido global de `AppState` (que é da aba Cronograma).
+    private let pushedRequest: (filters: ScheduleFilters, focus: ScheduleFocus)?
+    @State private var didApplyPushedRequest = false
+
+    /// Aba Cronograma.
+    init() {
+        pushedRequest = nil
+    }
+
+    /// Cronograma filtrado dentro de outra pilha; começa nos filtros e no dia de origem.
+    init(initialFilters: ScheduleFilters, initialFocus: ScheduleFocus) {
+        pushedRequest = (initialFilters, initialFocus)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +36,8 @@ struct ScheduleView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Color.canvas.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(pushedRequest == nil ? .hidden : .automatic, for: .navigationBar)
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $isShowingFilters) {
             ScheduleFilterSheet(items: allItems, applied: $filters)
         }
@@ -109,17 +124,28 @@ struct ScheduleView: View {
     }
 
     private func applyPendingRequest() {
+        if let pushedRequest {
+            guard !didApplyPushedRequest else { return }
+            didApplyPushedRequest = true
+            apply(filters: pushedRequest.filters, focus: pushedRequest.focus)
+            return
+        }
         guard let request = appState.scheduleRequest else { return }
         appState.scheduleRequest = nil
-        filters = request.filters
-        focus = request.focus
+        apply(filters: request.filters, focus: request.focus)
+    }
+
+    /// Aplica filtros e foco e escolhe o dia (mesma regra de antes, agora usada pelos dois casos).
+    private func apply(filters newFilters: ScheduleFilters, focus newFocus: ScheduleFocus) {
+        filters = newFilters
+        focus = newFocus
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         let days = MockData.scheduleDays
         func matching(_ day: Date) -> [ScheduleItem] {
-            allItems.filter { calendar.isDate($0.startDate, inSameDayAs: day) && request.filters.includes($0) }
+            allItems.filter { calendar.isDate($0.startDate, inSameDayAs: day) && newFilters.includes($0) }
         }
-        let day: Date? = switch request.focus {
+        let day: Date? = switch newFocus {
         case .upcoming:
             days.first { $0 >= today && matching($0).contains(where: \.isOpen) }
                 ?? days.first { $0 >= today && !matching($0).isEmpty }

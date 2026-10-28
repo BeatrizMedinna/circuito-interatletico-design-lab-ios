@@ -1,15 +1,16 @@
 import SwiftUI
 
-/// Critérios da lista de Modalidades (tela 17): uma opção por campo, combináveis.
+/// Critérios da lista de Modalidades (tela 17): várias opções por campo, combináveis.
+/// Campo vazio = "Todas".
 struct SportsFilters: Equatable {
-    var gender: Gender?
-    var divisionID: Division.ID?
+    var genders: Set<Gender> = []
+    var divisionIDs: Set<Division.ID> = []
 
-    var activeCount: Int { [gender != nil, divisionID != nil].filter { $0 }.count }
+    var activeCount: Int { [!genders.isEmpty, !divisionIDs.isEmpty].filter { $0 }.count }
     var isEmpty: Bool { activeCount == 0 }
 
     func includes(_ competition: Competition) -> Bool {
-        (gender == nil || competition.sport.gender == gender)
-            && (divisionID == nil || competition.division.id == divisionID)
+        (genders.isEmpty || genders.contains(competition.sport.gender))
+            && (divisionIDs.isEmpty || divisionIDs.contains(competition.division.id))
     }
 }

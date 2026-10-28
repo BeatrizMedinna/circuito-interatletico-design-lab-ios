@@ -84,10 +84,12 @@ struct MatchDetailView: View {
             return ("flag.checkered", "Partida encerrada por W.O. Vitória de \(winner.name).")
         }
         guard match.status == .scheduled else { return nil }
+        // O placar "– : –" e o status "A iniciar" já dizem que o jogo não começou;
+        // o aviso só aparece quando falta informação que a tela não mostra.
         if match.teamA == nil || match.teamB == nil {
             return ("questionmark.circle", "Os adversários serão definidos pelos resultados da fase anterior.")
         }
-        return ("clock", "O placar e os lances aparecem aqui quando a partida começar.")
+        return nil
     }
 }
 

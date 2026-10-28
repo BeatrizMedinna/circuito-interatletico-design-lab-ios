@@ -14,18 +14,18 @@ struct TrialInfoTab: View {
                 SectionHeader(title: "Informações")
                 VStack(alignment: .leading, spacing: Spacing.m) {
                     pair {
-                        item("Data", Formatters.fullDay(trial.startDate))
-                        item("Horário", Formatters.time(trial.startDate))
+                        item("Data", Formatters.fullDay(trial.startDate), symbol: "calendar")
+                        item("Horário", Formatters.time(trial.startDate), symbol: "clock")
                     }
                     pair {
-                        item("Situação", trial.isClosed ? "Encerrada" : trial.hasPartialResults ? "Resultados parciais" : "Agendada")
-                        item("Disputa", isTeam ? "Por equipe" : "Individual")
+                        item("Situação", symbol: "info.circle", trial.isClosed ? "Encerrada" : trial.hasPartialResults ? "Resultados parciais" : "Agendada")
+                        item("Disputa", isTeam ? "Por equipe" : "Individual", symbol: isTeam ? "person.3" : "person")
                     }
                     pair {
-                        item("Critério", criterion.label)
-                        item("Unidade", unit.label)
+                        item("Critério", criterion.label, symbol: "list.number")
+                        item("Unidade", unit.label, symbol: "ruler")
                     }
-                    item("Local", trial.venue)
+                    item("Local", trial.venue, symbol: "mappin.and.ellipse")
                 }
                 .padding(Spacing.m)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -36,10 +36,15 @@ struct TrialInfoTab: View {
         }
     }
 
-    private func item(_ label: String, _ value: String) -> some View {
+    private func item(_ label: String, symbol: String, _ value: String) -> some View {
+        item(label, value, symbol: symbol)
+    }
+
+    private func item(_ label: String, _ value: String, symbol: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            // Mesmo padrão das Informações da partida: rótulo secundário, valor em destaque.
-            Text(label)
+            // Mesmo padrão das Informações da partida: ícone e rótulo secundários, valor em destaque.
+            Label(label, systemImage: symbol)
+                .labelStyle(InfoLabelStyle())
                 .font(.footnote)
                 .foregroundStyle(.textSecondary)
             Text(value)

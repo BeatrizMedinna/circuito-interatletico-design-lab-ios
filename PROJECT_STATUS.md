@@ -435,3 +435,12 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
 - 2026-10-27 — Alta fidelidade, Etapa 9 (auditoria final): rolagem segura ao mudar o tamanho do texto nos detalhes, cabeçalho de seção adaptável; fluxos críticos e estados raros verificados; cabeçalho da Início aguarda decisão.
 - 2026-10-27 — Correção complementar: cabeçalho da Início rola com o conteúdo e as abas ficam fixas; testado no iPhone 17 Pro e 16e.
 - 2026-10-27 — Ajuste a pedido da designer: cartões de partida (`MatchCard`) não empilham mais por nome longo — sempre em colunas; nome com várias palavras mantém o tamanho da fonte, usa até 2 linhas e termina em "…" (`TeamColumn`), nome completo no VoiceOver. Empilhamento continua só em texto de acessibilidade muito grande. Aplicado também ao cabeçalho do detalhe da partida (`MatchHeaderCard`): colunas sempre, nome longo com "…"; opção `stacksLongNames` e `TeamRow.isLongName` removidas.
+- 2026-10-28 — Ajustes aprovados pela designer:
+  1. Detalhe da partida "A iniciar" sem o aviso "O placar e os lances aparecem aqui…" (fica só o aviso de adversários a definir).
+  2. Ícones nos rótulos de Informações da partida e da prova (`InfoLabelStyle`): calendário, relógio, chave (Etapa), escudo, pino etc.
+  3. **Filtros com escolha múltipla** (regra funcional alterada com aprovação): `ScheduleFilters`/`SportsFilters` usam conjuntos (opções do mesmo campo somam; campos diferentes se combinam); contador conta campos. Modalidade e atlética: listas com vários ✓, campo resume ("2 modalidades") e mostra as escolhas como pílulas removíveis com "limpar" (mesma barra da tela). Categoria e divisão: `MultiFlowChips` com "Todas" marcado por padrão. "Ver mais"/"Ver todos" continuam abrindo com uma escolha.
+  4. Aba Modalidades do perfil: coluna de posição (1º, 2º… da prova; 1º/2º no mata-mata só quando a chave termina; senão "—").
+  5. "Ver todos" do perfil da atlética e da modalidade abre o Cronograma filtrado **na pilha atual** (rota `AppRoute.schedule`), com Voltar nativo; aba Cronograma e "Ver mais" da Início seguem como antes.
+  6. Perfil de outra atlética: "Você torce por **Búfalos**." com o nome em Teal (frase de instrução removida).
+  7. `RankingRow` sem o sufixo "· Sua atlética" (anel, coração e faixa Teal mantidos; VoiceOver diz "sua atlética").
+  Testado no iPhone 17 Pro com toques reais: perfil → Agenda → Ver todos → filtros múltiplos (Basquete + Futsal + Feminino) → remover pílula → Voltar ao perfil; detalhe "A iniciar"; classificação; Início → Ver mais. Torcidômetro adiado.
