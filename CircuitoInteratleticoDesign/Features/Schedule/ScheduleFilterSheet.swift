@@ -27,12 +27,18 @@ struct ScheduleFilterSheet: View {
                                           placeholder: "Todas as modalidades")
                         }
                         .buttonStyle(.pressableCard)
-                        // Escolhas uma a uma, removíveis, com "limpar" à esquerda (como na tela).
+                        // Escolhas em lista, cada uma com ✕ (a barra de pílulas fica só na tela).
                         if !draft.sportNames.isEmpty {
-                            selectedChips(clearAllLabel: "Limpar modalidades", onClearAll: { draft.sportNames = [] }) {
-                                ForEach(sportOptions.map(\.name).filter(draft.sportNames.contains), id: \.self) { name in
-                                    RemovableChip(title: name) { withAnimation { _ = draft.sportNames.remove(name) } }
-                                }
+                            SelectedItemsList(items: sportOptions.filter { draft.sportNames.contains($0.name) },
+                                              title: \.name,
+                                              onRemove: { draft.sportNames.remove($0.name) },
+                                              onRemoveAll: { draft.sportNames = [] }) { sport in
+                                Image(systemName: sport.symbol)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(.textPrimary)
+                                    .frame(width: 32, height: 32)
+                                    .background(.surfaceInset, in: Circle())
+                                    .accessibilityHidden(true)
                             }
                         }
                     }
@@ -60,12 +66,11 @@ struct ScheduleFilterSheet: View {
                         }
                         .buttonStyle(.pressableCard)
                         if !draft.athleticIDs.isEmpty {
-                            selectedChips(clearAllLabel: "Limpar atléticas", onClearAll: { draft.athleticIDs = [] }) {
-                                ForEach(MockData.athletics.filter { draft.athleticIDs.contains($0.id) }) { athletic in
-                                    RemovableChip(title: athletic.name) {
-                                        withAnimation { _ = draft.athleticIDs.remove(athletic.id) }
-                                    }
-                                }
+                            SelectedItemsList(items: MockData.athletics.filter { draft.athleticIDs.contains($0.id) },
+                                              title: \.name,
+                                              onRemove: { draft.athleticIDs.remove($0.id) },
+                                              onRemoveAll: { draft.athleticIDs = [] }) { athletic in
+                                AthleticBadge(size: .small, isFavorite: athletic.id == appState.favoriteAthletic?.id)
                             }
                         }
                     }
@@ -106,15 +111,6 @@ struct ScheduleFilterSheet: View {
     /// Texto do campo: "1 modalidade", "3 atléticas"; vazio mostra o "Todas…".
     private func summary(_ count: Int, one: String, many: String) -> String? {
         count == 0 ? nil : "\(count) \(count == 1 ? one : many)"
-    }
-
-    /// Barra de escolhas do campo, de ponta a ponta da sheet.
-    private func selectedChips<Chips: View>(clearAllLabel: String, onClearAll: @escaping () -> Void,
-                                            @ViewBuilder chips: () -> Chips) -> some View {
-        ActiveFiltersBar(onClearAll: { withAnimation { onClearAll() } }, clearAllLabel: clearAllLabel) {
-            chips()
-        }
-        .padding(.horizontal, -Spacing.l)
     }
 
     private var resultCount: Int { items.filter(draft.includes).count }

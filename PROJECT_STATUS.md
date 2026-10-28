@@ -444,3 +444,4 @@ Como testar cenários no simulador (Xcode › Edit Scheme › Run › Arguments)
   6. Perfil de outra atlética: "Você torce por **Búfalos**." com o nome em Teal (frase de instrução removida).
   7. `RankingRow` sem o sufixo "· Sua atlética" (anel, coração e faixa Teal mantidos; VoiceOver diz "sua atlética").
   Testado no iPhone 17 Pro com toques reais: perfil → Agenda → Ver todos → filtros múltiplos (Basquete + Futsal + Feminino) → remover pílula → Voltar ao perfil; detalhe "A iniciar"; classificação; Início → Ver mais. Torcidômetro adiado.
+- 2026-10-28 — Escolhas de modalidade e atlética **dentro da sheet de filtros** agora em lista vertical (`SelectedItemsList`): linhas retangulares com ícone/escudo, nome e ✕; "Remover todas" com 2+ escolhas. A barra horizontal de pílulas fica só no Cronograma, após aplicar.
