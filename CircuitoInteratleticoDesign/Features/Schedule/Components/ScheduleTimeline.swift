@@ -82,11 +82,11 @@ struct ScheduleTimeline: View {
         }
         .padding(.leading, Spacing.s)
         .padding(.bottom, Spacing.m)
-        // Trilho: horários já iniciados em cinza forte (4,1:1), próximos em cinza discreto.
-        // Antes era branco, pesado demais no Dark; a diferença continua visível.
+        // Trilho: horários já iniciados (ao vivo e encerrados) na cor primária do evento,
+        // próximos em cinza discreto.
         .overlay(alignment: .leading) {
             Rectangle()
-                .fill(hasStarted ? Color.borderStrong : Color.separatorLine)
+                .fill(hasStarted ? Color.brandPrimary : Color.separatorLine)
                 .frame(width: 2)
                 .accessibilityHidden(true)
         }

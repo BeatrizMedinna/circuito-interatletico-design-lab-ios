@@ -37,7 +37,7 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if hasFinishedOnboarding, let favoriteAthletic {
+            if hasFinishedOnboarding {
                 MainTabView(appState: AppState(favoriteAthletic: favoriteAthletic))
             } else {
                 OnboardingView(editionName: MockData.edition.name,
@@ -46,6 +46,10 @@ struct RootView: View {
                                onRetry: { Task { await loadAthletics() } },
                                onEnter: { athletic in
                                    favoriteAthletic = athletic
+                                   hasFinishedOnboarding = true
+                               },
+                               onSkip: {
+                                   favoriteAthletic = nil
                                    hasFinishedOnboarding = true
                                })
                 .task {

@@ -113,6 +113,7 @@ struct MatchHeaderCard: View {
                 }
             team(.b)
         }
+        .teamSideBars(match.teamA, match.teamB, inset: Spacing.m, size: .prominent)
         if linksTeams {
             row.accessibilityElement(children: .contain)
         } else {

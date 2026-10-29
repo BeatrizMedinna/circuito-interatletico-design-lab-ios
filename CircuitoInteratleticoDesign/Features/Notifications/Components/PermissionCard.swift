@@ -56,7 +56,7 @@ struct PermissionCard: View {
 #Preview {
     PermissionCard(
         symbol: "bell.badge",
-        title: "Receba avisos dos jogos",
+        title: "Fique por dentro dos jogos",
         message: "Saiba na hora quando um jogo vai começar ou quando o horário mudar.",
         primaryTitle: "Ativar notificações",
         primaryAction: {},

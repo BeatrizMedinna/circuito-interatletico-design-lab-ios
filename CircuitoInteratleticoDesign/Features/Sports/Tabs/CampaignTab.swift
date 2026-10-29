@@ -13,7 +13,7 @@ struct CampaignTab: View {
                            text: "A classificação aparece quando a chave for definida.")
             } else {
                 InlineNote(systemImage: "info.circle",
-                           text: "No mata-mata, a classificação mostra até onde cada atlética chegou na chave.")
+                           text: "Na eliminatória, a classificação mostra até onde cada atlética chegou na chave.")
                 VStack(spacing: 1) {
                     ForEach(entries) { entry in
                         NavigationLink(value: AppRoute.athletic(entry.athletic.id)) {

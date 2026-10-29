@@ -18,7 +18,7 @@ struct TrialInfoTab: View {
                         item("Horário", Formatters.time(trial.startDate), symbol: "clock")
                     }
                     pair {
-                        item("Situação", symbol: "info.circle", trial.isClosed ? "Encerrada" : trial.hasPartialResults ? "Resultados parciais" : "Agendada")
+                        item("Situação", symbol: "info.circle", trial.isClosed ? "Encerrada" : trial.hasPartialResults ? "Resultados parciais" : "A iniciar")
                         item("Disputa", isTeam ? "Por equipe" : "Individual", symbol: isTeam ? "person.3" : "person")
                     }
                     pair {

@@ -72,13 +72,12 @@ struct Podium: View {
                 .frame(maxWidth: .infinity, minHeight: [112, 88, 72][level])
                 .background([Color.surfaceSelected, Color.surfaceInset, Color.surfaceInset][level],
                             in: UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card))
-                // Primeiro lugar com faixa Lime no topo do degrau.
+                // Faixa na cor da atlética no topo do degrau; o 1º segue destacado pelo número Lime.
                 .overlay(alignment: .top) {
-                    if level == 0 {
-                        UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card)
-                            .fill(.actionPrimary)
-                            .frame(height: 3)
-                    }
+                    UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card)
+                        .fill(entry.athletic.brandColor)
+                        .frame(height: 5)
+                        .accessibilityHidden(true)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -124,13 +123,12 @@ struct Podium: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(isLeader ? Color.surfaceSelected : Color.surfaceInset,
                         in: RoundedRectangle(cornerRadius: Radius.card))
-            // O líder mantém a faixa Lime, agora à esquerda.
+            // Faixa na cor da atlética à esquerda, como nas linhas do ranking.
             .overlay(alignment: .leading) {
-                if isLeader {
-                    UnevenRoundedRectangle(topLeadingRadius: Radius.card, bottomLeadingRadius: Radius.card)
-                        .fill(.actionPrimary)
-                        .frame(width: 4)
-                }
+                UnevenRoundedRectangle(topLeadingRadius: Radius.card, bottomLeadingRadius: Radius.card)
+                    .fill(entry.athletic.brandColor)
+                    .frame(width: 5)
+                    .accessibilityHidden(true)
             }
         }
         .buttonStyle(.pressableCard)

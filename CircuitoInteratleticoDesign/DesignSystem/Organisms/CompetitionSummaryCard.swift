@@ -88,7 +88,7 @@ struct CompetitionSummaryCard: View {
     private var stageValue: String {
         switch progress {
         case .notGenerated: "—"
-        case .notStarted: competition.isElimination ? "A iniciar" : "Agendada"
+        case .notStarted: "A iniciar"
         case .inProgress(let phase): competition.isElimination ? phase : "Parcial"
         case .finished: "Encerrada"
         }

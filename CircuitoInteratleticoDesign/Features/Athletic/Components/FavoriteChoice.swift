@@ -10,7 +10,7 @@ struct FavoriteChoice: View {
         let current = appState.favoriteAthletic
         VStack(alignment: .leading, spacing: Spacing.xs) {
             if current?.id == athletic.id {
-                Text("Esta é a sua atlética de coração. Você vê os jogos e avisos dela em destaque.")
+                Text("Esta é a sua atlética de coração. Os jogos e as notificações dela aparecem em destaque.")
                     .font(.footnote)
                     .foregroundStyle(.textSecondary)
                 Button("Remover atlética de coração") { appState.setFavorite(nil) }
@@ -26,7 +26,7 @@ struct FavoriteChoice: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.secondary)
-                // Nome da atlética atual em Teal (cor da atlética de coração); o botão já diz a ação.
+                // Nome da atlética atual em destaque (cor da atlética de coração); o botão já diz a ação.
                 Group {
                     if let current {
                         Text("Você torce por \(Text(current.name).foregroundStyle(Color.favoriteAccent).fontWeight(.semibold)).")

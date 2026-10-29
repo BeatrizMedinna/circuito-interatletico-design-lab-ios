@@ -117,7 +117,7 @@ struct ScheduleFilterSheet: View {
 
     private var footer: some View {
         VStack(spacing: Spacing.xs) {
-            Text(resultCount == 0 ? "Nenhum jogo com esses filtros"
+            Text(resultCount == 0 ? "Nenhum jogo ou prova com esses filtros"
                  : resultCount == 1 ? "1 jogo ou prova no cronograma" : "\(resultCount) jogos e provas no cronograma")
                 .font(.footnote)
                 .foregroundStyle(.textSecondary)
@@ -126,7 +126,7 @@ struct ScheduleFilterSheet: View {
             Button {
                 withAnimation { draft = ScheduleFilters() }
             } label: {
-                Text("Limpar").frame(maxWidth: .infinity)
+                Text("Limpar filtros").frame(maxWidth: .infinity)
             }
             .buttonStyle(.secondary)
             .disabled(draft.isEmpty)

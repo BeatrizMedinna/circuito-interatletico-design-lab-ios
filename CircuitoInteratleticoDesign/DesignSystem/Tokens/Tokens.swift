@@ -40,7 +40,8 @@ extension ShapeStyle where Self == Color {
     static var actionPrimary: Color { Color(.paletteBrandFill) }
     /// Lime como texto ou ícone interativo (Lime Strong na variante clara).
     static var brandPrimary: Color { Color(.paletteBrand) }
-    /// Tudo que é da atlética de coração (Teal). Não usar como sucesso.
+    /// Tudo que é da atlética de coração (branco no escuro; antes Teal). Neutro de
+    /// propósito: as cores ficam para o evento (primária) e para cada atlética.
     static var favoriteAccent: Color { Color(.paletteFavorite) }
 
     // MARK: Estados (sempre com ícone, rótulo ou borda além da cor)

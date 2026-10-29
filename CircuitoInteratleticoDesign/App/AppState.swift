@@ -148,7 +148,7 @@ final class AppState {
         if let athletic {
             showToast("Agora você torce por \(athletic.name)")
         } else {
-            showToast("Você não segue nenhuma atlética")
+            showToast("Atlética de coração removida")
         }
     }
 
@@ -174,7 +174,7 @@ final class AppState {
     func markAllAsRead() {
         guard case .loaded(let notifications) = notificationsState else { return }
         readNotificationIDs.formUnion(notifications.map(\.id))
-        showToast("Todas as notificações foram lidas")
+        showToast("Notificações marcadas como lidas")
     }
 
     func resolveNotificationPermission(allowed: Bool) {

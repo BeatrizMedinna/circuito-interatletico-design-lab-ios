@@ -54,7 +54,7 @@ struct HomeHeader: View {
     }
 
     /// Atlética de coração; tocar abre a troca ou a remoção (RN-86).
-    /// O escudo ganha o anel Teal da atlética de coração e a seta fica junto do
+    /// O escudo ganha o anel branco da atlética de coração e a seta fica junto do
     /// nome, para o rótulo "Atlética de coração" usar a largura toda em textos grandes.
     private var favoriteButton: some View {
         Button(action: onPickFavorite) {

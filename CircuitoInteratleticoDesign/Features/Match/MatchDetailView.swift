@@ -81,7 +81,7 @@ struct MatchDetailView: View {
     /// Explica estados que o cabeçalho sozinho não deixa claros.
     private func statusNote(for match: Match) -> (symbol: String, text: String)? {
         if let side = match.walkoverWinner, let winner = match.team(side) {
-            return ("flag.checkered", "Partida encerrada por W.O. Vitória de \(winner.name).")
+            return ("flag.checkered", "Vitória de \(winner.name) por W.O.: a partida não foi disputada.")
         }
         guard match.status == .scheduled else { return nil }
         // O placar "– : –" e o status "A iniciar" já dizem que o jogo não começou;

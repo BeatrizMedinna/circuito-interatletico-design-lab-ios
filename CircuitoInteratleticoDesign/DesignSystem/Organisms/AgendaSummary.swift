@@ -44,11 +44,11 @@ struct AgendaSummary: View {
         let selection = AgendaSelection(items)
         VStack(alignment: .leading, spacing: Spacing.xl) {
             if !selection.upcoming.isEmpty {
-                section("Ao vivo e próximo", selection.upcoming,
+                section("Ao vivo e a seguir", selection.upcoming,
                         showsAll: selection.hasMoreUpcoming, focus: .upcoming)
             }
             if let last = selection.lastFinished {
-                section("Último encerrado", [last], showsAll: selection.hasMoreFinished, focus: .recent)
+                section("Último resultado", [last], showsAll: selection.hasMoreFinished, focus: .recent)
             }
         }
     }

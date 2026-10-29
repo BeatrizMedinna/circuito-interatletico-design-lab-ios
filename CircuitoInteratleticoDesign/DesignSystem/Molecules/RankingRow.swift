@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Linha de classificação: posição, escudo, nome, pontos e seta.
-/// A atlética de coração (por parâmetro ou pelo ambiente) ganha faixa, anel e
-/// coração em Teal (o VoiceOver diz "sua atlética").
+/// Faixa à esquerda na cor da atlética. A atlética de coração (por parâmetro ou
+/// pelo ambiente) ganha anel e coração brancos (o VoiceOver diz "sua atlética").
 struct RankingRow: View {
     let position: Int?
     let athletic: Athletic
@@ -48,9 +48,7 @@ struct RankingRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.surface)
         .overlay(alignment: .leading) {
-            if showsFavorite {
-                Rectangle().fill(.favoriteAccent).frame(width: 3)
-            }
+            AthleticColorBar(color: athletic.brandColor, edge: .leading)
         }
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)

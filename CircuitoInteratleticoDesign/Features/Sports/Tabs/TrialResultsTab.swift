@@ -31,7 +31,7 @@ struct ResultRow: View {
         .padding(.trailing, Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.surface)
-        // Atlética de coração em Teal (faixa e coração), como no Ranking.
+        // Atlética de coração em branco (faixa e coração).
         .overlay(alignment: .leading) {
             Rectangle().fill(isFavorite ? Color.favoriteAccent : .clear).frame(width: 3)
         }
@@ -102,7 +102,7 @@ struct TrialResultsTab: View {
                 } else {
                     InlineNote(systemImage: trial.isClosed ? "checkmark.seal" : "exclamationmark.circle",
                                text: trial.isClosed
-                                ? "Prova encerrada. \(criterion.label); marcas iguais dividem a posição."
+                                ? "Resultado final. \(criterion.label); marcas iguais dividem a posição."
                                 : "Resultados parciais: podem mudar até o encerramento da prova.")
                     VStack(spacing: 1) {
                         ForEach(trial.ranked(by: criterion)) { ranked in

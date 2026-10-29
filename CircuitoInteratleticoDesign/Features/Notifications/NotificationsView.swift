@@ -66,7 +66,7 @@ struct NotificationsView: View {
             ContentUnavailableView {
                 Label("Nenhuma edição em andamento", systemImage: "calendar.badge.exclamationmark")
             } description: {
-                Text("Os avisos da próxima edição aparecem aqui.")
+                Text("As notificações da próxima edição aparecem aqui.")
             }
 
         case .loaded(let all):

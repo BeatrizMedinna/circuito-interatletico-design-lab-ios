@@ -68,7 +68,7 @@ struct SportsFilterSheet: View {
             Button {
                 withAnimation { draft = SportsFilters() }
             } label: {
-                Text("Limpar").frame(maxWidth: .infinity)
+                Text("Limpar filtros").frame(maxWidth: .infinity)
             }
             .buttonStyle(.secondary)
             .disabled(draft.isEmpty)

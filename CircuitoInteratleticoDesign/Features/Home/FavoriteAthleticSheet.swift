@@ -47,7 +47,7 @@ struct FavoriteAthleticSheet: View {
                         .foregroundStyle(.textPrimary)
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
-                Text("Sem atlética de coração, você vê os jogos e avisos de todas.")
+                Text("Sem atlética de coração, você vê os jogos e as notificações de todas.")
                     .font(.footnote)
                     .foregroundStyle(.textSecondary)
                     .multilineTextAlignment(.center)

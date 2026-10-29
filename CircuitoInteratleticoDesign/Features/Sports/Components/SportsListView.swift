@@ -46,7 +46,7 @@ struct SportsListView: View {
         } description: {
             Text(query.isEmpty ? "Tente outra categoria ou divisão."
                  : filters.isEmpty ? "Confira a grafia ou tente outro nome, como Futsal ou Natação."
-                 : "Nada combina com a busca e os filtros juntos. Tente limpar um deles.")
+                 : "Nenhuma modalidade atende à busca e aos filtros juntos. Tente limpar um deles.")
         } actions: {
             if !query.isEmpty {
                 Button("Limpar busca") { query = "" }

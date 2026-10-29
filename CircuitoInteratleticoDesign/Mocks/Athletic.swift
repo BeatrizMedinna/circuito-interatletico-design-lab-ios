@@ -19,4 +19,7 @@ struct Athletic: Identifiable, Hashable {
     let acronym: String
     let institution: String
     let division: Division
+    /// Cor base escolhida pela atlética no cadastro (com escudo/logo, nome e descrição).
+    /// Hex "RRGGBB". Usada só como acento: faixa lateral nos cartões e contorno do "Torcer".
+    var colorHex: String = "8A8F98"
 }

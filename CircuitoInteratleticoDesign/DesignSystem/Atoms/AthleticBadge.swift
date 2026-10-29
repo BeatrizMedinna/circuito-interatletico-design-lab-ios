@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Escudo circular da atlética (SF Symbol genérico até existir a identidade visual).
 /// `isUndefined` mostra a vaga "a definir" com borda tracejada; `isFavorite`
-/// desenha o anel Teal da atlética de coração.
+/// desenha o anel branco da atlética de coração; `ringColor` contorna o círculo
+/// na cor da atlética (perfil).
 struct AthleticBadge: View {
     enum Size {
         case small, medium, prominent, large
@@ -22,6 +23,8 @@ struct AthleticBadge: View {
     var fill: Color = .surfaceInset
     var isUndefined = false
     var isFavorite = false
+    /// Contorno na cor da atlética (ex.: cabeçalho do perfil).
+    var ringColor: Color? = nil
 
     @ScaledMetric(relativeTo: .body) private var scale: CGFloat = 1
 
@@ -36,7 +39,7 @@ struct AthleticBadge: View {
                     Circle().strokeBorder(.textTertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                 } else {
                     Circle().fill(fill)
-                        .overlay { Circle().strokeBorder(.separatorLine, lineWidth: 1) }
+                        .overlay { Circle().strokeBorder(ringColor ?? .separatorLine, lineWidth: ringColor == nil ? 1 : 3) }
                 }
             }
             .overlay {

@@ -7,7 +7,7 @@ enum MatchListKind: Hashable {
     var title: String {
         switch self {
         case .upcoming: "Próximos jogos"
-        case .recent: "Últimos jogos"
+        case .recent: "Últimos resultados"
         }
     }
 

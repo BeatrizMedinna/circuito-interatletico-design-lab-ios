@@ -1,13 +1,16 @@
 import SwiftUI
 
 /// Tela 01 — Escolha da atlética de coração no primeiro acesso.
-/// O torcedor busca, seleciona uma atlética e toca em "Entrar".
+/// O torcedor busca, seleciona uma atlética e toca em "Continuar", ou segue sem
+/// atlética de coração (RN-86: a escolha é opcional e pode ser feita depois).
 struct OnboardingView: View {
     /// `nil` quando não há edição ativa.
     let editionName: String?
     let state: LoadState<[Athletic]>
     let onRetry: () -> Void
     let onEnter: (Athletic) -> Void
+    /// Entra no app sem atlética de coração.
+    let onSkip: () -> Void
 
     @State private var selectedID: Athletic.ID?
     @State private var query: String
@@ -17,11 +20,13 @@ struct OnboardingView: View {
          initialSelectionID: Athletic.ID? = nil,
          initialQuery: String = "",
          onRetry: @escaping () -> Void = {},
-         onEnter: @escaping (Athletic) -> Void = { _ in }) {
+         onEnter: @escaping (Athletic) -> Void = { _ in },
+         onSkip: @escaping () -> Void = {}) {
         self.editionName = editionName
         self.state = state
         self.onRetry = onRetry
         self.onEnter = onEnter
+        self.onSkip = onSkip
         _selectedID = State(initialValue: initialSelectionID)
         _query = State(initialValue: initialQuery)
     }
@@ -45,7 +50,7 @@ struct OnboardingView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: Spacing.xxs) {
             // Mesmo estilo dos títulos das telas principais (Início, Cronograma, Ranking).
-            Text("Escolha sua Atlética")
+            Text("Escolha sua atlética")
                 .font(.title.bold())
                 .foregroundStyle(.textPrimary)
                 .accessibilityAddTraits(.isHeader)
@@ -93,14 +98,27 @@ struct OnboardingView: View {
     }
 
     private var enterBar: some View {
-        Button("Entrar") {
-            if let selectedAthletic {
-                onEnter(selectedAthletic)
+        VStack(spacing: Spacing.xxs) {
+            Button("Continuar") {
+                if let selectedAthletic {
+                    onEnter(selectedAthletic)
+                }
             }
+            .buttonStyle(.primary)
+            .disabled(selectedAthletic == nil)
+            .accessibilityHint(selectedAthletic == nil ? "Selecione uma atlética para continuar" : "")
+
+            // Ação secundária discreta: a escolha é opcional e pode ser feita depois.
+            Button("Seguir sem atlética", action: onSkip)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.textPrimary)
+                .underline()
+                .frame(minHeight: 44)
+                .disabled(!isLoaded)
+                .opacity(!isLoaded ? 0 : 1)
+                .accessibilityHidden(!isLoaded)
+                .accessibilityHint("Você pode escolher sua atlética depois, na Início")
         }
-        .buttonStyle(.primary)
-        .disabled(selectedAthletic == nil)
-        .accessibilityHint(selectedAthletic == nil ? "Selecione uma atlética para continuar" : "")
         .padding(.horizontal, Spacing.l)
         .padding(.top, Spacing.s)
         .padding(.bottom, Spacing.xs)
@@ -114,6 +132,10 @@ struct OnboardingView: View {
         case .loading, .loaded: true
         case .failed, .unavailable: false
         }
+    }
+
+    private var isLoaded: Bool {
+        if case .loaded = state { true } else { false }
     }
 
     private var selectedAthletic: Athletic? {

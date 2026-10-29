@@ -67,6 +67,7 @@ struct MatchCard: View {
                     ScoreBoxes(match: match)
                     TeamColumn(athletic: match.teamB, isDimmed: match.isLoser(.b))
                 }
+                .teamSideBars(match.teamA, match.teamB, inset: Spacing.m)
             }
             if showsVenue {
                 Label(match.venue, systemImage: "mappin.and.ellipse")

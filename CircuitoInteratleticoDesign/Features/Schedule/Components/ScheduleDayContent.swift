@@ -23,12 +23,12 @@ struct ScheduleDayContent: View {
 
     private var emptyDayView: some View {
         ContentUnavailableView {
-            Label(filters.isEmpty ? "Nenhum jogo ou prova neste dia" : "Nada com esses filtros",
+            Label(filters.isEmpty ? "Nenhum jogo ou prova neste dia" : "Nenhum jogo ou prova com esses filtros",
                   systemImage: filters.isEmpty ? "calendar" : "line.3.horizontal.decrease")
         } description: {
             Text(filters.isEmpty
                  ? "Não há jogos nem provas marcados para \(Formatters.fullDay(selectedDay))."
-                 : "Nenhum jogo ou prova de \(Formatters.fullDay(selectedDay)) atende aos filtros.")
+                 : "Tente outro dia ou ajuste os filtros.")
         } actions: {
             if let nextDay {
                 Button("Ver \(Formatters.dayTab(nextDay).lowercased() == "hoje" ? "hoje" : Formatters.fullDay(nextDay))") {

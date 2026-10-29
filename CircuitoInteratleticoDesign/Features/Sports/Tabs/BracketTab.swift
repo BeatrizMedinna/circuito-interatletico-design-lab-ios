@@ -74,7 +74,7 @@ private struct MatchupCard: View {
 
             teamRow(teams.a, score: match?.scoreA, side: .a, match: match, winner: winner)
             if matchup.isBye {
-                Text("Sem adversário: avança direto, sem jogo (bye).")
+                Text("Sem adversário nesta fase: avança direto, sem jogo.")
                     .font(.subheadline.italic())
                     .foregroundStyle(.textSecondary)
                     .padding(.horizontal, Spacing.m)
@@ -105,7 +105,7 @@ private struct MatchupCard: View {
     @ViewBuilder
     private func statusLabel(_ match: Match?) -> some View {
         if matchup.isBye {
-            Text("BYE").font(.eyebrow).tracking(0.6).foregroundStyle(.textSecondary)
+            Text("AVANÇO DIRETO").font(.eyebrow).tracking(0.6).foregroundStyle(.textSecondary)
         } else if let match {
             if match.status == .scheduled {
                 Text("\(Formatters.dayLabel(match.startDate)), \(Formatters.time(match.startDate))".uppercased())
@@ -153,7 +153,7 @@ private struct MatchupCard: View {
 
     private func accessibilityText(teams: (a: Athletic?, b: Athletic?), match: Match?, winner: Athletic?) -> String {
         let nameA = teams.a?.name ?? "A definir"
-        if matchup.isBye { return "Jogo \(number), bye: \(nameA) avança direto" }
+        if matchup.isBye { return "Jogo \(number), avanço direto: \(nameA) segue sem adversário" }
         let nameB = teams.b?.name ?? "A definir"
         var parts = ["Jogo \(number)", "\(nameA) contra \(nameB)"]
         if let match {

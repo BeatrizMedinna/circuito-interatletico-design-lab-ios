@@ -17,7 +17,8 @@ struct AthleticSummaryCard<Action: View>: View {
             : AnyLayout(HStackLayout(spacing: Spacing.m))
         VStack(alignment: .leading, spacing: Spacing.m) {
             identity {
-                AthleticBadge(size: .large, isFavorite: isFavorite)
+                // Contorno na cor da atlética; "Sua atlética" ao lado já marca a de coração.
+                AthleticBadge(size: .large, ringColor: athletic.brandColor)
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(athletic.name)
                         .font(.title3.bold())

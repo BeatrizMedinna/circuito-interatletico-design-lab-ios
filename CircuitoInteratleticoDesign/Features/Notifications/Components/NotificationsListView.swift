@@ -28,18 +28,18 @@ struct NotificationsListView: View {
 
             if effectiveScope == .favorite && allCount > 0 {
                 ContentUnavailableView {
-                    Label("Nenhum aviso da sua atlética", systemImage: "bell.slash")
+                    Label("Nenhuma notificação da sua atlética", systemImage: "bell.slash")
                 } description: {
-                    Text("Avisos sobre os jogos de \(appState.favoriteAthletic?.name ?? "sua atlética") aparecem aqui.")
+                    Text("As notificações sobre os jogos de \(appState.favoriteAthletic?.name ?? "sua atlética") aparecem aqui.")
                 } actions: {
-                    Button("Ver avisos gerais") { withAnimation { scope = .general } }
+                    Button("Ver notificações gerais") { withAnimation { scope = .general } }
                         .buttonStyle(.secondary)
                 }
             } else {
                 ContentUnavailableView {
                     Label("Nenhuma notificação", systemImage: "bell.slash")
                 } description: {
-                    Text("Avisos de jogos e mudanças de horário ou local aparecem aqui.")
+                    Text("Jogos prestes a começar e mudanças de horário ou local aparecem aqui.")
                 }
             }
         }
@@ -84,8 +84,8 @@ struct NotificationsListView: View {
         case .notDetermined where !appState.hasDeferredNotificationPrompt:
             PermissionCard(
                 symbol: "bell.badge",
-                title: "Receba avisos dos jogos",
-                message: "Saiba na hora quando um jogo vai começar ou quando o horário ou o local mudar.",
+                title: "Fique por dentro dos jogos",
+                message: "Receba um alerta quando um jogo estiver para começar ou mudar de horário ou local.",
                 primaryTitle: "Ativar notificações",
                 primaryAction: onRequestSystemPrompt,
                 secondaryTitle: "Agora não",
@@ -95,7 +95,7 @@ struct NotificationsListView: View {
             PermissionCard(
                 symbol: "bell.slash",
                 title: "Notificações desativadas",
-                message: "Você continua vendo os avisos aqui, mas não recebe alertas. Para recebê-los, ative nos Ajustes do iPhone.",
+                message: "As notificações continuam aqui, mas você não recebe alertas. Para receber, ative nos Ajustes do iPhone.",
                 primaryTitle: "Abrir Ajustes",
                 primaryAction: {
                     if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }

@@ -18,7 +18,7 @@ struct HomeMatchSection: View {
                         )
                     }
                     .frame(minHeight: 44)
-                    .accessibilityLabel("Ver mais \(kind.title.lowercased()) no cronograma")
+                    .accessibilityLabel(kind == .upcoming ? "Ver mais próximos jogos no cronograma" : "Ver mais resultados no cronograma")
                 }
             }
             .padding(.horizontal, Spacing.l)
